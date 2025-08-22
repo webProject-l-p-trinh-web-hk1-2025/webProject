@@ -14,7 +14,7 @@ docker compose -f postgreSQL.yaml up -d --build
 ```
 **Reset database**
 ```
-docker volume rm postgres_data
+docker volume rm webproject_postgres_data
 sudo docker compose -f postgreSQL.yaml up -d --build
 ```
 **Thao tác với DB**

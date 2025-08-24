@@ -46,3 +46,10 @@ Giao diện tài liệu API:
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
+3. **cách push code làm việc trong một nhóm**
+tạo nhánh kèm tên module, chức năng
+```
+git checkout -b <tên_module>/feature/<tên_tính_năng>
+```
+
+# TUYỆT ĐỐI KHÔNG PUSH CODE THẲNG LÊN main HAY develop

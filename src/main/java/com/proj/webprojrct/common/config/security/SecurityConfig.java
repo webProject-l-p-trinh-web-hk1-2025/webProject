@@ -1,6 +1,10 @@
 package com.proj.webprojrct.common.config.security;
 
 import lombok.RequiredArgsConstructor;
+import com.proj.webprojrct.common.config.security.JwtAuthenticationFilter;
+
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +25,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService uds;
     private final PasswordEncoder passwordEncoder;
+    private final JwtAuthenticationFilter jwtFilter;
 
     // @Bean
     // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -33,36 +38,26 @@ public class SecurityConfig {
     // }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/home", "/doLogin", "/css/**", "/js/**", "/favicon.ico", "/error", "/WEB-INF/jsp/**").permitAll()
+                .requestMatchers("/login", "/dologin", "/register", "/doregister", "/refresh", "/home", "/css/**", "/js/**", "/favicon.ico", "/error", "/WEB-INF/jsp/**").permitAll()
                 .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/doLogin")
-                .usernameParameter("phone")
-                .passwordParameter("password")
-                .defaultSuccessUrl("/home", true)
-                .failureUrl("/login?error=true")
-                .permitAll()
-                )
-                .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .permitAll()
-                );
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
-    // @Bean
-    // public AuthenticationManager authManager(HttpSecurity http) {
-    //     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-    //     provider.setUserDetailsService(uds);
-    //     provider.setPasswordEncoder(passwordEncoder);
-    //     return new ProviderManager(provider);
-    // }
+    @Bean
+    public DaoAuthenticationProvider daoAuthProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(uds);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();

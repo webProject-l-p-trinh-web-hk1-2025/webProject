@@ -31,6 +31,15 @@ public class User implements UserDetails {
     @Column(name = "password_hash", nullable = false, length = 1000)
     private String passwordHash;
 
+    @Column(unique = true, length = 255)
+    private String email;
+
+    @Column(name = "avatar_url", length = 500)
+    private String avatarUrl;
+
+    @Column(length = 255)
+    private String address;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;

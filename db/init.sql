@@ -3,26 +3,41 @@ CREATE TABLE users (
     full_name VARCHAR(100) NOT NULL,
     phone VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(1000) NOT NULL,
-    role VARCHAR(255) NOT NULL,
-    is_active BOOLEAN NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    avatar_url VARCHAR(500),
+    address VARCHAR(255),
+    role VARCHAR(50) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     refresh_token VARCHAR(2000),
-    created_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-INSERT INTO users (id, full_name, phone, password_hash, role, is_active, created_at)
-VALUES (0, 'anh kiet', '0889251007',
+-- Admin 1
+INSERT INTO users (full_name, phone, password_hash, email, avatar_url, address, role, is_active)
+VALUES ('anh kiet', '0889251007',
         '$2a$12$T3ztDZ4qOq39rCbtwiY7CeJu2sp2wU6yyLPalK4VgxEPhiv1PM7Vq',
-        'ADMIN', TRUE, NOW());
-ON CONFLICT DO NOTHING;
-INSERT INTO users (id, full_name, phone, password_hash, role, is_active, created_at)
-VALUES (1, 'kiet', '1234567890',
-        '$2a$12$T3ztDZ4qOq39rCbtwiY7CeJu2sp2wU6yyLPalK4VgxEPhiv1PM7Vq',
-        'ADMIN', TRUE, NOW())
-ON CONFLICT DO NOTHING;
+        'kiet@example.com',
+        'https://example.com/avatar1.png',
+        '123 Lê Lợi, Q1, TP.HCM',
+        'ADMIN', TRUE)
+ON CONFLICT (phone) DO NOTHING;
 
-INSERT INTO users (id, full_name, phone, password_hash, role, is_active, created_at)
-VALUES (2, 'anh kiet', '98898898321',
+-- Admin 2
+INSERT INTO users (full_name, phone, password_hash, email, avatar_url, address, role, is_active)
+VALUES ('kiet', '1234567890',
+        '$2a$12$T3ztDZ4qOq39rCbtwiY7CeJu2sp2wU6yyLPalK4VgxEPhiv1PM7Vq',
+        'admin2@example.com',
+        'https://example.com/avatar2.png',
+        '456 Nguyễn Huệ, Q1, TP.HCM',
+        'ADMIN', TRUE)
+ON CONFLICT (phone) DO NOTHING;
+
+-- Admin 3
+INSERT INTO users (full_name, phone, password_hash, email, avatar_url, address, role, is_active)
+VALUES ('anh kiet', '98898898321',
         '$2a$12$7d5RDRcYVCxxINajw.n9HOwEaIe5dyBtGGbIUfaQVujFy0IuR7Rea',
-        'ADMIN', TRUE, NOW())
-ON CONFLICT DO NOTHING;
-
+        'admin3@example.com',
+        'https://example.com/avatar3.png',
+        '789 Trần Hưng Đạo, Q5, TP.HCM',
+        'ADMIN', TRUE)
+ON CONFLICT (phone) DO NOTHING;

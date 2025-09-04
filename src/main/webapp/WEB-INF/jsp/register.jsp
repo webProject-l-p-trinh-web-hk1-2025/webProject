@@ -25,6 +25,9 @@
                 <label>Xác nhận mật khẩu:</label><br>
                 <input type="password" name="confirmPassword" required /><br>
 
+                <label>Email:</label><br>
+                <input type="email" name="email" value="${user.email}" required /><br>
+
                 <button type="submit">Đăng ký</button>
             </form>
 

@@ -26,6 +26,9 @@
                 <p style="color:red">${error}</p>
             </c:if>
             <p>Don't have an account? <a href="/register">Register here</a></p>
+            <a href="/resetPassword">
+                <p>Forget password</p>
+            </a>
         </body>
 
         </html>

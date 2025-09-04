@@ -8,6 +8,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import com.proj.webprojrct.common.config.security.CustomUserDetails;
 import jakarta.servlet.http.HttpSession;
+
+import java.lang.annotation.Repeatable;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +30,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
     @GetMapping("/login")
     public String loginPage(@CookieValue(value = "access_token", required = false) String accessToken) {
@@ -178,6 +182,7 @@ public class AuthController {
             @RequestParam String password,
             @RequestParam String confirmPassword,
             @RequestParam String fullName,
+            @RequestParam String email,
             Model model) {
         if (accessToken != null && jwtUtil.validateToken(accessToken)) {
             return "redirect:/home";
@@ -197,8 +202,47 @@ public class AuthController {
         newUser.setFullName(fullName);
         newUser.setIsActive(true); // Mặc định kích hoạt tài khoản
         newUser.setRole(userRole); // Vai trò mặc định
+        newUser.setEmail(email);
         userRepo.save(newUser);
         model.addAttribute("message", "Đăng ký thành công! Vui lòng đăng nhập.");
         return "register";
     }
+
+    @GetMapping("/resetPassword")
+    public String resetPasswordPage(@CookieValue(value = "access_token", required = false) String accessToken) {
+        if (accessToken != null && jwtUtil.validateToken(accessToken)) {
+            return "redirect:/home";
+        }
+        return "resetPassword";
+    }
+
+    @PostMapping("/doResetPassword")
+    public String resetPassword(@RequestParam String input,
+            @CookieValue(value = "access_token", required = false) String accessToken,
+            Model model) {
+        if (accessToken != null && jwtUtil.validateToken(accessToken)) {
+            return "redirect:/home";
+        }
+        //User user = userRepo.findByPhone(phone).orElse(null);
+        if (input == null || input.isEmpty()) {
+            model.addAttribute("error", "vui lòng hập email hoặc số điện thoại.");
+            return "resetPassword";
+        }
+        if (input.contains("@")) {
+            boolean result = authService.EmailResetPasswordHandle(input, model);
+            if (!result) {
+                return "resetPassword";
+            }
+            model.addAttribute("message", "Mật khẩu mới đã được gửi qua email. Vui lòng kiểm tra email của bạn.");
+
+        } else {
+            boolean result = authService.PhoneResetPasswordHandle(input, model);
+            if (!result) {
+                return "resetPassword";
+            }
+            model.addAttribute("message", "Mật khẩu mới đã được gửi qua SMS. Vui lòng kiểm tra điện thoại của bạn.");
+        }
+        return "resetPassword";
+    }
+
 }

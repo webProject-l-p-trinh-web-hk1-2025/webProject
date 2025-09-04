@@ -11,9 +11,9 @@
             <c:if test="${not empty error}">
                 <div style="color: red;">${error}</div>
             </c:if>
-            <form action="${pageContext.request.contextPath}/reset-password" method="post">
-                <label for="phone">Số điện thoại:</label>
-                <input type="text" id="phone" name="phone" required />
+            <form action="${pageContext.request.contextPath}/doResetPassword" method="post">
+                <label for="phone">Số điện thoại hoặc email:</label>
+                <input type="text" id="input" name="input" required />
                 <button type="submit">Reset</button>
             </form>
             <c:if test="${not empty message}">

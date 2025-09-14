@@ -5,22 +5,22 @@ Online mobile phone store project
 
 Linux
 ```
-sudo docker compose -f postgreSQL.yaml up -d --build
+sudo docker compose -f mySQL.yaml up -d --build
 ```
 Windows
 
 ```
-docker compose -f postgreSQL.yaml up -d --build
+docker compose -f mySQL.yaml up -d --build
 ```
 **Reset database**
 ```
-docker volume rm postgres_data
-sudo docker compose -f postgreSQL.yaml up -d --build
+docker volume rm mysql_data
+sudo docker compose -f mySQL.yaml up -d --build
 ```
 **Thao tác với DB**
 ```
-docker exec -it postgres bash
-psql -U cps -d cps_db
+docker exec -it mysql bash
+mysql -u cps -p cps_db
 ```
 
 2. **Build toàn bộ project**

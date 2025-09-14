@@ -1,33 +1,31 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:16
-    container_name: cps_postgres
+  mysql:
+    image: mysql:8.0.33
+    container_name: cps_mysql
     restart: unless-stopped
     environment:
-      POSTGRES_DB: cps_db
-      POSTGRES_USER: cps_user
-      POSTGRES_PASSWORD: cps_pass
+      MYSQL_DATABASE: cps_db
+      MYSQL_USER: cps_user
+      MYSQL_PASSWORD: cps_pass
+      MYSQL_ROOT_PASSWORD: root_pass
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - cps-network
 
   web:
     build: .
-    image: cps_web
     container_name: cps_spring_app
     depends_on:
-      - postgres
+      - mysql
       - mailhog
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cps_db
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cps_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: cps_user
       SPRING_DATASOURCE_PASSWORD: cps_pass
 
@@ -56,7 +54,7 @@ services:
       - cps-network
 
 volumes:
-  postgres_data:
+  mysql_data:
 
 
 networks:

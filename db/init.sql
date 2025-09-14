@@ -1,5 +1,5 @@
 CREATE TABLE users (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
     phone VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(1000) NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE users (
     role VARCHAR(50) NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     refresh_token VARCHAR(2000),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Admin 1
@@ -20,7 +20,7 @@ VALUES ('anh kiet', '0889251007',
         'https://example.com/avatar1.png',
         '123 Lê Lợi, Q1, TP.HCM',
         'ADMIN', TRUE)
-ON CONFLICT (phone) DO NOTHING;
+ON DUPLICATE KEY UPDATE phone = phone;
 
 -- Admin 2
 INSERT INTO users (full_name, phone, password_hash, email, avatar_url, address, role, is_active)
@@ -30,7 +30,7 @@ VALUES ('kiet', '1234567890',
         'https://example.com/avatar2.png',
         '456 Nguyễn Huệ, Q1, TP.HCM',
         'ADMIN', TRUE)
-ON CONFLICT (phone) DO NOTHING;
+ON DUPLICATE KEY UPDATE phone = phone;
 
 -- Admin 3
 INSERT INTO users (full_name, phone, password_hash, email, avatar_url, address, role, is_active)
@@ -40,4 +40,4 @@ VALUES ('anh kiet', '98898898321',
         'https://example.com/avatar3.png',
         '789 Trần Hưng Đạo, Q5, TP.HCM',
         'ADMIN', TRUE)
-ON CONFLICT (phone) DO NOTHING;
+ON DUPLICATE KEY UPDATE phone = phone;

@@ -4,9 +4,12 @@ import com.proj.webprojrct.user.entity.UserRole;
 import com.proj.webprojrct.common.config.security.JwtUtil;
 import com.proj.webprojrct.user.entity.User;
 import com.proj.webprojrct.user.repository.UserRepository;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+
 import com.proj.webprojrct.common.config.security.CustomUserDetails;
+
 import jakarta.servlet.http.HttpSession;
 
 import java.lang.annotation.Repeatable;
@@ -14,12 +17,14 @@ import java.lang.annotation.Repeatable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import lombok.*;
 
 @AllArgsConstructor
@@ -60,7 +65,6 @@ public class AuthController {
                 return "login"; // login.jsp
             }
 
-            // Sinh token
             String accessToken = jwtUtil.generateAccessToken(user);
             String refreshToken = jwtUtil.generateRefreshToken(user);
 
@@ -91,15 +95,14 @@ public class AuthController {
     }
 
     @GetMapping("/home")
-    public String homePage(Model model, @CookieValue(value = "access_token", required = false) String accessToken) {
-        if (accessToken != null && jwtUtil.validateToken(accessToken)) {
-            String phone = jwtUtil.extractUsername(accessToken);
-            User user = userRepo.findByPhone(phone).orElse(null);
-            if (user != null) {
-                model.addAttribute("username", user.getFullName());
-                model.addAttribute("role", user.getRole().name());
-                model.addAttribute("phone", user.getPhone());
-            }
+    public String homePage(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+            User user = userDetails.getUser();
+            model.addAttribute("username", user.getFullName());
+            model.addAttribute("role", user.getRole().name());
+            model.addAttribute("phone", user.getPhone());
         }
         return "home";
     }

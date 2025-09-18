@@ -64,6 +64,12 @@ public class User implements UserDetails {
             insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
+    @Column(name = "verify_email", nullable = false)
+    private Boolean verifyEmail = false;
+
+    @Column(name = "verify_phone", nullable = false)
+    private Boolean verifyPhone = false;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(() -> role.name());

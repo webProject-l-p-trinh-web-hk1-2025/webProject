@@ -14,7 +14,7 @@ docker compose -f mySQL.yaml up -d --build
 ```
 **Reset database**
 ```
-docker volume rm mysql_data
+webproject10_mysql_data
 sudo docker compose -f mySQL.yaml up -d --build
 ```
 **Thao tác với DB**

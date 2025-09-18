@@ -8,7 +8,7 @@
 
         <body>
             <h2>Login</h2>
-            <form action="/dologin" method="post">
+            <form action="${pageContext.request.contextPath}/dologin" method="post">
                 <label for="phone">Phone:</label>
                 <input type="text" id="phone" name="phone" required><br><br>
 
@@ -25,8 +25,9 @@
             <c:if test="${not empty error}">
                 <p style="color:red">${error}</p>
             </c:if>
-            <p>Don't have an account? <a href="/register">Register here</a></p>
-            <a href="/resetPassword">
+
+            <p>Don't have an account? <a href="${pageContext.request.contextPath}/register">Register here</a></p>
+            <a href="${pageContext.request.contextPath}/resetPassword">
                 <p>Forget password</p>
             </a>
         </body>

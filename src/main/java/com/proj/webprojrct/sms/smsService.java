@@ -27,4 +27,9 @@ public class smsService {
         ).create();
         System.out.println("SMS sent: " + message.getSid());
     }
+
+    public void sendOtp(String to, String otp) {
+        String body = "Your OTP code is: " + otp;
+        sendSms(to, body);
+    }
 }

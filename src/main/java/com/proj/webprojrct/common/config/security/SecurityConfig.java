@@ -27,30 +27,30 @@ public class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationFilter jwtFilter;
 
-    // @Bean
-    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    //     http
-    //             .csrf(csrf -> csrf.disable())
-    //             .authorizeHttpRequests(auth -> auth
-    //             .anyRequest().permitAll() // tạm mở tất cả
-    //             );
-    //     return http.build();
-    // }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/css/**", "/js/**", "/favicon.ico", "/error", "/WEB-INF/jsp/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                .anyRequest().authenticated()
-                )
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
+                .anyRequest().permitAll() // tạm mở tất cả
+                );
         return http.build();
     }
+    // @Bean
+    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    //     http.csrf(csrf -> csrf.disable())
+    //             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    //             .authorizeHttpRequests(auth -> auth
+    //             .requestMatchers("/", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/api/documents/**", "/api/products/**", "/css/**", "/js/**", "/favicon.ico", "/error", "/WEB-INF/jsp/**").permitAll()
+    //             .requestMatchers("/admin/**").hasRole("ADMIN")
+    //             .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+    //             .anyRequest().authenticated()
+    //             )
+    //             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    //             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+    //     return http.build();
+    // }
 
     @Bean
     public DaoAuthenticationProvider daoAuthProvider() {

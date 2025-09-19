@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.lang.annotation.Repeatable;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +33,7 @@ import com.proj.webprojrct.auth.dto.request.LoginRequest;
 import com.proj.webprojrct.auth.dto.response.LoginResponse;
 
 import lombok.*;
+
 import com.proj.webprojrct.auth.dto.request.ChangePassRequest;
 
 import com.proj.webprojrct.auth.dto.request.RegisterRequest;
@@ -258,9 +260,11 @@ public class AuthController {
         return "change-password";
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/verify-otp")
     public String showOtpForm(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
             return "verify-otp";
         }

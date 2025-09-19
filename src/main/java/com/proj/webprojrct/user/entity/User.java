@@ -104,4 +104,8 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return isActive;
     }
+
+    public UserRole getRole() {
+        return role;
+    }
 }

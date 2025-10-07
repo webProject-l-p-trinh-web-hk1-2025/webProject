@@ -8,6 +8,8 @@ import com.proj.webprojrct.cart.entity.CartItem;
 import com.proj.webprojrct.cart.repository.CartRepository;
 import com.proj.webprojrct.cart.repository.CartItemRepository;
 import com.proj.webprojrct.cart.service.CartService;
+import com.proj.webprojrct.user.entity.User;
+import com.proj.webprojrct.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,20 +27,25 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private CartItemRepository cartItemRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public CartResponse getCartByUserId(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Cart cart = cartRepository.findByUser(user)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
-                    newCart.setUserId(userId);
+                    newCart.setUser(user);
                     newCart.setCreatedAt(LocalDateTime.now());
                     return cartRepository.save(newCart);
                 });
-        List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
+        List<CartItem> items = cartItemRepository.findByCart(cart);
         List<CartItemResponse> itemResponses = items.stream().map(item -> {
             CartItemResponse resp = new CartItemResponse();
             resp.setId(item.getId());
-            resp.setCartId(item.getCartId());
+            resp.setCartId(item.getCart().getId());
             resp.setProductId(item.getProductId());
             resp.setQuantity(item.getQuantity());
             return resp;
@@ -46,21 +53,23 @@ public class CartServiceImpl implements CartService {
 
         CartResponse response = new CartResponse();
         response.setId(cart.getId());
-        response.setUserId(cart.getUserId());
+        response.setUserId(cart.getUser().getId());
         response.setItems(itemResponses);
         return response;
     }
 
     @Override
     public void addItemToCart(Long userId, CartRequest request) {
-        Cart cart = cartRepository.findByUserId(userId)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Cart cart = cartRepository.findByUser(user)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
-                    newCart.setUserId(userId);
+                    newCart.setUser(user);
                     newCart.setCreatedAt(LocalDateTime.now());
                     return cartRepository.save(newCart);
                 });
-        List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
+        List<CartItem> items = cartItemRepository.findByCart(cart);
         Optional<CartItem> existing = items.stream()
                 .filter(i -> i.getProductId().equals(request.getProductId()))
                 .findFirst();
@@ -70,7 +79,7 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.save(item);
         } else {
             CartItem item = new CartItem();
-            item.setCartId(cart.getId());
+            item.setCart(cart);
             item.setProductId(request.getProductId());
             item.setQuantity(request.getQuantity());
             cartItemRepository.save(item);
@@ -79,9 +88,11 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void removeItemFromCart(Long userId, Long productId) {
-        Cart cart = cartRepository.findByUserId(userId)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
-        List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
+        List<CartItem> items = cartItemRepository.findByCart(cart);
         items.stream()
                 .filter(i -> i.getProductId().equals(productId))
                 .findFirst()
@@ -90,8 +101,10 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void clearCart(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
-        cartItemRepository.deleteByCartId(cart.getId());
+        cartItemRepository.deleteByCart(cart);
     }
 }

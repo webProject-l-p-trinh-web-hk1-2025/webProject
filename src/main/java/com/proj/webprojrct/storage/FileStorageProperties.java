@@ -11,4 +11,5 @@ public class FileStorageProperties {
 
     private String avatars;
     private String products;
+    private String documents;
 }

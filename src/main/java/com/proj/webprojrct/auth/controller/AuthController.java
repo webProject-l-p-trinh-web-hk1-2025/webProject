@@ -251,7 +251,7 @@ public class AuthController {
         }
 
         model.addAttribute("message", message);
-        return "change-password"; // JSP name
+        return "change-password";
     }
 
     @GetMapping("/change-password")

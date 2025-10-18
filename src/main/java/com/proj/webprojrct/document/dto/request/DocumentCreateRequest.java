@@ -1,0 +1,17 @@
+package com.proj.webprojrct.document.dto;
+
+import lombok.*;
+
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class DocumentCreateRequest {
+
+    private String title;
+    private String description; // HTML content
+    private long productId;
+}

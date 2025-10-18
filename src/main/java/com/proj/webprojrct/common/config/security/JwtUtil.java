@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -16,6 +17,7 @@ import io.jsonwebtoken.security.Keys;
 public class JwtUtil {
 
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    //private final Key refreshKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private final long ACCESS_EXPIRATION = 1000 * 60 * 15;   // 15 phút
     private final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 ngày
 
@@ -38,6 +40,19 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRATION))
                 .signWith(key)
                 .compact();
+    }
+
+    public boolean validateRefreshToken(String token) {
+        try {
+            // parse token, ném exception nếu invalid
+            Jwts.parserBuilder()
+                    .setSigningKey(key) // key dùng cho refresh token
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     // Lấy username

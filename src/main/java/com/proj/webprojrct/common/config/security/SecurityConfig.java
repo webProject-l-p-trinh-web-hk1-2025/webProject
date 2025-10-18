@@ -42,8 +42,9 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/css/**", "/js/**", "/favicon.ico", "/error", "/WEB-INF/jsp/**").permitAll()
-                // .requestMatchers("/api/cart/**").permitAll()//cho phep truy cap api cart ma khong can xac thu
-                .requestMatchers("/api/cart/**").authenticated()// yeu cau xac thuc moi truy cap duoc api cart
+                .requestMatchers("/cart", "/order").permitAll()
+                .requestMatchers("/api/cart/**").authenticated()
+                .requestMatchers("/api/orders/**").authenticated()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()

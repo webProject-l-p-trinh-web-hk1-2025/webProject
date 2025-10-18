@@ -44,7 +44,7 @@ public class CartServiceImpl implements CartService {
         List<CartItem> items = cartItemRepository.findByCart(cart);
         List<CartItemResponse> itemResponses = items.stream().map(item -> {
             CartItemResponse resp = new CartItemResponse();
-            resp.setId(item.getId());
+            resp.setCartItemId(item.getId());  
             resp.setCartId(item.getCart().getId());
             resp.setProductId(item.getProductId());
             resp.setQuantity(item.getQuantity());
@@ -52,8 +52,9 @@ public class CartServiceImpl implements CartService {
         }).collect(Collectors.toList());
 
         CartResponse response = new CartResponse();
-        response.setId(cart.getId());
+        response.setCartId(cart.getId()); 
         response.setUserId(cart.getUser().getId());
+        response.setCreatedAt(cart.getCreatedAt());  
         response.setItems(itemResponses);
         return response;
     }

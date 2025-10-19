@@ -1,78 +1,126 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-  String ctx = request.getContextPath();
-  String id  = request.getParameter("id");
-%>
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Product Detail</title>
+  <title>Chi tiết sản phẩm</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    .product-image { max-width: 250px; max-height: 250px; border-radius: 8px; border: 1px solid #ccc; object-fit: contain; }
+    .spec-label { color: #6c757d; font-weight: 500; }
+    .price-tag { font-size: 1.5rem; font-weight: 600; color: #dc3545; }
+  </style>
 </head>
 <body class="bg-light">
-<div class="container py-4" style="max-width:820px;">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="m-0">Product Detail</h3>
+<div class="container py-4" style="max-width:900px;">
+  <div id="alertBox" class="alert alert-danger d-none"></div>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/product_list">Sản phẩm</a></li>
+      <li class="breadcrumb-item active">Chi tiết</li>
+    </ol>
+  </nav>
 
-    <!-- Nút Back: ưu tiên quay lại trang trước; nếu vào trực tiếp thì về /product_list -->
-    <button class="btn btn-secondary" type="button" onclick="goBack()">Back</button>
+  <div id="productCard" class="card d-none">
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-md-4 text-center">
+          <img id="image" class="product-image" src="">
+        </div>
+        <div class="col-md-8">
+          <h3 id="name"></h3>
+          <div class="mb-2"><span class="badge bg-primary" id="brand"></span> <span class="badge bg-info" id="category"></span></div>
+          <div id="price" class="price-tag mb-3"></div>
+          <div><strong>Tồn kho:</strong> <span id="stock"></span></div>
+          <div><strong>Ngày tạo:</strong> <span id="createdAt"></span></div>
+          <a id="editBtn" class="btn btn-outline-primary mt-3" href="#"><i class="bi bi-pencil-square me-1"></i>Sửa</a>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
+  <div id="specsCard" class="card mt-3 d-none">
+    <div class="card-header"><h5 class="mb-0">Thông số kỹ thuật</h5></div>
     <div class="card-body">
-      <dl class="row">
-        <dt class="col-sm-3">ID</dt>          <dd class="col-sm-9" id="p_id"></dd>
-        <dt class="col-sm-3">Name</dt>        <dd class="col-sm-9" id="p_name"></dd>
-        <dt class="col-sm-3">Brand</dt>       <dd class="col-sm-9" id="p_brand"></dd>
-        <dt class="col-sm-3">Price</dt>       <dd class="col-sm-9" id="p_price"></dd>
-        <dt class="col-sm-3">Stock</dt>       <dd class="col-sm-9" id="p_stock"></dd>
-        <dt class="col-sm-3">Created</dt>     <dd class="col-sm-9" id="p_created"></dd>
-        <dt class="col-sm-3">Description</dt> <dd class="col-sm-9" id="p_desc"></dd>
-      </dl>
-
-      <div id="err" class="text-danger small"></div>
+      <dl class="row mb-0" id="specList"></dl>
     </div>
   </div>
 </div>
 
 <script>
-const ctx = "<%=ctx%>";
-const api = ctx + "/api/products";
-const id  = "<%= id==null ? "" : id %>";
+const ctx = "${pageContext.request.contextPath}";
+const id = new URLSearchParams(window.location.search).get("id");
+const api = ctx + '/api/products/' + id;
 
-// Back thông minh
-function goBack(){
-  if (document.referrer && document.referrer.startsWith(location.origin)) {
-    history.back();
-  } else {
-    window.location = ctx + "/product_list";
-  }
-}
-
-(async ()=>{
-  if (!id){ return showErr("Missing id"); }
+(async function load() {
   try {
-    const res = await fetch(api + "/" + id, { headers: { "Accept": "application/json" }});
-    if (!res.ok){ return showErr("Not found ("+res.status+")"); }
+    const res = await fetch(api);
+    if (!res.ok) throw new Error("Không tìm thấy sản phẩm");
     const p = await res.json();
-
-    set("p_id", p.id);
-    set("p_name", p.name || "");
-    set("p_brand", p.brand || "");
-    set("p_price", fmt(p.price));
-    set("p_stock", p.stock ?? 0);
-    set("p_created", p.createdAt ? new Date(p.createdAt).toLocaleString() : "");
-    set("p_desc", p.description || "");
-  } catch(e){
-    console.error(e);
-    showErr("Error loading detail");
+    document.getElementById("productCard").classList.remove("d-none");
+    fill(p);
+  } catch (e) {
+    showError(e.message);
   }
 })();
 
-function set(i,v){ document.getElementById(i).textContent = v ?? ""; }
-function fmt(x){ if (x==null) return ""; const n=Number(x); return isNaN(n)?x:n.toLocaleString(); }
-function showErr(msg){ document.getElementById("err").textContent = msg; }
+function showError(msg) {
+  const a = document.getElementById("alertBox");
+  a.textContent = msg;
+  a.classList.remove("d-none");
+}
+
+function fill(p) {
+  document.getElementById("name").textContent = p.name;
+  document.getElementById("brand").textContent = p.brand;
+  document.getElementById("category").textContent = p.category?.name || "Chưa phân loại";
+  document.getElementById("price").textContent = p.price?.toLocaleString('vi-VN') + " ₫";
+  document.getElementById("stock").textContent = p.stock;
+  document.getElementById("createdAt").textContent = new Date(p.createdAt).toLocaleDateString('vi-VN');
+  document.getElementById("image").src = p.imageUrl ? ctx + p.imageUrl : ctx + "/images/no-image.png";
+
+  const editBtn = document.getElementById("editBtn");
+  editBtn.href = ctx + '/admin/products/edit/' + p.id;
+
+  // specs
+  const specListEl = document.getElementById("specList");
+  const rows = [];
+
+  // top-level technical fields on the product
+  if (p.screenSize) rows.push({ key: 'Screen size', value: p.screenSize });
+  if (p.displayTech) rows.push({ key: 'Display tech', value: p.displayTech });
+  if (p.resolution) rows.push({ key: 'Resolution', value: p.resolution });
+  if (p.displayFeatures) rows.push({ key: 'Display features', value: p.displayFeatures });
+  if (p.rearCamera) rows.push({ key: 'Rear camera', value: p.rearCamera });
+  if (p.frontCamera) rows.push({ key: 'Front camera', value: p.frontCamera });
+  if (p.chipset) rows.push({ key: 'Chipset', value: p.chipset });
+  if (p.cpuSpecs) rows.push({ key: 'CPU specs', value: p.cpuSpecs });
+  if (p.ram) rows.push({ key: 'RAM', value: p.ram });
+  if (p.storage) rows.push({ key: 'Storage', value: p.storage });
+  if (p.battery) rows.push({ key: 'Battery', value: p.battery });
+  if (p.simType) rows.push({ key: 'SIM type', value: p.simType });
+  if (p.os) rows.push({ key: 'OS', value: p.os });
+  if (p.nfcSupport) rows.push({ key: 'NFC support', value: p.nfcSupport });
+
+  // custom specs (key/value)
+  const customSpecs = p.specs || [];
+  customSpecs.forEach(s => {
+    if (s && s.key) rows.push({ key: s.key, value: s.value });
+  });
+
+  if (rows.length > 0) {
+    document.getElementById("specsCard").classList.remove("d-none");
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      html += '<dt class="col-sm-4 spec-label">' + (r.key || '') + '</dt>';
+      html += '<dd class="col-sm-8">' + (r.value || '') + '</dd>';
+    }
+    specListEl.innerHTML = html;
+  }
+}
 </script>
 </body>
 </html>

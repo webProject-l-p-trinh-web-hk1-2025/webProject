@@ -17,5 +17,5 @@ public class UserResponse {
     private String fullname;
     private String email;
     private String address;
-    private String avt_url;
+    private String avatarUrl;
 }

@@ -1,7 +1,6 @@
 package com.proj.webprojrct.payment.entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,7 +38,6 @@ public class Payment {
     @Column(name = "status", length = 20)
     private String status;
 
-    @Column(name = "paid_at", nullable = false, updatable = false,
-            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime paidAt;
+    @Column(name = "paid_at", nullable = false)
+    private String paidAt;
 }

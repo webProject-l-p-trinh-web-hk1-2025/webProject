@@ -1,5 +1,6 @@
 package com.proj.webprojrct.product.entity;
 
+import com.proj.webprojrct.category.entity.Category;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -12,7 +13,9 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class Product {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false) private String name;
@@ -21,21 +24,35 @@ public class Product {
     @Column(precision = 12, scale = 2, nullable = false)
     private BigDecimal price;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
     @Column(nullable = false)
-    @Builder.Default
-    private Integer stock = 0;
+    private Integer stock;
 
-    @Column(name = "created_at")
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "product",
-               cascade = CascadeType.ALL,
-               orphanRemoval = true,
-               fetch = FetchType.LAZY)
+    private String imageUrl;
+
+    // --- Specs ---
+    private String screenSize;
+    private String displayTech;
+    private String rearCamera;
+    private String frontCamera;
+    private String chipset;
+    private String nfcSupport;
+    private String ram;
+    private String storage;
+    private String battery;
+    private String simType;
+    private String os;
+    private String resolution;
+    private String displayFeatures;
+    private String cpuSpecs;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ProductSpec> specifications = new ArrayList<>();
 }

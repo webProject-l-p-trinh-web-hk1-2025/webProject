@@ -4,35 +4,26 @@ import com.proj.webprojrct.document.dto.request.DocumentCreateRequest;
 import com.proj.webprojrct.document.dto.request.DocumentUpdateRequest;
 import com.proj.webprojrct.document.dto.response.DocumentResponse;
 import com.proj.webprojrct.document.entity.Document;
+import org.mapstruct.*;
 
-public final class DocumentMapper {
-    private DocumentMapper(){}
+import java.util.List;
 
-    // Create DTO -> Entity
-    public static Document toEntity(DocumentCreateRequest r){
-        if (r == null) return null;
-        return Document.builder()
-                .title(r.getTitle())
-                .content(r.getContent())
-                .build();
-    }
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface DocumentMapper {
 
-    // Update vào entity hiện có 
-    public static void updateEntity(Document d, DocumentUpdateRequest r){
-        if (d == null || r == null) return;
-        if (r.getTitle() != null)   d.setTitle(r.getTitle());
-        if (r.getContent() != null) d.setContent(r.getContent());
-    }
+    @Mappings({
+        @Mapping(target = "documentId", ignore = true),
+        @Mapping(target = "createdAt", ignore = true),
+        @Mapping(target = "updatedAt", ignore = true)
+    })
+    Document toEntity(DocumentCreateRequest request);
 
-    // Entity -> Response
-    public static DocumentResponse toResponse(Document d){
-        if (d == null) return null;
-        return DocumentResponse.builder()
-                .id(d.getDocumentId())
-                .title(d.getTitle())
-                .content(d.getContent())
-                .createdAt(d.getCreatedAt())
-                .updatedAt(d.getUpdatedAt())
-                .build();
-    }
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(DocumentUpdateRequest dto, @MappingTarget Document entity);
+
+    @Mapping(target = "id", source = "documentId")
+    DocumentResponse toResponse(Document document);
+
+    List<DocumentResponse> toResponseList(List<Document> documents);
 }
+

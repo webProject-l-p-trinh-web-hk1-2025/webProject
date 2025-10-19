@@ -13,7 +13,7 @@ public interface FileStorageServiceI {
     String save(String filename, InputStream data) throws IOException;
 
     /**
-     * Đọc nội dung file dạng byte[].
+     * Đọc file theo tên, trả về nội dung file dưới dạng mảng byte.
      */
     byte[] read(String filename) throws IOException;
 

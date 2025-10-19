@@ -24,6 +24,7 @@ import java.util.List;
 public class DocumentController {
 
     private final DocumentRepository repo;
+    private final com.proj.webprojrct.document.mapper.DocumentMapper documentMapper;
 
     @GetMapping
     @Transactional(readOnly = true)
@@ -31,23 +32,23 @@ public class DocumentController {
         List<Document> docs = (q == null || q.isBlank())
                 ? repo.findAll()
                 : repo.findByTitleContainingIgnoreCaseOrderByUpdatedAtDesc(q.trim());
-        return docs.stream().map(DocumentMapper::toResponse).toList();
+    return docs.stream().map(documentMapper::toResponse).toList();
     }
 
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     public DocumentResponse get(@PathVariable Long id) {
-        return repo.findById(id)
-                .map(DocumentMapper::toResponse)
+    return repo.findById(id)
+        .map(documentMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public ResponseEntity<DocumentResponse> create(@Valid @RequestBody DocumentCreateRequest req) {
-        Document entity = DocumentMapper.toEntity(req);
-        entity = repo.save(entity);
-        DocumentResponse body = DocumentMapper.toResponse(entity);
+    Document entity = documentMapper.toEntity(req);
+    entity = repo.save(entity);
+    DocumentResponse body = documentMapper.toResponse(entity);
         return ResponseEntity.created(URI.create("/api/documents/" + body.getId())).body(body);
     }
 
@@ -56,9 +57,9 @@ public class DocumentController {
     public DocumentResponse update(@PathVariable Long id, @Valid @RequestBody DocumentUpdateRequest req) {
         Document entity = repo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
-        DocumentMapper.updateEntity(entity, req);
-        entity = repo.save(entity);
-        return DocumentMapper.toResponse(entity);
+    documentMapper.updateEntityFromDto(req, entity);
+    entity = repo.save(entity);
+    return documentMapper.toResponse(entity);
     }
 
     @DeleteMapping("/{id}")

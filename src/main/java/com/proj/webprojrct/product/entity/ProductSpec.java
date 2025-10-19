@@ -4,16 +4,16 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "specifications")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "product_specs")
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
 public class ProductSpec {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "spec_key")
-    private String key;
-
-    @Column(name = "spec_value")
+    @Column(name = "spec_key") private String key;
     private String value;
 
     @ManyToOne(fetch = FetchType.LAZY)

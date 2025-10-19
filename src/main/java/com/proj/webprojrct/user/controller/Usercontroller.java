@@ -149,7 +149,7 @@ public class Usercontroller {
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-    @GetMapping("/user/profile")
+    @GetMapping("/profile")
     public String getUserProfile(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -163,7 +163,7 @@ public class Usercontroller {
         return "profile";
     }
 
-    @GetMapping("/user/update-profile")
+    @GetMapping("/update-profile")
     public String updateUserProfile(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -176,7 +176,7 @@ public class Usercontroller {
         }
     }
 
-    @PostMapping("/user/update-profile")
+    @PostMapping("/update-profile")
     public String handleUpdateUserProfile(
             @ModelAttribute UserUpdateRequest userReq,
             @RequestParam(value = "avt", required = false) MultipartFile avt,

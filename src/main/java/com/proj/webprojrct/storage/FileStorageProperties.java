@@ -11,4 +11,8 @@ public class FileStorageProperties {
 
     private String avatars;
     private String products;
+    private String documents;
+
+    // media cho phần chat support
+    private String media;
 }

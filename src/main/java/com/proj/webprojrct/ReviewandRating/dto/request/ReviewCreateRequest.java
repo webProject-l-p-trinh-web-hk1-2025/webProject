@@ -1,4 +1,4 @@
-package main.java.com.proj.webprojrct.ReviewandRating.dto.request;
+package com.proj.webprojrct.reviewandrating.dto.request;
 import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor

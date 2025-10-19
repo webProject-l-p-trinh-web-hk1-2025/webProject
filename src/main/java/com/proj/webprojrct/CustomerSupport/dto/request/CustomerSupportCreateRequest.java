@@ -1,4 +1,4 @@
-package main.java.com.proj.webprojrct.CustomerSupport.dto.request;
+package com.proj.webprojrct.customersupport.dto.request;
 import lombok.*;
 
 @AllArgsConstructor

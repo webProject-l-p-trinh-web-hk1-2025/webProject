@@ -1,4 +1,4 @@
-package main.java.com.proj.webprojrct.ReviewandRating.dto.response;
+package com.proj.webprojrct.reviewandrating.dto.response;
 
 import java.time.LocalDateTime;
 import lombok.*;

@@ -1,4 +1,4 @@
-package main.java.com.proj.webprojrct.CustomerSupport.dto.response;
+package com.proj.webprojrct.customersupport.dto.response;
 
 import java.time.LocalDateTime;
 import lombok.*;

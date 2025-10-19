@@ -36,15 +36,26 @@ public class SecurityConfig {
     //             );
     //     return http.build();
     // }
+    // @Bean
+    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    //     http.csrf(csrf -> csrf.disable())
+    //             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    //             .authorizeHttpRequests(auth -> auth
+    //             .requestMatchers("/", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/api/documents/**", "/api/products/**", "/css/**", "/js/**", "/favicon.ico", "/error", "/WEB-INF/jsp/**").permitAll()
+    //             .requestMatchers("/admin/**").hasRole("ADMIN")
+    //             .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+    //             .anyRequest().authenticated()
+    //             )
+    //             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    //             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+    //     return http.build();
+    // }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/css/**", "/js/**", "/favicon.ico", "/error", "/WEB-INF/jsp/**").permitAll()
-                .requestMatchers("/cart", "/order").permitAll()
-                .requestMatchers("/api/cart/**").authenticated()
-                .requestMatchers("/api/orders/**").authenticated()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()

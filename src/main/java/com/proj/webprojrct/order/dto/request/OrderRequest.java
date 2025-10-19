@@ -3,6 +3,10 @@ package com.proj.webprojrct.order.dto.request;
 import lombok.Data;
 import java.math.BigDecimal;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class OrderRequest {
     private Long productId;

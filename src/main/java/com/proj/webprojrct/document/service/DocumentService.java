@@ -58,6 +58,36 @@ public class DocumentService {
         return documentRepository.save(doc);
     }
 
+    @Transactional
+    public Document updateDocument(Long id, DocumentCreateRequest dto, List<MultipartFile> images) {
+        Document existing = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document không tồn tại với id: " + id));
+
+        existing.setTitle(dto.getTitle());
+        existing.setDescription(dto.getDescription());
+        existing.setProductId(dto.getProductId());
+
+        if (images != null && !images.isEmpty()) {
+            List<DocumentImage> newImages = new ArrayList<>();
+            for (MultipartFile file : images) {
+                if (file != null && !file.isEmpty()) {
+                    try (InputStream inputStream = file.getInputStream()) {
+                        String savedFileName = documentStorageService.save(file.getOriginalFilename(), inputStream);
+                        DocumentImage img = new DocumentImage();
+                        img.setImageUrl("/uploads/documents/" + savedFileName);
+                        img.setDocument(existing);
+                        newImages.add(img);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Lỗi khi lưu ảnh: " + e.getMessage());
+                    }
+                }
+            }
+            existing.getImages().addAll(newImages);
+        }
+
+        return documentRepository.save(existing);
+    }
+
     private final String uploadDir = "uploads/document/";
 
     public String saveImage(MultipartFile file) {
@@ -81,7 +111,6 @@ public class DocumentService {
             Path filePath = uploadPath.resolve(uniqueFileName);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Trả về URL để client có thể dùng trực tiếp
             return "/" + uploadDir + uniqueFileName;
 
         } catch (Exception e) {

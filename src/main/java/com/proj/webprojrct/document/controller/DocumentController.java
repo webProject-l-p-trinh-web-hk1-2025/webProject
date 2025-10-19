@@ -64,6 +64,23 @@ public class DocumentController {
         return "admin/document_detail"; // JSP hiển thị chi tiết từng document
     }
 
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        Document document = documentService.getDocument(id);
+        model.addAttribute("document", document);
+        return "admin/document_form";
+    }
+
+    @PostMapping("/update/{id}")
+    public String updateDocument(@PathVariable Long id,
+            @ModelAttribute DocumentCreateRequest dto,
+            @RequestParam(value = "images", required = false) List<MultipartFile> images,
+            Model model) {
+        documentService.updateDocument(id, dto, images);
+        model.addAttribute("success", "Cập nhật document thành công!");
+        return "redirect:/admin/document/list";
+    }
+
     @PostMapping("/upload-image")
     @ResponseBody
     public ResponseEntity<?> handleEditorImageUpload(@RequestParam("image") MultipartFile image) {

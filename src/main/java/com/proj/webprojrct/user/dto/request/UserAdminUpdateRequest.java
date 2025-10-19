@@ -9,10 +9,10 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class UserCreateRequest {
+public class UserAdminUpdateRequest {
 
     private UserRole role;
     private String fullname;
     private String email;
-    private String phone;
+    private String address;
 }

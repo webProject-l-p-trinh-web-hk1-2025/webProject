@@ -27,19 +27,51 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req,
             HttpServletResponse res,
             FilterChain chain) throws IOException, ServletException {
-        String token = null;
+        String accessToken = null;
+
+        // lấy access_token trong cookie
         if (req.getCookies() != null) {
             for (Cookie c : req.getCookies()) {
                 if ("access_token".equals(c.getName())) {
-                    token = c.getValue();
+                    accessToken = c.getValue();
                 }
             }
         }
 
-        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String username = jwtUtil.extractUsername(token);
-            var userDetails = userDetailsService.loadUserByUsername(username);
-            if (jwtUtil.isTokenValid(token, userDetails)) {
+        try {
+            if (accessToken != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                String username = jwtUtil.extractUsername(accessToken);
+                var userDetails = userDetailsService.loadUserByUsername(username);
+
+                if (jwtUtil.isTokenValid(accessToken, userDetails)) {
+                    var auth = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
+            }
+        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+            // access_token hết hạn → thử dùng refresh_token
+            String refreshToken = null;
+            if (req.getCookies() != null) {
+                for (Cookie c : req.getCookies()) {
+                    if ("refresh_token".equals(c.getName())) {
+                        refreshToken = c.getValue();
+                    }
+                }
+            }
+
+            if (refreshToken != null && jwtUtil.validateRefreshToken(refreshToken)) {
+                String username = jwtUtil.extractUsername(refreshToken);
+                var userDetails = userDetailsService.loadUserByUsername(username);
+
+                // cấp access mới
+                String newAccess = jwtUtil.generateAccessToken(userDetails);
+
+                Cookie newAccessCookie = new Cookie("access_token", newAccess);
+                newAccessCookie.setHttpOnly(true);
+                newAccessCookie.setPath("/");
+                res.addCookie(newAccessCookie);
+
                 var auth = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
@@ -48,4 +80,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         chain.doFilter(req, res);
     }
+
 }

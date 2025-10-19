@@ -1,13 +1,19 @@
 package com.proj.webprojrct.document.dto.response;
 
-import java.time.LocalDateTime;
 import lombok.*;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class DocumentResponse {
+
     private Long id;
     private String title;
-    private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String description;
+    private String productId;
+    private List<DocumentImageResponse> images;
 }

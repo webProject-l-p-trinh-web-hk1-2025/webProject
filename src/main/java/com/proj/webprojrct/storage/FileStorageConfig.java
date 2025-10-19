@@ -5,6 +5,7 @@ import com.proj.webprojrct.storage.service.AvatarStorageService;
 import com.proj.webprojrct.storage.service.ProductStorageService;
 
 import com.proj.webprojrct.storage.service.DocumentStorageService;
+import com.proj.webprojrct.storage.service.MediaStorageService;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,8 +34,8 @@ public class FileStorageConfig {
     }
 
     @Bean
-    public com.proj.webprojrct.storage.service.MediaStorageService mediaStorage(FileStorageProperties props) throws IOException {
-        return new com.proj.webprojrct.storage.service.MediaStorageService(Paths.get(props.getMedia()));
+    public MediaStorageService mediaStorage(FileStorageProperties props) throws IOException {
+        return new MediaStorageService(Paths.get(props.getMedia()));
     }
 
 }

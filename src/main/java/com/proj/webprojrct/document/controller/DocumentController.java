@@ -1,6 +1,6 @@
 package com.proj.webprojrct.document.controller;
 
-import com.proj.webprojrct.document.dto.DocumentCreateRequest;
+import com.proj.webprojrct.document.dto.request.DocumentCreateRequest;
 import com.proj.webprojrct.document.entity.Document;
 import com.proj.webprojrct.document.service.DocumentService;
 

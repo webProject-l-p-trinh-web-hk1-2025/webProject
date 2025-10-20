@@ -1,5 +1,8 @@
 package com.proj.webprojrct.payment.vnpay.service;
 
+import com.proj.webprojrct.order.entity.Order;
+import com.proj.webprojrct.order.repository.OrderRepository;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -34,6 +37,7 @@ import com.proj.webprojrct.payment.entity.Payment;
 import com.proj.webprojrct.payment.repository.PaymentRepository;
 import com.twilio.twiml.voice.Pay;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RequiredArgsConstructor
@@ -42,13 +46,18 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
 
+    private final OrderRepository orderRepository;
+
     public PaymentResDto createPaymentUrl(Long orderId, HttpServletRequest request) throws UnsupportedEncodingException {
         String orderType = "other";
 
-        // long amount = Integer.parseInt(req.getParameter("amount")) * 100;
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng (Order) với ID: " + orderId));
+        BigDecimal totalAmountBigDecimal = order.getTotalAmount();
+        BigDecimal multiplier = new BigDecimal("100");
+        long amount = totalAmountBigDecimal.multiply(multiplier).longValue();
         // String bankCode = req.getParameter("bankCode");
-        long amount = 100000 * 100; //test
-        // long amount = ...
+        //long amount = 100000 * 100; //test
+
         String vnp_TxnRef = String.valueOf(orderId);
 
         String vnp_IpAddr = Config.getIpAddress(request);
@@ -260,6 +269,13 @@ public class PaymentService {
             percent = 100;
         }
 
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng (Order) với ID: " + orderId));
+        BigDecimal totalAmountBigDecimal = order.getTotalAmount();
+        BigDecimal multiplier = new BigDecimal("100");
+        long originalAmountVND = totalAmountBigDecimal.multiply(multiplier).longValue();
+        double refundAmountVND = originalAmountVND * ((double) percent / 100.0);
+        long amount = (long) refundAmountVND;
+
         String vnp_RequestId = Config.getRandomNumber(8);
         String vnp_Version = "2.1.0";
         String vnp_Command = "refund";
@@ -267,7 +283,7 @@ public class PaymentService {
         String vnp_TransactionType = trantype;
         String vnp_TxnRef = String.valueOf(orderId);
         double discount = (double) percent / 100.0;
-        long amount = 100000 * 100; //test
+        //long amount = 100000 * 100; //test
         String vnp_Amount = String.valueOf(amount);
         String vnp_OrderInfo = "Hoan tien GD OrderId:" + vnp_TxnRef;
         String vnp_TransactionNo = ""; //Assuming value of the parameter "vnp_TransactionNo" does not exist on your system.

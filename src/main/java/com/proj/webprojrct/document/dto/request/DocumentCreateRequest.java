@@ -1,4 +1,4 @@
-package com.proj.webprojrct.document.dto;
+package com.proj.webprojrct.document.dto.request;
 
 import lombok.*;
 

@@ -1,5 +1,6 @@
 package com.proj.webprojrct.auth.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
@@ -11,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.proj.webprojrct.sms.smsService;
+import com.proj.webprojrct.sms.speedSMsService;
 import com.proj.webprojrct.email.emailService;
 
 import com.proj.webprojrct.common.config.security.PasswordConfig;
@@ -54,6 +56,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final smsService smsS;
+    private final speedSMsService sSms;
     private final emailService emailService;
     private final JwtUtil jwtUtil;
 
@@ -128,13 +131,36 @@ public class AuthService {
             model.addAttribute("error", "Số điện thoại không tồn tại.");
             return false;
         }
-
+        if (!user.getVerifyPhone()) {
+            model.addAttribute("error", "Số điện thoại chưa được xác thực.");
+            return false;
+        }
+        ////
         String newPassword = PasswordConfig.generateRandomPassword();
         String smsBody = "Mật khẩu mới sau khi reset của bạn là: " + newPassword;
         String formattedPhone = formatPhone(phone);
-        smsS.sendSms(formattedPhone, smsBody);
+        boolean smsSentSuccessfully;
+
+        try {
+            smsSentSuccessfully = sSms.sendSMS(formattedPhone, smsBody);
+        } catch (IOException e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Lỗi hệ thống gửi SMS, vui lòng thử lại sau.");
+            return false;
+        }
+
+        if (!smsSentSuccessfully) {
+            model.addAttribute("error", "Gửi SMS thất bại. Vui lòng kiểm tra lại SĐT hoặc liên hệ admin.");
+            return false;
+        }
+        // if (!sSms.sendSMS(formattedPhone, smsBody)) {
+        //     return false;
+        // }
+        //String formattedPhone = formatPhone(phone);
+        //smsS.sendSms(formattedPhone, smsBody);
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+
         return true;
     }
 
@@ -142,6 +168,10 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
             model.addAttribute("error", "Email không tồn tại.");
+            return false;
+        }
+        if (!user.getVerifyEmail()) {
+            model.addAttribute("error", "Email chưa được xác thực.");
             return false;
         }
 
@@ -162,15 +192,18 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
 
         if (!user.getIsActive()) {
-            return "Tài khoản đã bị khóa.";
+            throw new RuntimeException("Tài khoản đã bị khóa.");
+            //return "Tài khoản đã bị khóa.";
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            return "Mật khẩu cũ không đúng!";
+            throw new RuntimeException("Mật khẩu cũ không đúng!");
+            //return "Mật khẩu cũ không đúng!";
         }
 
         if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
-            return "Mật khẩu mới và xác nhận mật khẩu không khớp!";
+            throw new RuntimeException("Mật khẩu mới và xác nhận mật khẩu không khớp!");
+            //return "Mật khẩu mới và xác nhận mật khẩu không khớp!";
         }
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
@@ -213,8 +246,7 @@ public class AuthService {
         User user = userRepository.findByPhone(phone)
                 .orElseThrow(() -> new RuntimeException("Số điện thoại không tồn tại"));
         String formattedPhone = formatPhone(phone);
-        formattedPhone = "+18777804236";
-
+        //formattedPhone = "+18777804236";
         // Sinh OTP 6 số
         String otp = generateOtp();
 
@@ -229,7 +261,7 @@ public class AuthService {
         otpCodeRepository.save(otpEntity);
 
         // Gửi OTP qua SMS
-        smsS.sendOtp(formattedPhone, otp);
+        sSms.sendOtp(formattedPhone, otp);
 
         return "OTP đã được gửi đến số điện thoại của bạn.";
     }
@@ -245,13 +277,15 @@ public class AuthService {
         Optional<OtpCode> otpEntityOpt = otpCodeRepository.findByUserAndOtpCodeAndUsedFalse(user, otpInput);
 
         if (otpEntityOpt.isEmpty()) {
-            return "Mã OTP không đúng hoặc đã được sử dụng.";
+            throw new RuntimeException("Mã OTP không đúng hoặc đã được sử dụng.");
+            //return "Mã OTP không đúng hoặc đã được sử dụng.";
         }
 
         OtpCode otpEntity = otpEntityOpt.get();
 
         if (otpEntity.getExpiryTime().isBefore(LocalDateTime.now())) {
-            return "Mã OTP đã hết hạn.";
+            throw new RuntimeException("Mã OTP đã hết hạn.");
+            //return "Mã OTP đã hết hạn.";
         }
         if (otpEntity.getType() == OtpType.EMAIL) {
             user.setVerifyEmail(true);
@@ -261,7 +295,10 @@ public class AuthService {
         // Đánh dấu OTP đã dùng
         otpEntity.setUsed(true);
         userRepository.save(user);
-        otpCodeRepository.save(otpEntity);
+        //otpCodeRepository.save(otpEntity);
+        ///    
+        otpCodeRepository.delete(otpEntity);
+        ///
 
         return "Xác thực OTP thành công.";
     }
@@ -272,9 +309,9 @@ public class AuthService {
 
     private String formatPhone(String phone) {
         if (phone.startsWith("0")) {
-            System.out.println("Formatted phone: " + "+84" + phone.substring(1));
-            return "+84" + phone.substring(1);
-        } else if (phone.startsWith("+84")) {
+            System.out.println("Formatted phone: " + "84" + phone.substring(1));
+            return "84" + phone.substring(1);
+        } else if (phone.startsWith("84")) {
             return phone;
         } else {
             throw new IllegalArgumentException("Số điện thoại không đúng định dạng VN: " + phone);

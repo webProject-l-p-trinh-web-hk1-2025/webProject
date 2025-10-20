@@ -10,6 +10,8 @@ import com.proj.webprojrct.cart.repository.CartItemRepository;
 import com.proj.webprojrct.cart.service.CartService;
 import com.proj.webprojrct.user.entity.User;
 import com.proj.webprojrct.user.repository.UserRepository;
+import com.proj.webprojrct.product.entity.Product;
+import com.proj.webprojrct.product.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,9 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ProductRepository productRepository;
+
     @Override
     public CartResponse getCartByUserId(Long userId) {
         User user = userRepository.findById(userId)
@@ -48,6 +53,15 @@ public class CartServiceImpl implements CartService {
             resp.setCartId(item.getCart().getId());
             resp.setProductId(item.getProductId());
             resp.setQuantity(item.getQuantity());
+            
+            // Lấy thông tin sản phẩm
+            Product product = productRepository.findById(item.getProductId()).orElse(null);
+            if (product != null) {
+                resp.setProductName(product.getName());
+                resp.setProductPrice(product.getPrice().doubleValue());
+                resp.setProductImageUrl(product.getImageUrl());
+            }
+            
             return resp;
         }).collect(Collectors.toList());
 
@@ -84,6 +98,27 @@ public class CartServiceImpl implements CartService {
             item.setProductId(request.getProductId());
             item.setQuantity(request.getQuantity());
             cartItemRepository.save(item);
+        }
+    }
+
+    @Override
+    public void updateItemQuantity(Long userId, Long cartItemId, int quantity) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Cart cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+        
+        if (!cartItem.getCart().getId().equals(cart.getId())) {
+            throw new RuntimeException("Cart item does not belong to this user");
+        }
+        
+        if (quantity <= 0) {
+            cartItemRepository.deleteById(cartItemId);
+        } else {
+            cartItem.setQuantity(quantity);
+            cartItemRepository.save(cartItem);
         }
     }
 

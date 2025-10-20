@@ -38,19 +38,24 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setUser(user);
         order.setStatus("PENDING");
-        order.setTotalAmount(request.getPrice().multiply(new BigDecimal(request.getQuantity())));
-        order.setShippingAddress("Default Address");
+        order.setTotalAmount(request.getTotalAmount());
+        order.setShippingAddress(request.getShippingAddress() != null ? request.getShippingAddress() : "Default Address");
         order.setCreatedAt(LocalDateTime.now());
         order = orderRepository.save(order);
 
-        OrderItem orderItem = new OrderItem();
-        orderItem.setOrder(order);
-        orderItem.setProductId(request.getProductId());
-        orderItem.setQuantity(request.getQuantity());
-        orderItem.setPrice(request.getPrice());
-        orderItemRepository.save(orderItem);
+        final Order savedOrder = order;
+        if (request.getOrderItems() != null) {
+            for (OrderRequest.OrderItemRequest itemReq : request.getOrderItems()) {
+                OrderItem orderItem = new OrderItem();
+                orderItem.setOrder(savedOrder);
+                orderItem.setProductId(itemReq.getProductId());
+                orderItem.setQuantity(itemReq.getQuantity());
+                orderItem.setPrice(itemReq.getPrice());
+                orderItemRepository.save(orderItem);
+            }
+        }
 
-        return getOrderById(order.getId());
+        return getOrderById(savedOrder.getId());
     }
 
     @Override

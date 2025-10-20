@@ -40,6 +40,19 @@ public class CartController {
         return ResponseEntity.ok(new ResponseMessage("Thêm hàng vào giỏ thành công!"));
     }
 
+    // Cập nhật số lượng sản phẩm trong giỏ hàng
+    @PutMapping("/update/{cartItemId}")
+    public ResponseEntity<ResponseMessage> updateItem(@AuthenticationPrincipal CustomUserDetails userDetails, 
+                                                      @PathVariable Long cartItemId,
+                                                      @RequestBody CartRequest request) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ResponseMessage("Vui lòng đăng nhập để cập nhật giỏ hàng!"));
+        }
+        cartService.updateItemQuantity(userDetails.getUser().getId(), cartItemId, request.getQuantity());
+        return ResponseEntity.ok(new ResponseMessage("Đã cập nhật số lượng sản phẩm!"));
+    }
+
     // Xóa sản phẩm khỏi giỏ hàng
     @DeleteMapping("/remove/{productId}")
     public ResponseEntity<ResponseMessage> removeItem(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long productId) {

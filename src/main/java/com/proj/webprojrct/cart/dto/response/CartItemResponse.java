@@ -12,4 +12,9 @@ public class CartItemResponse {
     private Long cartId;
     private Long productId;
     private Integer quantity;
+    
+    // Thông tin sản phẩm để hiển thị
+    private String productName;
+    private Double productPrice;
+    private String productImageUrl;
 }

@@ -21,12 +21,7 @@ uri="http://www.springframework.org/tags/form" prefix="form" %>
     >
       <form:hidden path="productId" />
       <form:hidden path="parentReviewId" />
-      <c:if test="${not empty reviewRequest.parentReviewId}">
-        <p style="font-style: italic">
-          You are replying to review #${reviewRequest.parentReviewId}. Rating is
-          not required for replies.
-        </p>
-      </c:if>
+      <c:if test="${not empty reviewRequest.parentReviewId}"> </c:if>
 
       <table>
         <c:if test="${empty reviewRequest.parentReviewId}">

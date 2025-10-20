@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.proj.webprojrct.reviewandrating.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Page<Review> findByProduct_Id(Long productId, Pageable pageable);
+    // only fetch top-level reviews (parentReview is null) for product listing
+    Page<Review> findByProduct_IdAndParentReviewIsNull(Long productId, Pageable pageable);
 }

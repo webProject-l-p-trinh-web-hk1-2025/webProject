@@ -18,6 +18,8 @@ public class ProductResponse {
     private Integer stock;
     private LocalDateTime createdAt;
     private String imageUrl;
+    private java.util.List<String> imageUrls;
+    private java.util.List<com.proj.webprojrct.product.dto.ImageDto> images;
     private CategoryDto category;
     private List<SpecDto> specs;
 

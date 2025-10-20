@@ -40,8 +40,8 @@
       <div class="col-md-6 mb-3"><label>NFC support</label><input name="nfcSupport" class="form-control"></div>
     </div>
     <div class="mb-3">
-      <label>Ảnh sản phẩm</label>
-      <input type="file" name="image" class="form-control" accept="image/*">
+      <label>Ảnh sản phẩm (có thể chọn nhiều ảnh)</label>
+      <input type="file" id="imagesInputCreate" name="image" class="form-control" accept="image/*" multiple>
     </div>
     <button class="btn btn-primary" type="submit">Lưu sản phẩm</button>
     <a href="${pageContext.request.contextPath}/product_list" class="btn btn-outline-secondary">Hủy</a>
@@ -92,11 +92,11 @@ document.getElementById("createForm").addEventListener("submit", async e => {
   if (!res.ok) return alert("Lỗi tạo sản phẩm!");
   const p = await res.json();
 
-  const img = f.image.files[0];
-  if (img) {
+  const imgs = document.getElementById('imagesInputCreate').files;
+  if (imgs && imgs.length > 0) {
     const fd = new FormData();
-    fd.append("image", img);
-  await fetch(ctx + '/api/products/' + p.id + '/image', { method: "POST", body: fd });
+    for (let i = 0; i < imgs.length; i++) fd.append('images', imgs[i]);
+    await fetch(ctx + '/api/products/' + p.id + '/images', { method: 'POST', body: fd });
   }
   alert("Thêm sản phẩm thành công!");
   location.href = ctx + '/product_list';

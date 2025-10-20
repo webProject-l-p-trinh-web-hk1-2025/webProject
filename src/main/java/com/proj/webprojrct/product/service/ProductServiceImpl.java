@@ -121,8 +121,6 @@ public class ProductServiceImpl implements ProductService {
         Product p = repo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm #" + id));
 
-        // Use an absolute upload directory under the application working directory to avoid
-        // relying on the servlet container working directory. Ensure parent directories exist.
         File dir = new File(System.getProperty("user.dir"), "uploads/products");
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
@@ -137,8 +135,6 @@ public class ProductServiceImpl implements ProductService {
         String filename = id + "_" + System.currentTimeMillis() + ext;
         File dest = new File(dir, filename);
 
-        // Copy the stream instead of transferTo to avoid issues when temp files are on a
-        // different filesystem or when security policies prevent rename.
         try (InputStream in = file.getInputStream()) {
             Files.copy(in, dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }

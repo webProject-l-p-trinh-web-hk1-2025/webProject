@@ -91,7 +91,6 @@ public class ProductUploadController {
         productRepository.deleteById(id);
     }
 
-    // Support POST method for deletion as well
     @ResponseBody
     @PostMapping("/{id}/delete")
     public void deleteProductPost(@PathVariable Long id) {

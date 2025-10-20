@@ -1,32 +1,39 @@
 package com.proj.webprojrct.document.entity;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity
 @Table(name = "documents")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Document {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "document_id")
-    private Long documentId;
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 
-    @Column(length = 200, nullable = false)
+public class Document {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "document_id")
+    private Long id;
+
     private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String content;
+    private String description;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Long productId;
 
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    public void onCreate() { this.createdAt = this.updatedAt = LocalDateTime.now(); }
-
-    @PreUpdate
-    public void onUpdate() { this.updatedAt = LocalDateTime.now(); }
+    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DocumentImage> images;
 }

@@ -1,5 +1,7 @@
 package com.proj.webprojrct.user.dto.request;
 
+import com.proj.webprojrct.user.entity.UserRole;
+
 import lombok.*;
 
 @AllArgsConstructor
@@ -9,7 +11,7 @@ import lombok.*;
 @Builder
 public class UserCreateRequest {
 
-    private String role;
+    private UserRole role;
     private String fullname;
     private String email;
     private String phone;

@@ -1,0 +1,13 @@
+package com.proj.webprojrct.order.service;
+
+import com.proj.webprojrct.order.dto.request.OrderRequest;
+import com.proj.webprojrct.order.dto.response.OrderResponse;
+
+import java.util.List;
+
+public interface OrderService {
+    OrderResponse createOrder(Long userId, OrderRequest request);
+    OrderResponse getOrderById(Long orderId);
+    List<OrderResponse> getOrdersByUserId(Long userId);
+    void cancelOrder(Long orderId);
+}

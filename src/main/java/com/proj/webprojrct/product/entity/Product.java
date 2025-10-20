@@ -10,16 +10,21 @@ import java.util.List;
 
 @Entity
 @Table(name = "products")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false) private String name;
-    @Column(nullable = false) private String brand;
+    @Column(nullable = false)
+    private String name;
+    @Column(nullable = false)
+    private String brand;
 
     @Column(precision = 12, scale = 2, nullable = false)
     private BigDecimal price;
@@ -55,4 +60,8 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ProductSpec> specifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ProductImage> images = new ArrayList<>();
 }

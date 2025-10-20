@@ -1,74 +1,95 @@
 package com.proj.webprojrct.document.controller;
 
-import com.proj.webprojrct.document.dto.request.DocumentCreateRequest;
-import com.proj.webprojrct.document.dto.request.DocumentUpdateRequest;
-import com.proj.webprojrct.document.dto.response.DocumentResponse;
+import com.proj.webprojrct.document.dto.DocumentCreateRequest;
 import com.proj.webprojrct.document.entity.Document;
-import com.proj.webprojrct.document.mapper.DocumentMapper;
-import com.proj.webprojrct.document.repository.DocumentRepository;
-import jakarta.validation.Valid;
+import com.proj.webprojrct.document.service.DocumentService;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-@RestController
+import org.springframework.http.ResponseEntity;
+
+@Controller
+@RequestMapping("/admin/document")
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/documents", produces = MediaType.APPLICATION_JSON_VALUE)
 public class DocumentController {
 
-    private final DocumentRepository repo;
-    private final com.proj.webprojrct.document.mapper.DocumentMapper documentMapper;
+    private final DocumentService documentService;
 
-    @GetMapping
-    @Transactional(readOnly = true)
-    public List<DocumentResponse> list(@RequestParam(required = false) String q) {
-        List<Document> docs = (q == null || q.isBlank())
-                ? repo.findAll()
-                : repo.findByTitleContainingIgnoreCaseOrderByUpdatedAtDesc(q.trim());
-    return docs.stream().map(documentMapper::toResponse).toList();
+    @GetMapping("/create")
+    public String showCreateForm(Model model) {
+        model.addAttribute("document", null);
+        model.addAttribute("formAction", "/admin/document/create");
+        return "admin/document_form";
+    }
+
+    @PostMapping("/create")
+    public String handleCreateDocument(
+            @ModelAttribute DocumentCreateRequest dto,
+            @RequestParam("images") List<MultipartFile> images,
+            Model model) {
+
+        try {
+            documentService.createDocument(dto, images);
+            model.addAttribute("success", "Tạo Document thành công!");
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+        }
+        return "admin/document_form";
+    }
+
+    @GetMapping("/all")
+    public String showAllDocuments(Model model) {
+        List<Document> documents = documentService.getAllDocuments();
+        model.addAttribute("documents", documents);
+        return "admin/document_list"; // JSP hiển thị danh sách document
     }
 
     @GetMapping("/{id}")
-    @Transactional(readOnly = true)
-    public DocumentResponse get(@PathVariable Long id) {
-    return repo.findById(id)
-        .map(documentMapper::toResponse)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
+    public String showDocumentDetail(@PathVariable Long id, Model model) {
+        Document doc = documentService.getDocument(id);
+        model.addAttribute("document", doc);
+        return "admin/document_detail"; // JSP hiển thị chi tiết từng document
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional
-    public ResponseEntity<DocumentResponse> create(@Valid @RequestBody DocumentCreateRequest req) {
-    Document entity = documentMapper.toEntity(req);
-    entity = repo.save(entity);
-    DocumentResponse body = documentMapper.toResponse(entity);
-        return ResponseEntity.created(URI.create("/api/documents/" + body.getId())).body(body);
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        Document document = documentService.getDocument(id);
+        model.addAttribute("document", document);
+        return "admin/document_form";
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional
-    public DocumentResponse update(@PathVariable Long id, @Valid @RequestBody DocumentUpdateRequest req) {
-        Document entity = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
-    documentMapper.updateEntityFromDto(req, entity);
-    entity = repo.save(entity);
-    return documentMapper.toResponse(entity);
+    @PostMapping("/update/{id}")
+    public String updateDocument(@PathVariable Long id,
+            @ModelAttribute DocumentCreateRequest dto,
+            @RequestParam(value = "images", required = false) List<MultipartFile> images,
+            Model model) {
+        documentService.updateDocument(id, dto, images);
+        model.addAttribute("success", "Cập nhật document thành công!");
+        return "redirect:/admin/document/list";
     }
 
-    @DeleteMapping("/{id}")
-    @Transactional
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (!repo.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found");
+    @PostMapping("/upload-image")
+    @ResponseBody
+    public ResponseEntity<?> handleEditorImageUpload(@RequestParam("image") MultipartFile image) {
+        try {
+            String imageUrl = documentService.saveImage(image); // Gọi service
+            return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Could not upload the image"));
         }
-        repo.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }

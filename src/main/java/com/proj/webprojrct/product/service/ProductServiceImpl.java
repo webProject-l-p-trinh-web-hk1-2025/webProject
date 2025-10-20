@@ -30,11 +30,13 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository repo;
     private final ProductMapper mapper;
     private final CategoryRepository categoryRepo;
+    private final com.proj.webprojrct.product.repository.ProductImageRepository imageRepo;
 
-    public ProductServiceImpl(ProductRepository repo, ProductMapper mapper, CategoryRepository categoryRepo) {
+    public ProductServiceImpl(ProductRepository repo, ProductMapper mapper, CategoryRepository categoryRepo, com.proj.webprojrct.product.repository.ProductImageRepository imageRepo) {
         this.repo = repo;
         this.mapper = mapper;
         this.categoryRepo = categoryRepo;
+        this.imageRepo = imageRepo;
     }
 
     @Override
@@ -100,17 +102,30 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponse> search(String brand, BigDecimal minPrice, BigDecimal maxPrice, int page, int size, String sort) {
+    public Page<ProductResponse> search(String brand, String name, BigDecimal minPrice, BigDecimal maxPrice, int page, int size, String sort) {
         String[] parts = sort.split(",");
         Sort s = parts.length == 2 ? Sort.by(Sort.Direction.fromString(parts[1]), parts[0]) : Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page, size, s);
 
         Specification<Product> spec = (root, cq, cb) -> cb.conjunction();
         if (brand != null && !brand.isBlank()) spec = spec.and((r, cq2, cb2) -> cb2.like(cb2.lower(r.get("brand")), "%" + brand.toLowerCase() + "%"));
+        if (name != null && !name.isBlank()) spec = spec.and((r, cq2, cb2) -> cb2.like(cb2.lower(r.get("name")), "%" + name.toLowerCase() + "%"));
         if (minPrice != null) spec = spec.and((r, cq2, cb2) -> cb2.greaterThanOrEqualTo(r.get("price"), minPrice));
         if (maxPrice != null) spec = spec.and((r, cq2, cb2) -> cb2.lessThanOrEqualTo(r.get("price"), maxPrice));
 
         return repo.findAll(spec, pageable).map(mapper::toResponse);
+    }
+
+    @Override
+    public List<String> getAllBrands() {
+        return repo.findDistinctBrands();
+    }
+
+    @Override
+    public List<String> suggestNames(String q, int limit) {
+        if (q == null || q.isBlank()) return java.util.Collections.emptyList();
+        var page = PageRequest.of(0, Math.max(1, limit));
+        return repo.findDistinctNamesMatching(q, page);
     }
 
     @Override
@@ -128,7 +143,7 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        String original = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();
+    String original = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();
         String ext = "";
         int idx = original.lastIndexOf('.');
         if (idx >= 0) ext = original.substring(idx);
@@ -139,8 +154,71 @@ public class ProductServiceImpl implements ProductService {
             Files.copy(in, dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        p.setImageUrl("/uploads/products/" + filename);
+        String url = "/uploads/products/" + filename;
+
+        // persist image record
+        var img = com.proj.webprojrct.product.entity.ProductImage.builder()
+                .url(url)
+                .product(p)
+                .build();
+        // add to product and save image record
+        p.getImages().add(img);
+        // if product has no primary imageUrl, set it for backward compatibility
+        if (p.getImageUrl() == null || p.getImageUrl().isBlank()) p.setImageUrl(url);
+
+        // save product (cascade will persist image) and also ensure imageRepo is aware
         repo.save(p);
-        return p.getImageUrl();
+        return url;
+    }
+
+    @Override
+    public void deleteImage(Long imageId) throws IOException {
+        var imgOpt = imageRepo.findById(imageId);
+        if (imgOpt.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy ảnh #" + imageId);
+        var img = imgOpt.get();
+
+        final String url = img.getUrl();
+        Long productId = null;
+        try {
+            if (img.getProduct() != null) productId = img.getProduct().getId();
+        } catch (Exception ignore) {
+            // guarded: product proxy may not be initializable
+        }
+
+        // Xóa file nếu tồn tại
+        if (url != null && url.startsWith("/uploads/")) {
+            File f = new File(System.getProperty("user.dir"), url.substring(1));
+            try { Files.deleteIfExists(f.toPath()); } catch (IOException e) {
+                // log but don't prevent deletion of DB record
+            }
+        }
+
+        // If we know the product, load it fully and remove the image from its collection
+        if (productId != null) {
+            var pOpt = repo.findById(productId);
+            if (pOpt.isPresent()) {
+                var p = pOpt.get();
+                // Ensure images collection is initialized then remove the image
+                if (p.getImages() != null) {
+                    p.getImages().removeIf(i -> i.getId() != null && i.getId().equals(imageId));
+                }
+                // If the deleted image was the product's primary imageUrl, pick another or clear
+                if (p.getImageUrl() != null && url != null && p.getImageUrl().equals(url)) {
+                    String newUrl = null;
+                    if (p.getImages() != null && !p.getImages().isEmpty()) {
+                        // pick first remaining image
+                        newUrl = p.getImages().get(0).getUrl();
+                    }
+                    p.setImageUrl(newUrl);
+                }
+                repo.save(p);
+                // Finally ensure the image row is removed from DB if still present
+                if (imageRepo.existsById(imageId)) imageRepo.deleteById(imageId);
+                return;
+            }
+        }
+
+        // Fallback: delete image record directly
+        if (imageRepo.existsById(imageId)) imageRepo.deleteById(imageId);
     }
 }

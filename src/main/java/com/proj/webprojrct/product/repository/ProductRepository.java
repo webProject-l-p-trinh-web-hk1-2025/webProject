@@ -8,11 +8,9 @@ import com.proj.webprojrct.product.entity.Product;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
-	// Return distinct non-null brand names ordered alphabetically
 	@org.springframework.data.jpa.repository.Query("select distinct p.brand from Product p where p.brand is not null order by p.brand asc")
 	java.util.List<String> findDistinctBrands();
 
-	// find distinct product names matching (case-insensitive) a substring, limited by given size
 	@org.springframework.data.jpa.repository.Query(value = "select distinct p.name from Product p where lower(p.name) like lower(concat('%', :q, '%')) order by p.name asc")
 	java.util.List<String> findDistinctNamesMatching(@org.springframework.data.repository.query.Param("q") String q, org.springframework.data.domain.Pageable pageable);
 

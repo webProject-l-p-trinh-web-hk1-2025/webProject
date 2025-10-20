@@ -161,12 +161,12 @@ public class ProductServiceImpl implements ProductService {
                 .url(url)
                 .product(p)
                 .build();
-        // add to product and save image record
+        // recordtheme vào product và lưu ảnh
         p.getImages().add(img);
         // if product has no primary imageUrl, set it for backward compatibility
         if (p.getImageUrl() == null || p.getImageUrl().isBlank()) p.setImageUrl(url);
 
-        // save product (cascade will persist image) and also ensure imageRepo is aware
+        // Lưu product
         repo.save(p);
         return url;
     }
@@ -182,7 +182,7 @@ public class ProductServiceImpl implements ProductService {
         try {
             if (img.getProduct() != null) productId = img.getProduct().getId();
         } catch (Exception ignore) {
-            // guarded: product proxy may not be initializable
+            
         }
 
         // Xóa file nếu tồn tại

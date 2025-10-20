@@ -54,8 +54,14 @@
     </div>
 
     <div class="mb-3">
-      <label>Ảnh mới (tùy chọn)</label>
-      <input type="file" name="image" accept="image/*" class="form-control">
+      <label>Ảnh mới (tùy chọn, có thể chọn nhiều ảnh)</label>
+      <input type="file" id="imagesInputEdit" name="images" accept="image/*" class="form-control" multiple>
+    </div>
+
+    <!-- Existing uploaded images -->
+    <div class="mb-3">
+      <label>Ảnh đã upload</label>
+      <div id="existingImages" class="d-flex flex-wrap gap-2 mt-2"></div>
     </div>
 
     <button class="btn btn-primary" type="submit">Lưu thay đổi</button>
@@ -79,6 +85,8 @@ const id = document.getElementById("productId").value;
     if (c.id == "${product.category.id}") opt.selected = true;
     sel.append(opt);
   });
+  // after categories, load existing product images to display and allow delete
+  try { const p = await (await fetch(ctx + '/api/products/' + id)).json(); renderExistingImages(p); } catch (e) { /* ignore */ }
 })();
 
 // Submit update
@@ -110,13 +118,19 @@ document.getElementById("editForm").addEventListener("submit", async e => {
 
   console.log('Update payload', data);
   formData.append("data", new Blob([JSON.stringify(data)], { type: "application/json" }));
-  if (form.image.files.length > 0) formData.append("image", form.image.files[0]);
 
   try {
     const res = await fetch(ctx + '/api/products/' + id, { method: "PUT", body: formData });
     if (res.ok) {
       const body = await res.json().catch(() => null);
       console.log('Update success', body);
+      // if multiple images selected, upload them via the images endpoint
+      const imgs = document.getElementById('imagesInputEdit').files;
+      if (imgs && imgs.length > 0) {
+        const fd = new FormData();
+        for (let i = 0; i < imgs.length; i++) fd.append('images', imgs[i]);
+        await fetch(ctx + '/api/products/' + id + '/images', { method: 'POST', body: fd });
+      }
       alert("Cập nhật thành công!");
       location.href = ctx + '/product_detail?id=' + id;
       return;
@@ -132,6 +146,51 @@ document.getElementById("editForm").addEventListener("submit", async e => {
     alert('Lỗi mạng hoặc server: ' + e.message);
   }
 });
+
+function renderExistingImages(p) {
+  const container = document.getElementById('existingImages');
+  container.innerHTML = '';
+  const imgs = p.images && p.images.length ? p.images : (p.imageUrls && p.imageUrls.length ? p.imageUrls.map(u => ({ id: null, url: u })) : (p.imageUrl ? [{ id: null, url: p.imageUrl }] : []));
+  imgs.forEach(it => {
+    const wrap = document.createElement('div');
+    wrap.style.position = 'relative';
+    wrap.style.width = '80px';
+    wrap.style.height = '80px';
+
+    const img = document.createElement('img');
+    img.src = (it.url || '').startsWith('/') ? ctx + it.url : it.url;
+    img.style.objectFit = 'cover';
+    img.style.width = '80px';
+    img.style.height = '80px';
+    img.style.border = '1px solid #ccc';
+    img.style.borderRadius = '6px';
+    wrap.appendChild(img);
+
+    if (it.id) {
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'btn btn-sm btn-danger';
+      del.style.position = 'absolute';
+      del.style.top = '-6px';
+      del.style.right = '-6px';
+      del.innerHTML = '<i class="bi bi-trash"></i>';
+      del.title = 'Xóa ảnh';
+      del.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+        const d = await fetch(ctx + '/api/products/images/' + it.id, { method: 'DELETE' });
+        if (d.ok) {
+          wrap.remove();
+        } else {
+          alert('Xóa ảnh thất bại');
+        }
+      });
+      wrap.appendChild(del);
+    }
+
+    container.appendChild(wrap);
+  });
+}
 </script>
 </body>
 </html>

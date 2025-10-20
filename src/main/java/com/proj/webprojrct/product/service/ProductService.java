@@ -14,6 +14,9 @@ public interface ProductService {
     void delete(Long id);
     ProductResponse getById(Long id);
     List<ProductResponse> getAll();
-    Page<ProductResponse> search(String brand, BigDecimal minPrice, BigDecimal maxPrice, int page, int size, String sort);
+    Page<ProductResponse> search(String brand, String name, BigDecimal minPrice, BigDecimal maxPrice, int page, int size, String sort);
     String uploadImage(Long id, MultipartFile file) throws IOException;
+    void deleteImage(Long imageId) throws IOException;
+    List<String> getAllBrands();
+    List<String> suggestNames(String q, int limit);
 }

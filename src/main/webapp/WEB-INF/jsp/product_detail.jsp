@@ -28,6 +28,7 @@
       <div class="row g-4">
         <div class="col-md-4 text-center">
           <img id="image" class="product-image" src="">
+          <div id="thumbs" class="d-flex flex-wrap justify-content-center gap-2 mt-2"></div>
         </div>
         <div class="col-md-8">
           <h3 id="name"></h3>
@@ -80,6 +81,54 @@ function fill(p) {
   document.getElementById("stock").textContent = p.stock;
   document.getElementById("createdAt").textContent = new Date(p.createdAt).toLocaleDateString('vi-VN');
   document.getElementById("image").src = p.imageUrl ? ctx + p.imageUrl : ctx + "/images/no-image.png";
+
+  // if there are multiple images, render thumbnails and allow switching
+  const thumbs = document.getElementById('thumbs');
+  const imgs = p.imageUrls && p.imageUrls.length ? p.imageUrls : (p.imageUrl ? [p.imageUrl] : []);
+  if (imgs.length > 0) {
+    thumbs.innerHTML = '';
+    imgs.forEach((u, i) => {
+      // u may be a string url or an object {id, url}
+      const idVal = typeof u === 'string' ? null : u.id;
+      const url = typeof u === 'string' ? u : u.url;
+      const wrap = document.createElement('div');
+      wrap.style.position = 'relative';
+      const imgEl = document.createElement('img');
+      imgEl.src = url.startsWith('/') ? ctx + url : url;
+      imgEl.className = 'product-image';
+      imgEl.style.maxWidth = '60px';
+      imgEl.style.maxHeight = '60px';
+      imgEl.style.cursor = 'pointer';
+      imgEl.addEventListener('click', () => { document.getElementById('image').src = imgEl.src; });
+
+      // delete button
+      if (idVal) {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-danger';
+        btn.style.position = 'absolute';
+        btn.style.top = '-6px';
+        btn.style.right = '-6px';
+        btn.innerHTML = '<i class="bi bi-x"></i>';
+        btn.title = 'Xóa ảnh';
+        btn.addEventListener('click', async (ev) => {
+          ev.stopPropagation();
+          if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+          const dres = await fetch(ctx + '/api/products/images/' + idVal, { method: 'DELETE' });
+          if (dres.ok) {
+            // refresh product
+            const newP = await (await fetch(api)).json();
+            fill(newP);
+          } else {
+            alert('Xóa ảnh thất bại');
+          }
+        });
+        wrap.appendChild(btn);
+      }
+
+      wrap.appendChild(imgEl);
+      thumbs.appendChild(wrap);
+    });
+  }
 
   const editBtn = document.getElementById("editBtn");
   editBtn.href = ctx + '/admin/products/edit/' + p.id;

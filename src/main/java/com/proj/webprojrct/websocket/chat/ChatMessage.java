@@ -25,10 +25,7 @@ public class ChatMessage {
     private String senderId;
     private String recipientId;
     private String content;
-    // optional media path saved in StorageMedia.path (relative filename)
     private String mediaPath;
-
-    // optional media content type e.g. image/png, video/mp4
     private String mediaType;
     private Date timestamp;
 }

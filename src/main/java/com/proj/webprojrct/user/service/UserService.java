@@ -3,18 +3,15 @@ package com.proj.webprojrct.user.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.proj.webprojrct.common.config.security.CustomUserDetails;
 import com.proj.webprojrct.user.dto.request.UserUpdateRequest;
 import com.proj.webprojrct.user.entity.User;
@@ -26,8 +23,7 @@ import com.proj.webprojrct.user.dto.request.UserAdminUpdateRequest;
 import com.proj.webprojrct.user.dto.request.UserCreateRequest;
 import com.proj.webprojrct.user.dto.response.UserAdminResponse;
 import com.proj.webprojrct.user.entity.UserRole;
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.rest.chat.v1.service.UserReader;
+ 
 
 import lombok.*;
 
@@ -146,6 +142,7 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
+       
     public UserResponse updateCurrentUserProfile(Authentication authentication, UserUpdateRequest userReq, MultipartFile avt) {
         if (authentication == null || !authentication.isAuthenticated()
                 || authentication instanceof AnonymousAuthenticationToken) {
@@ -195,4 +192,34 @@ public class UserService {
 
         return userMapper.toDto(user);
     }
+
+
+
+////////////////Service cho phần chat support////////////////////////////////////////////////////////////
+
+    public List<User> findAdmins() {
+        return userRepository.findAll().stream()
+                .filter(u -> u.getRole() != null && u.getRole().name().equals("ADMIN"))
+                .collect(Collectors.toList());
+    }
+
+     
+    public UserResponse handleGetUserByPhone(Authentication authentication, String phone) {
+            if (authentication == null || !authentication.isAuthenticated()
+                    || authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+                throw new RuntimeException("Bạn chưa đăng nhập.");
+            }
+
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            User currUser = userDetails.getUser();
+            if (currUser.getRole() != UserRole.ADMIN) {
+                throw new RuntimeException("Bạn không đủ quyền truy cập.");
+            }
+
+            User user = userRepository.findByPhone(phone)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+
+            return userMapper.toDto(user);
+        }
+
 }

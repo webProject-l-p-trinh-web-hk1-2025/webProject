@@ -14,8 +14,6 @@ public class ChatNotification {
     private String senderId;
     private String recipientId;
     private String content;
-    
-    // optional media information
     private String mediaPath;
     private String mediaType;
     private java.util.Date timestamp;

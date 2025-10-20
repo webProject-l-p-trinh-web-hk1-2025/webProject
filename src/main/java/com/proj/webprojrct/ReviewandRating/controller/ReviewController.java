@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.proj.webprojrct.common.config.security.CustomUserDetails;
@@ -17,6 +18,7 @@ import com.proj.webprojrct.reviewandrating.dto.request.ReviewRequest;
 import com.proj.webprojrct.reviewandrating.service.ReviewService;
 
 @Controller
+//@RequestMapping("/user")
 public class ReviewController {
 
     @Autowired
@@ -29,7 +31,8 @@ public class ReviewController {
                                      @RequestParam(defaultValue = "20") int size,
                                      Model model) {
         model.addAttribute("productId", productId);
-    model.addAttribute("reviewsPage", reviewService.handleGetReviewsByProduct(productId, org.springframework.data.domain.PageRequest.of(page, size)));
+        // request top-level reviews sorted by createdAt ascending to preserve chronological order
+        model.addAttribute("reviewsPage", reviewService.handleGetReviewsByProduct(productId, org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").ascending())));
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", size);
         return "reviews/product-reviews";
@@ -75,15 +78,16 @@ public class ReviewController {
         Long currentUserId = userDetails.getUser().getId();
 
     reviewService.handleCreateReview(reviewRequest, currentUserId);
-        return "redirect:/products/" + productId + "/reviews";
+    //return "redirect:/user/products/" + productId + "/reviews";
+    return "redirect:/products/" + productId + "/reviews";
     }
 
     // Hiển thị tất cả rating và bình luận sang một trang trống mới (chỉ phục vụ cho việc xem bình luận)
     // Có thể xóa phần này  
-    @GetMapping("/reviews/{reviewId}")
-    public String viewReviewThread(@PathVariable Long reviewId, Model model) {
-    reviewService.handleGetReviewThread(reviewId).ifPresent(r -> model.addAttribute("review", r));
-        return "reviews/thread";
-    }
+    // @GetMapping("/reviews/{reviewId}")
+    // public String viewReviewThread(@PathVariable Long reviewId, Model model) {
+    // reviewService.handleGetReviewThread(reviewId).ifPresent(r -> model.addAttribute("review", r));
+    //     return "reviews/thread";
+    // }
 
 }

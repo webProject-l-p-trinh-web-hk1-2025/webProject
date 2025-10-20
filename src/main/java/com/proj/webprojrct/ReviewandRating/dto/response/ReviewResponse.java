@@ -14,6 +14,7 @@ public class ReviewResponse {
 
     private Long reviewId;
     private Long userId;
+    private String userName;
     private Long productId;
     private Long parentReviewId;
     // Nếu trả về một list review response như này thì chỉ tốn 1 lần gọi request từ front-end

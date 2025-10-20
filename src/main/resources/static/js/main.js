@@ -1,13 +1,9 @@
 "use strict";
-"use strict";
 
-const usernamePage = document.querySelector("#username-page");
 const chatPage = document.querySelector("#chat-page");
-const usernameForm = document.querySelector("#usernameForm");
 const messageForm = document.querySelector("#messageForm");
 const messageInput = document.querySelector("#message");
 const fileInput = document.querySelector("#fileInput");
-const connectingElement = document.querySelector(".connecting");
 const chatArea = document.querySelector("#chat-messages");
 const logout = document.querySelector("#logout");
 
@@ -21,14 +17,13 @@ let currentRole = "USER";
 async function initAuth() {
   try {
     const resp = await fetch("/api/me");
-    if (!resp.ok) return showManualLogin();
+    if (!resp.ok) return showAuthError();
     const info = await resp.json();
     if (info && info.authenticated) {
       nickname = info.phone || info.email || "user" + info.id;
       fullname = info.fullName || nickname;
       currentRole = (info.role || "USER").toUpperCase();
 
-      if (usernamePage) usernamePage.classList.add("hidden");
       if (chatPage) chatPage.classList.remove("hidden");
       const connectedFullname = document.querySelector(
         "#connected-user-fullname"
@@ -43,27 +38,22 @@ async function initAuth() {
   } catch (err) {
     console.debug("initAuth: /api/me failed", err);
   }
-  showManualLogin();
+  showAuthError();
 }
 
-function showManualLogin() {
-  if (usernameForm) usernameForm.style.display = "";
-}
-
-function connect(event) {
-  nickname = document.querySelector("#nickname").value.trim();
-  fullname = document.querySelector("#fullname").value.trim();
-
-  if (nickname && fullname) {
-    usernamePage.classList.add("hidden");
-    chatPage.classList.remove("hidden");
-
-    const socket = new SockJS("/ws");
-    stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, onConnected, onError);
-  }
-  event.preventDefault();
+function showAuthError() {
+  // create a small banner to inform the user that authentication is required
+  const existing = document.getElementById("auth-error-banner");
+  if (existing) return;
+  const banner = document.createElement("div");
+  banner.id = "auth-error-banner";
+  banner.style.background = "#ffdddd";
+  banner.style.color = "#800";
+  banner.style.padding = "12px";
+  banner.style.margin = "8px";
+  banner.style.border = "1px solid #f5c2c2";
+  banner.textContent = "Authentication failed. Please login to use chat.";
+  document.body.insertBefore(banner, document.body.firstChild);
 }
 
 function onConnected() {
@@ -83,7 +73,6 @@ function onConnected() {
   document.querySelector("#connected-user-fullname").textContent = fullname;
   findAndDisplayConnectedUsers().then(() => {
     if (currentRole === "ADMIN") {
-      // load conversation list (users who've messaged this admin) so admin can reply even if they're offline
       loadAdminConversations().catch((e) =>
         console.debug("loadAdminConversations failed", e)
       );
@@ -98,11 +87,7 @@ function onConnected() {
 }
 
 function onError() {
-  if (connectingElement) {
-    connectingElement.textContent =
-      "Could not connect to WebSocket server. Please refresh this page to try again!";
-    connectingElement.style.color = "red";
-  }
+  console.error("Could not connect to WebSocket server.");
 }
 
 // ------------------------- Users list -------------------------
@@ -112,25 +97,18 @@ async function findAndDisplayConnectedUsers() {
 
   connectedUsers = connectedUsers.filter((user) => user.nickName !== nickname);
 
-  // If current user is a normal USER, only show admins — but also include admins that are offline
   if (currentRole !== "ADMIN") {
     connectedUsers = connectedUsers.filter(
       (user) => (user.role || "").toUpperCase() === "ADMIN"
     );
 
-    // fetch admins list (may include offline admins) and merge
     try {
       const adminsResp = await fetch("/users/admins");
       if (adminsResp.ok) {
         const admins = await adminsResp.json();
         admins.forEach((a) => {
-          // create object shape compatible with registry responses
-          const adminObj = {
-            nickName: a.phone || a.email,
-            fullName: a.fullName,
-            role: "ADMIN",
-          };
-          // if admin not already in connectedUsers list, add as offline entry
+          const adminObj = normalizeUserRaw(a);
+
           if (!connectedUsers.find((u) => u.nickName === adminObj.nickName)) {
             adminObj.status = "OFFLINE";
             connectedUsers.push(adminObj);
@@ -158,16 +136,29 @@ async function findAndDisplayConnectedUsers() {
 function appendUserElement(user, connectedUsersList) {
   const listItem = document.createElement("li");
   listItem.classList.add("user-item");
-  listItem.id = user.nickName; // stable id for mapping messages
+  listItem.id = user.nickName;
 
   listItem.dataset.role = (user.role || "USER").toUpperCase();
 
   const userImage = document.createElement("img");
   userImage.src = "../img/user_icon.png";
-  userImage.alt = user.fullName;
+
+  userImage.alt = user.fullName + (user.nickName ? ` (${user.nickName})` : "");
 
   const usernameSpan = document.createElement("span");
-  usernameSpan.textContent = user.fullName;
+
+  if ((currentRole || "").toUpperCase() === "ADMIN") {
+    usernameSpan.textContent = user.fullName || "";
+
+    if (user.nickName && user.nickName !== user.fullName) {
+      const phoneSpan = document.createElement("small");
+      phoneSpan.classList.add("user-phone");
+      phoneSpan.textContent = ` (${user.nickName})`;
+      usernameSpan.appendChild(phoneSpan);
+    }
+  } else {
+    usernameSpan.textContent = user.fullName || user.nickName || "";
+  }
 
   const receivedMsgs = document.createElement("span");
   receivedMsgs.textContent = "0";
@@ -207,9 +198,8 @@ async function loadAdminConversations() {
   try {
     const resp = await fetch(`/conversations/${nickname}`);
     if (!resp.ok) return;
-    const senders = await resp.json(); // array of senderIds (nick)
+    const senders = await resp.json();
     for (const sender of senders) {
-      // ensure each sender appears in the user list (fetch user details if necessary)
       await ensureUserItem(sender);
     }
   } catch (e) {
@@ -219,14 +209,12 @@ async function loadAdminConversations() {
 
 async function ensureUserItem(nick) {
   if (!nick) return;
-  // if already present, nothing to do
+
   if (document.getElementById(nick)) return;
 
-  // try to fetch user details
   try {
     const resp = await fetch(`/users/${encodeURIComponent(nick)}`);
     if (!resp.ok) {
-      // fallback: show nick only
       appendUserElement(
         { nickName: nick, fullName: nick, role: "USER", status: "OFFLINE" },
         document.getElementById("connectedUsers")
@@ -234,11 +222,8 @@ async function ensureUserItem(nick) {
       return;
     }
     const u = await resp.json();
-    const obj = {
-      nickName: u.phone || u.email,
-      fullName: u.fullName || u.phone || u.email,
-      role: u.role || "USER",
-    };
+
+    const obj = normalizeUserRaw(u);
     obj.status = "OFFLINE";
     appendUserElement(obj, document.getElementById("connectedUsers"));
   } catch (e) {
@@ -248,6 +233,20 @@ async function ensureUserItem(nick) {
       document.getElementById("connectedUsers")
     );
   }
+}
+
+function normalizeUserRaw(raw) {
+  if (!raw)
+    return { nickName: "", fullName: "", role: "USER", status: "OFFLINE" };
+  const nick =
+    raw.nickName || raw.phone || raw.email || (raw.id ? "user" + raw.id : "");
+  const full = raw.fullName || raw.fullname || raw.name || nick || "";
+  return {
+    nickName: nick,
+    fullName: full,
+    role: (raw.role || "USER").toUpperCase(),
+    status: raw.status || "OFFLINE",
+  };
 }
 
 // ------------------------- Message rendering -------------------------
@@ -262,7 +261,6 @@ function displayMessage(senderId, content, timestamp) {
   const message = document.createElement("p");
   message.textContent = content;
   messageContainer.appendChild(message);
-  // timestamp placeholder (history or real-time will fill)
   const ts = document.createElement("div");
   ts.classList.add("msg-ts");
   ts.style.fontSize = "0.8rem";
@@ -322,7 +320,7 @@ function formatTimestamp(dateStrOrMillis) {
     typeof dateStrOrMillis === "number"
       ? new Date(dateStrOrMillis)
       : new Date(dateStrOrMillis);
-  // show time now for recent messages, otherwise date and time
+
   const now = new Date();
   const sameDay = d.toDateString() === now.toDateString();
   if (sameDay) {
@@ -393,7 +391,6 @@ async function fetchAndDisplayUserChat() {
     } else {
       const el = displayMessage(chat.senderId, chat.content, chat.timestamp);
       if (el) {
-        // already set inside displayMessage
       }
     }
   });
@@ -407,8 +404,6 @@ async function sendMessage(event) {
   if (!stompClient || !selectedUserId) return;
 
   const messageContent = messageInput.value.trim();
-
-  // If user selected a file, upload first
   const file = fileInput ? fileInput.files[0] : null;
   if (file) {
     const form = new FormData();
@@ -448,7 +443,6 @@ async function sendMessage(event) {
     return;
   }
 
-  // Otherwise send text
   if (messageContent) {
     const chatMessage = {
       senderId: nickname,
@@ -475,7 +469,6 @@ async function onMessageReceived(payload) {
   const senderId = message.senderId;
   const senderElem = document.getElementById(senderId);
 
-  // If chat with sender is open, append the incoming message (text or media)
   if (selectedUserId && selectedUserId === senderId) {
     if (message.mediaPath) {
       const el = displayMediaMessage(
@@ -490,7 +483,6 @@ async function onMessageReceived(payload) {
     } else if (message.content) {
       const el = displayMessage(senderId, message.content, message.timestamp);
       if (el) {
-        // timestamp set inside displayMessage
       }
     }
 
@@ -507,7 +499,6 @@ async function onMessageReceived(payload) {
     return;
   }
 
-  // If chat with sender is not open, increment unread badge
   if (senderElem) {
     const nbrMsg = senderElem.querySelector(".nbr-msg");
     if (nbrMsg) {
@@ -530,10 +521,8 @@ function onLogout() {
   );
   window.location.reload();
 }
-
-usernameForm.addEventListener("submit", connect, true);
-messageForm.addEventListener("submit", sendMessage, true);
-logout.addEventListener("click", onLogout, true);
+messageForm.addEventListener("submit", sendMessage);
+logout.addEventListener("click", onLogout);
 window.onbeforeunload = () => onLogout();
 
 initAuth();

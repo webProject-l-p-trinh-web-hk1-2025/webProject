@@ -79,6 +79,14 @@ body {
   font-weight: bold;
 }
 
+/* small lighter phone text shown next to fullname for admins */
+.user-phone {
+  margin-left: 6px;
+  font-weight: normal;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85em;
+}
+
 .separator {
   height: 1px;
   background-color: #ccc;

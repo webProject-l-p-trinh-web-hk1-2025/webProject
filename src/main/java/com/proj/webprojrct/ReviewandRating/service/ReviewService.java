@@ -38,7 +38,13 @@ public class ReviewService {
         review.setUser(userRepository.getReferenceById(currentUserId));
         review.setProduct(productRepository.getReferenceById(dto.getProductId()));
         if (dto.getParentReviewId() != null) {
-            review.setParentReview(reviewRepository.getReferenceById(dto.getParentReviewId()));
+            // If replying to a reply, attach this new reply to the top-level parent
+            // so all replies to the same top-level review are siblings (same level).
+            Review intendedParent = reviewRepository.findById(dto.getParentReviewId()).orElse(null);
+            if (intendedParent != null) {
+                Review rootParent = intendedParent.getParentReview() != null ? intendedParent.getParentReview() : intendedParent;
+                review.setParentReview(rootParent);
+            }
         }
         Review saved = reviewRepository.save(review);
         return reviewMapper.toDto(saved);
@@ -52,7 +58,8 @@ public class ReviewService {
     và truyền đối tượng review đó vào để tạo thành dto response
      */
     public Page<ReviewResponse> handleGetReviewsByProduct(Long productId, Pageable pageable) {
-        Page<Review> page = reviewRepository.findByProduct_Id(productId, pageable);
+    // fetch only top-level reviews (parentReview null) so child replies are shown nested only
+    Page<Review> page = reviewRepository.findByProduct_IdAndParentReviewIsNull(productId, pageable);
         return page.map(reviewMapper::toDto);
     }
 

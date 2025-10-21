@@ -4,61 +4,44 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
   <head>
     <title>Trang quản trị</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
-      .grid {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-      }
-      .card {
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        padding: 16px;
-        border-radius: 8px;
-        width: 260px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-      }
-      .card h3 {
-        margin: 0 0 10px 0;
-        font-size: 18px;
-      }
-      .card p {
-        margin: 0 0 12px 0;
-        color: #444;
-      }
-      .btn {
-        display: inline-block;
-        padding: 8px 12px;
-        background: #1976d2;
-        color: #fff;
-        text-decoration: none;
-        border-radius: 6px;
-      }
-      .btn.secondary {
-        background: #555;
-      }
-    </style>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="<c:url value='/css/admin-dashboard.css'/>" />
   </head>
   <body>
-    <h1>Trang quản trị</h1>
-    <p>Chọn chức năng quản lý bên dưới để truy cập trang quản trị tương ứng.</p>
+    <div class="page-header">
+      <div>
+        <h1>Trang quản trị</h1>
+        <div class="lead">Chọn chức năng quản lý hoặc xem nhanh số liệu.</div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center">
+        <a class="btn" href="${pageContext.request.contextPath}/admin/users"
+          >Users</a
+        >
+        <a class="btn" href="${pageContext.request.contextPath}/admin/products"
+          >Products</a
+        >
+        <a
+          class="btn secondary"
+          href="${pageContext.request.contextPath}/admin/chat"
+          >Chat</a
+        >
+      </div>
+    </div>
 
-    <div class="grid">
-      <div class="card">
-        <h3>Quản lý Users</h3>
-        <p>Danh sách, tạo, sửa, xóa tài khoản người dùng.</p>
+    <div class="top-grid">
+      <div class="card small">
+        <div class="card-title">Quản lý Users</div>
+        <div class="card-sub">
+          Danh sách, tạo, sửa, xóa tài khoản người dùng.
+        </div>
         <a class="btn" href="${pageContext.request.contextPath}/admin/users"
           >Mở Users</a
         >
       </div>
 
-      <div class="card">
-        <h3>Quản lý Documents</h3>
-        <p>Quản lý document/guides, upload ảnh, chỉnh sửa mô tả.</p>
+      <div class="card small">
+        <div class="card-title">Quản lý Documents</div>
+        <div class="card-sub">Quản lý document/guides, upload ảnh.</div>
         <a
           class="btn"
           href="${pageContext.request.contextPath}/admin/document/list"
@@ -66,124 +49,91 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         >
       </div>
 
-      <div class="card">
-        <h3>Quản lý Products</h3>
-        <p>Danh sách sản phẩm, sửa, xóa và thêm sản phẩm mới.</p>
-        <a class="btn" href="${pageContext.request.contextPath}/admin/products"
-          >Mở Products</a
-        >
-        <span style="margin-left: 8px"
-          ><a
+      <div class="card small">
+        <div class="card-title">Quản lý Products</div>
+        <div class="card-sub">Danh sách sản phẩm, thêm mới, sửa, xóa.</div>
+        <div style="display: flex; gap: 8px">
+          <a
+            class="btn"
+            href="${pageContext.request.contextPath}/admin/products"
+            >Mở Products</a
+          >
+          <a
             class="btn secondary"
             href="${pageContext.request.contextPath}/admin/products/new"
             >Thêm mới</a
-          ></span
-        >
+          >
+        </div>
       </div>
 
-      <div class="card">
-        <h3>Hỗ trợ & khác</h3>
+      <div class="card small">
+        <div class="card-title">Hỗ trợ & khác</div>
+        <div class="card-sub">Chat nội bộ và thông tin hệ thống.</div>
         <a class="btn" href="${pageContext.request.contextPath}/admin/chat"
           >Mở Chat</a
         >
       </div>
     </div>
 
-    <hr style="margin: 24px 0" />
+    <div class="section">
+      <div class="charts-row">
+        <div class="chart-box card">
+          <div class="card-title">Thống kê</div>
+          <div class="card-sub">Số lượng chính của hệ thống</div>
+          <div
+            style="
+              display: flex;
+              gap: 12px;
+              align-items: center;
+              margin-top: 8px;
+            "
+          >
+            <div style="width: 320px"><canvas id="overviewDonut"></canvas></div>
+            <div style="flex: 1"><canvas id="overviewBar"></canvas></div>
+          </div>
+        </div>
 
-    <h2>Thống kê</h2>
-    <div style="display: flex; gap: 24px; align-items: flex-start">
-      <div
-        style="
-          width: 360px;
-          background: #fff;
-          padding: 12px;
-          border-radius: 8px;
-        "
-      >
-        <canvas id="overviewDonut"></canvas>
-      </div>
-      <div style="flex: 1; background: #fff; padding: 12px; border-radius: 8px">
-        <canvas id="overviewBar"></canvas>
+        <div class="chart-box card">
+          <div class="card-title">Orders over time</div>
+          <div class="controls" style="margin: 8px 0">
+            <label>Period:</label>
+            <select id="periodSelect">
+              <option value="week" selected>Last 7 days</option>
+              <option value="month">By month</option>
+            </select>
+            <button id="reloadBtn" class="btn">Reload</button>
+            <button id="exportCsvBtn" class="btn secondary">Export CSV</button>
+            <div style="margin-left: auto">
+              Total: <strong id="ordersTotal">0</strong>
+            </div>
+          </div>
+          <div style="background: transparent; padding-top: 6px">
+            <canvas id="ordersChart" height="120"></canvas>
+          </div>
+        </div>
       </div>
     </div>
 
-    <hr style="margin: 24px 0" />
-    <h3>Orders over time</h3>
-    <div
-      style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px"
-    >
-      <label>Period:</label>
-      <select id="periodSelect">
-        <option value="week" selected>Last 7 days</option>
-        <option value="month">By month</option>
-      </select>
-      <button id="reloadBtn" class="btn" style="margin-left: 8px">
-        Reload
-      </button>
-      <div style="margin-left: 16px">
-        Total: <span id="ordersTotal">0</span>
-      </div>
-      <button id="exportCsvBtn" class="btn secondary" style="margin-left: 8px">
-        Export CSV
-      </button>
-    </div>
-    <div style="background: #fff; padding: 12px; border-radius: 8px">
-      <canvas id="ordersChart" height="120"></canvas>
-    </div>
-
-    <hr style="margin: 24px 0" />
-    <div
-      style="display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start"
-    >
-      <div
-        style="
-          flex: 1;
-          min-width: 320px;
-          background: #fff;
-          padding: 12px;
-          border-radius: 8px;
-        "
-      >
-        <h4>Revenue</h4>
-        <div
-          style="
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 8px;
-          "
-        >
+    <div class="section two-col">
+      <div class="card revenue">
+        <div class="card-title">Revenue</div>
+        <div class="controls" style="margin: 8px 0">
           <select id="revPeriodSelect">
             <option value="week" selected>Last 7 days</option>
             <option value="month">By month</option>
           </select>
           <button id="reloadRevBtn" class="btn">Reload</button>
           <button id="exportRevCsvBtn" class="btn secondary">Export CSV</button>
-          <div style="margin-left: 12px">
-            Total Revenue: <span id="revTotal">0</span>
+          <div style="margin-left: auto">
+            Total Revenue: <strong id="revTotal">0</strong>
           </div>
         </div>
         <canvas id="revenueChart" height="140"></canvas>
       </div>
 
-      <div
-        style="
-          width: 420px;
-          background: #fff;
-          padding: 12px;
-          border-radius: 8px;
-        "
-      >
-        <h4>Top Products</h4>
-        <div
-          style="
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 8px;
-          "
-        >
+      <div class="card top-products">
+        <div class="card-title">Top Products</div>
+        <div class="controls" style="margin: 8px 0">
           <label>Top</label>
           <select id="topLimitSelect">
             <option value="5">5</option>
@@ -228,11 +178,11 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         new Chart(donutCtx, {
           type: "doughnut",
           data: {
-            labels: ["Users", "Products", "Documents", "Orders"],
+            labels: ["Users", "Products", "Orders"],
             datasets: [
               {
-                data: [data.users, data.products, data.documents, data.orders],
-                backgroundColor: ["#1976d2", "#43a047", "#ffb300", "#e53935"],
+                data: [data.users, data.products, data.orders],
+                backgroundColor: ["#1976d2", "#43a047", "#e53935"],
               },
             ],
           },
@@ -245,12 +195,12 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         new Chart(barCtx, {
           type: "bar",
           data: {
-            labels: ["Users", "Products", "Documents", "Orders"],
+            labels: ["Users", "Products", "Orders"],
             datasets: [
               {
                 label: "Counts",
-                data: [data.users, data.products, data.documents, data.orders],
-                backgroundColor: ["#1976d2", "#43a047", "#ffb300", "#e53935"],
+                data: [data.users, data.products, data.orders],
+                backgroundColor: ["#1976d2", "#43a047", "#e53935"],
               },
             ],
           },

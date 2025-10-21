@@ -135,7 +135,7 @@
                                         <i class="fa fa-star-o"></i>
                                     </div>
                                     <div class="product-btns">
-                                        <button class="add-to-wishlist">
+                                        <button class="add-to-wishlist" data-product-id="${product.id}" onclick="toggleFavorite(${product.id}, this)">
                                             <i class="fa fa-heart-o"></i>
                                             <span class="tooltipp">Yêu thích</span>
                                         </button>
@@ -295,6 +295,128 @@ function updateCartCount() {
 if (IS_LOGGED_IN) {
     window.addEventListener('DOMContentLoaded', function() {
         updateCartCount();
+        loadFavoriteStates(); // Load trạng thái yêu thích
+    });
+}
+
+// Toggle favorite (thêm/xóa yêu thích)
+function toggleFavorite(productId, button) {
+    if (!IS_LOGGED_IN) {
+        alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích!');
+        window.location.href = '${pageContext.request.contextPath}/login';
+        return;
+    }
+    
+    var icon = button.querySelector('i');
+    var isFavorited = icon.classList.contains('fa-heart');
+    
+    if (isFavorited) {
+        // Xóa khỏi yêu thích
+        fetch('${pageContext.request.contextPath}/api/favorite/remove/' + productId, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else if (response.status === 401 || response.status === 403) {
+                throw new Error('Unauthorized');
+            } else {
+                throw new Error('Có lỗi xảy ra');
+            }
+        })
+        .then(data => {
+            icon.classList.remove('fa-heart');
+            icon.classList.add('fa-heart-o');
+            button.style.color = '';
+            alert('Đã xóa khỏi danh sách yêu thích!');
+            // Cập nhật số lượng wishlist trong header
+            if (typeof updateGlobalWishlistCount === 'function') {
+                updateGlobalWishlistCount();
+            }
+        })
+        .catch(error => {
+            if (error.message === 'Unauthorized') {
+                alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+                window.location.href = '${pageContext.request.contextPath}/login';
+            } else {
+                alert('Có lỗi: ' + error.message);
+            }
+        });
+    } else {
+        // Thêm vào yêu thích
+        fetch('${pageContext.request.contextPath}/api/favorite/add', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                productId: productId
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else if (response.status === 401 || response.status === 403) {
+                throw new Error('Unauthorized');
+            } else {
+                throw new Error('Có lỗi xảy ra');
+            }
+        })
+        .then(data => {
+            icon.classList.remove('fa-heart-o');
+            icon.classList.add('fa-heart');
+            button.style.color = '#d70018';
+            alert('Đã thêm vào danh sách yêu thích!');
+            // Cập nhật số lượng wishlist trong header
+            if (typeof updateGlobalWishlistCount === 'function') {
+                updateGlobalWishlistCount();
+            }
+        })
+        .catch(error => {
+            if (error.message === 'Unauthorized') {
+                alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+                window.location.href = '${pageContext.request.contextPath}/login';
+            } else {
+                alert('Có lỗi: ' + error.message);
+            }
+        });
+    }
+}
+
+// Load trạng thái yêu thích cho tất cả sản phẩm
+function loadFavoriteStates() {
+    fetch('${pageContext.request.contextPath}/api/favorite', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        return [];
+    })
+    .then(favorites => {
+        // Đánh dấu các sản phẩm đã yêu thích
+        favorites.forEach(function(favorite) {
+            var button = document.querySelector('.add-to-wishlist[data-product-id="' + favorite.productId + '"]');
+            if (button) {
+                var icon = button.querySelector('i');
+                icon.classList.remove('fa-heart-o');
+                icon.classList.add('fa-heart');
+                button.style.color = '#d70018';
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Lỗi khi tải trạng thái yêu thích:', error);
     });
 }
 </script>

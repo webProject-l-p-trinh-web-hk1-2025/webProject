@@ -87,7 +87,7 @@
                             <a href="${pageContext.request.contextPath}/wishlist">
                                 <i class="fa fa-heart-o"></i>
                                 <span>Yêu thích</span>
-                                <div class="qty">0</div>
+                                <div class="qty" id="wishlist-qty">0</div>
                             </a>
                         </div>
                         <!-- /Wishlist -->
@@ -149,3 +149,84 @@
     </div>
 </nav>
 <!-- /NAVIGATION -->
+
+<script>
+// Function to update cart count (global function)
+function updateGlobalCartCount() {
+    <%
+        org.springframework.security.core.Authentication scriptAuth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isScriptAuthenticated = scriptAuth != null && scriptAuth.isAuthenticated() && !(scriptAuth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
+    %>
+    var isLoggedIn = <%= isScriptAuthenticated %>;
+    
+    if (!isLoggedIn) return;
+    
+    fetch('${pageContext.request.contextPath}/api/cart', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function(response) {
+        if (response.ok) {
+            return response.json();
+        }
+        return null;
+    })
+    .then(function(data) {
+        if (data && data.items) {
+            var totalItems = data.items.reduce(function(sum, item) { return sum + item.quantity; }, 0);
+            var qtyElement = document.getElementById('cart-qty');
+            if (qtyElement) {
+                qtyElement.textContent = totalItems;
+            }
+        }
+    })
+    .catch(function(error) {
+        console.error('Error updating cart count:', error);
+    });
+}
+
+// Function to update wishlist count (global function)
+function updateGlobalWishlistCount() {
+    <%
+        org.springframework.security.core.Authentication wishlistAuth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isWishlistAuthenticated = wishlistAuth != null && wishlistAuth.isAuthenticated() && !(wishlistAuth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
+    %>
+    var isLoggedIn = <%= isWishlistAuthenticated %>;
+    
+    if (!isLoggedIn) return;
+    
+    fetch('${pageContext.request.contextPath}/api/favorite', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function(response) {
+        if (response.ok) {
+            return response.json();
+        }
+        return null;
+    })
+    .then(function(data) {
+        if (data) {
+            var qtyElement = document.getElementById('wishlist-qty');
+            if (qtyElement) {
+                qtyElement.textContent = data.length;
+            }
+        }
+    })
+    .catch(function(error) {
+        console.error('Error updating wishlist count:', error);
+    });
+}
+
+// Update counts on page load
+window.addEventListener('DOMContentLoaded', function() {
+    updateGlobalCartCount();
+    updateGlobalWishlistCount();
+});
+</script>

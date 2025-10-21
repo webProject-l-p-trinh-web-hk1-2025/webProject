@@ -14,6 +14,7 @@ import com.proj.webprojrct.product.entity.Product;
 import com.proj.webprojrct.product.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -123,6 +124,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
     public void removeItemFromCart(Long userId, Long productId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -136,6 +138,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
     public void clearCart(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));

@@ -593,7 +593,14 @@
         function removeItem(itemId) {
             if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
 
-            fetch('${pageContext.request.contextPath}/api/cart/remove/' + itemId, {
+            // Tìm item trong cart để lấy productId
+            var item = cart.find(function(i) { return i.id === itemId; });
+            if (!item) {
+                showMessage('Không tìm thấy sản phẩm', 'error');
+                return;
+            }
+
+            fetch('${pageContext.request.contextPath}/api/cart/remove/' + item.productId, {
                 method: 'DELETE',
                 credentials: 'include',
                 headers: {

@@ -1,18 +1,18 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-	<!DOCTYPE html>
-	<html>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Trang admin</title>
+    <sitemesh:write property="head" />
+  </head>
 
-	<head>
-		<meta charset="UTF-8">
-		<title>Trang admin</title>
-	</head>
+  <body>
+    <%@ include file="/common/headerAdmin.jsp" %>
 
-	<body>
-		<%@ include file="/common/headerAdmin.jsp" %>
+    <sitemesh:write property="body" />
 
-			<sitemesh:write property="body" />
-
-			<%@ include file="/common/footer.jsp" %>
-	</body>
-
-	</html>
+    <%@ include file="/common/footer.jsp" %>
+  </body>
+</html>

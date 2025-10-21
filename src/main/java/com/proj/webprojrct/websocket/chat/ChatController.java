@@ -25,7 +25,7 @@ public class ChatController {
     }
     @GetMapping("/admin/chat")
     public String chatadmin() {
-        return "chat_admin"; 
+        return "admin/chat_admin"; 
     }
 
 

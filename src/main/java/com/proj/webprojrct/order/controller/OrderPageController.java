@@ -6,7 +6,9 @@ import com.proj.webprojrct.common.config.security.CustomUserDetails;
 import com.proj.webprojrct.payment.entity.Payment;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +21,9 @@ public class OrderPageController {
     private OrderService orderService;
 
     @GetMapping("/create")
-    public String createOrderPage(@AuthenticationPrincipal CustomUserDetails userDetails,
-            Model model) {
+    public String createOrderPage(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -31,9 +34,9 @@ public class OrderPageController {
 
     // Trang chi tiết đơn hàng theo orderId
     @GetMapping("/{orderId}")
-    public String viewOrder(@PathVariable Long orderId,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            Model model) {
+    public String viewOrder(@PathVariable Long orderId, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -53,13 +56,20 @@ public class OrderPageController {
 
     // Trang danh sách đơn hàng của user
     @GetMapping
-    public String listOrders(@AuthenticationPrincipal CustomUserDetails userDetails,
-            Model model) {
+    public String listOrders(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         if (userDetails == null) {
             return "redirect:/login";
         }
 
         model.addAttribute("orders", orderService.getOrdersByUserId(userDetails.getUser().getId()));
         return "order_list"; // JSP: order_list.jsp
+    }
+
+    @GetMapping("/success/{orderId}")
+    public String orderSuccess(@PathVariable Long orderId, Model model) {
+        model.addAttribute("orderId", orderId);
+        return "order_success";
     }
 }

@@ -55,6 +55,7 @@ public class CartPageController {
 
     @GetMapping("/cart.jsp")
     public String cartTestPage() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return "cart";
     }
 }

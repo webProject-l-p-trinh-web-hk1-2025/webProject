@@ -50,16 +50,14 @@ public class ReviewService {
         return reviewMapper.toDto(saved);
     }
 
-
-
     /*
     Lấy từng đối tượng review trong trang, 
     sau đó gọi phương thức toDto của reviewMapper 
     và truyền đối tượng review đó vào để tạo thành dto response
      */
     public Page<ReviewResponse> handleGetReviewsByProduct(Long productId, Pageable pageable) {
-    // fetch only top-level reviews (parentReview null) so child replies are shown nested only
-    Page<Review> page = reviewRepository.findByProduct_IdAndParentReviewIsNull(productId, pageable);
+        // fetch only top-level reviews (parentReview null) so child replies are shown nested only
+        Page<Review> page = reviewRepository.findByProduct_IdAndParentReviewIsNull(productId, pageable);
         return page.map(reviewMapper::toDto);
     }
 

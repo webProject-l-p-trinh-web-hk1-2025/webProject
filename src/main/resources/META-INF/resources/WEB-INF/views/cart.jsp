@@ -621,31 +621,34 @@
                     });
             }
 
+            // HÀM NÀY NẰM Ở TRANG GIỎ HÀNG (CART)
             function proceedToOrder() {
                 var selectedItems = cart.filter(function (item) { return item.selected; });
-
+                console.log('Sản phẩm đã chọn để đặt hàng:', selectedItems);
                 if (selectedItems.length === 0) {
                     showMessage('Vui lòng chọn ít nhất 1 sản phẩm để tiếp tục', 'info');
                     return;
                 }
 
-                // 1. Tạo payload (giống hệt code cũ của bạn)
+                // Tạo payload
                 var orderRequest = {
                     totalAmount: selectedItems.reduce(function (sum, item) {
                         return sum + (item.price * item.quantity);
                     }, 0),
-                    shippingAddress: "", // Sẽ được cập nhật ở trang xác nhận
+                    shippingAddress: "",
                     orderItems: selectedItems.map(function (item) {
+                        // Đảm bảo "item" trong giỏ hàng của bạn CÓ "productName"
                         return {
                             productId: item.productId,
+                            productName: item.name, // <-- THÊM DÒNG NÀY VÀO
                             quantity: item.quantity,
                             price: item.price
                         };
                     })
                 };
 
+                // Lưu vào session và chuyển trang
                 sessionStorage.setItem('pendingOrder', JSON.stringify(orderRequest));
-
                 window.location.href = '/order/create';
             }
 

@@ -2,6 +2,8 @@ package com.proj.webprojrct.order.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.concurrent.ThreadLocalRandom;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -20,7 +22,7 @@ import com.proj.webprojrct.user.entity.User;
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
     private Long id;
 
@@ -40,5 +42,12 @@ public class Order {
     @Column(name = "created_at", nullable = false, updatable = false,
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
+
+    @PrePersist
+    public void generateRandomId() {
+        if (this.id == null) {
+            this.id = ThreadLocalRandom.current().nextLong(1000000000L, 9999999999L);
+        }
+    }
 
 }

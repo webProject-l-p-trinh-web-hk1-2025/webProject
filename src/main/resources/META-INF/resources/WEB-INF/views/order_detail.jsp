@@ -217,45 +217,89 @@
                         // Vô hiệu hóa nút để tránh nhấn đúp
                         confirmBtn.disabled = true;
                         confirmBtn.textContent = 'Đang xử lý...';
-
+                        console.log(`/api/vnpay/payment/create_payment?orderId=${orderId}&method=${method}`);
+                        console.log('Đang gọi API thanh toán cho orderId:', orderId, 'với phương thức:', method);
+                        debugger;
                         // Gọi API Controller duy nhất của bạn
                         // Sử dụng template literals (dấu `) để chèn biến vào URL
-                        fetch(`/api/vnpay/payment/create_payment?orderId=${orderId}&method=${method}`, {
-                            method: 'GET', // Phải khớp với @GetMapping
-                            headers: {
-                                // QUAN TRỌNG: Nếu API của bạn được bảo vệ bằng Spring Security (JWT),
-                                // bạn phải gửi kèm Token
-                                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
-                            }
-                        })
-                            .then(response => {
-                                if (!response.ok) {
-                                    // Bắt lỗi 4xx, 5xx từ server
-                                    throw new Error('Xử lý thanh toán thất bại. Lỗi: ' + response.status);
-                                }
-                                return response.json(); // Đọc response body dạng JSON
-                            })
-                            .then(data => {
-                                // Xử lý JSON (PaymentResDto) trả về
-                                // API của bạn luôn trả về một đối tượng có 'url'
-                                // - Nếu VNPAY: data.url là link của VNPAY
-                                // - Nếu COD: data.url là link trang thành công (vd: /order/success/123)
-                                if (data && data.url) {
-                                    console.log('API thành công. Đang chuyển hướng đến:', data.url);
-                                    window.location.href = data.url;
-                                } else {
-                                    throw new Error('Response từ server không hợp lệ (không có url).');
-                                }
-                            })
-                            .catch(error => {
-                                // Xử lý nếu fetch bị lỗi mạng, hoặc lỗi logic ở trên
-                                console.error('Lỗi khi gọi API thanh toán:', error);
-                                alert('Có lỗi xảy ra: ' + error.message);
 
-                                // Kích hoạt lại nút để người dùng thử lại
-                                confirmBtn.disabled = false;
-                                confirmBtn.textContent = 'Xác nhận mua hàng';
-                            });
+
+                        console.log(`/api/vnpay/payment/create_payment?orderId=${orderId}&method=${method}`);
+                        if (method === "COD") {
+                            fetch(`/api/vnpay/payment/create_payment?orderId=${orderId}&method=COD`, {
+                                method: 'GET', // Phải khớp với @GetMapping
+                                headers: {
+                                    // QUAN TRỌNG: Nếu API của bạn được bảo vệ bằng Spring Security (JWT),
+                                    // bạn phải gửi kèm Token
+                                    'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                                }
+                            })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        // Bắt lỗi 4xx, 5xx từ server
+                                        throw new Error('Xử lý thanh toán thất bại. Lỗi: ' + response.status);
+                                    }
+                                    return response.json(); // Đọc response body dạng JSON
+                                })
+                                .then(data => {
+                                    // Xử lý JSON (PaymentResDto) trả về
+                                    // API của bạn luôn trả về một đối tượng có 'url'
+                                    // - Nếu VNPAY: data.url là link của VNPAY
+                                    // - Nếu COD: data.url là link trang thành công (vd: /order/success/123)
+                                    if (data && data.url) {
+                                        console.log('API thành công. Đang chuyển hướng đến:', data.url);
+                                        window.location.href = data.url;
+                                    } else {
+                                        throw new Error('Response từ server không hợp lệ (không có url).');
+                                    }
+                                })
+                                .catch(error => {
+                                    // Xử lý nếu fetch bị lỗi mạng, hoặc lỗi logic ở trên
+                                    console.error('Lỗi khi gọi API thanh toán:', error);
+                                    alert('Có lỗi xảy ra: ' + error.message);
+
+                                    // Kích hoạt lại nút để người dùng thử lại
+                                    confirmBtn.disabled = false;
+                                    confirmBtn.textContent = 'Xác nhận mua hàng';
+                                });
+                        } else {
+                            fetch(`/api/vnpay/payment/create_payment?orderId=${orderId}&method=method=${method}`, {
+                                method: 'GET', // Phải khớp với @GetMapping
+                                headers: {
+                                    // QUAN TRỌNG: Nếu API của bạn được bảo vệ bằng Spring Security (JWT),
+                                    // bạn phải gửi kèm Token
+                                    'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                                }
+                            })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        // Bắt lỗi 4xx, 5xx từ server
+                                        throw new Error('Xử lý thanh toán thất bại. Lỗi: ' + response.status);
+                                    }
+                                    return response.json(); // Đọc response body dạng JSON
+                                })
+                                .then(data => {
+                                    // Xử lý JSON (PaymentResDto) trả về
+                                    // API của bạn luôn trả về một đối tượng có 'url'
+                                    // - Nếu VNPAY: data.url là link của VNPAY
+                                    // - Nếu COD: data.url là link trang thành công (vd: /order/success/123)
+                                    if (data && data.url) {
+                                        console.log('API thành công. Đang chuyển hướng đến:', data.url);
+                                        window.location.href = data.url;
+                                    } else {
+                                        throw new Error('Response từ server không hợp lệ (không có url).');
+                                    }
+                                })
+                                .catch(error => {
+                                    // Xử lý nếu fetch bị lỗi mạng, hoặc lỗi logic ở trên
+                                    console.error('Lỗi khi gọi API thanh toán:', error);
+                                    alert('Có lỗi xảy ra: ' + error.message);
+
+                                    // Kích hoạt lại nút để người dùng thử lại
+                                    confirmBtn.disabled = false;
+                                    confirmBtn.textContent = 'Xác nhận mua hàng';
+                                });
+                        }
                     }
                 </script>
             </body>

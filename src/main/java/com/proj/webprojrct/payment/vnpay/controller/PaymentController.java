@@ -48,7 +48,9 @@ public class PaymentController {
 
     @GetMapping("/create_payment")
     public ResponseEntity<?> createPayment(@RequestParam("orderId") Long orderId, @RequestParam("method") String method, HttpServletRequest request) throws UnsupportedEncodingException {
-        if (method == "COD") {
+        System.out.print(method + "99999999999");
+        if ("COD".equalsIgnoreCase(method)) {
+            System.out.print("88888888888");
             paymentService.createPaymentCOD(orderId);
             PaymentResDto codResponse = new PaymentResDto();
             codResponse.setStatus("OK");

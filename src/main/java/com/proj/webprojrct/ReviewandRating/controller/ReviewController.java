@@ -12,9 +12,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.validation.Valid;
+
+import org.springframework.validation.BindingResult;
 
 import com.proj.webprojrct.common.config.security.CustomUserDetails;
 import com.proj.webprojrct.reviewandrating.dto.request.ReviewRequest;
+
 import com.proj.webprojrct.reviewandrating.service.ReviewService;
 
 @Controller
@@ -27,9 +31,11 @@ public class ReviewController {
     // hiện phần review của product dựa trên product id
     @GetMapping("/products/{productId}/reviews")
     public String showProductReviews(@PathVariable Long productId,
-                                     @RequestParam(defaultValue = "0") int page,
-                                     @RequestParam(defaultValue = "20") int size,
-                                     Model model) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         model.addAttribute("productId", productId);
         // request top-level reviews sorted by createdAt ascending to preserve chronological order
         model.addAttribute("reviewsPage", reviewService.handleGetReviewsByProduct(productId, org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").ascending())));
@@ -56,9 +62,9 @@ public class ReviewController {
     // Xử lý submit rating và bình luận
     @PostMapping("/products/{productId}/reviews")
     public String handleCreateReview(@PathVariable Long productId,
-                                     @ModelAttribute @jakarta.validation.Valid ReviewRequest reviewRequest,
-                                     org.springframework.validation.BindingResult bindingResult,
-                                     Model model) {
+            @ModelAttribute ReviewRequest reviewRequest,
+            BindingResult bindingResult,
+            Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
             model.addAttribute("error", "Bạn chưa đăng nhập.");
@@ -77,9 +83,9 @@ public class ReviewController {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long currentUserId = userDetails.getUser().getId();
 
-    reviewService.handleCreateReview(reviewRequest, currentUserId);
-    //return "redirect:/user/products/" + productId + "/reviews";
-    return "redirect:/products/" + productId + "/reviews";
+        reviewService.handleCreateReview(reviewRequest, currentUserId);
+        //return "redirect:/user/products/" + productId + "/reviews";
+        return "redirect:/products/" + productId + "/reviews";
     }
 
     // Hiển thị tất cả rating và bình luận sang một trang trống mới (chỉ phục vụ cho việc xem bình luận)
@@ -89,5 +95,4 @@ public class ReviewController {
     // reviewService.handleGetReviewThread(reviewId).ifPresent(r -> model.addAttribute("review", r));
     //     return "reviews/thread";
     // }
-
 }

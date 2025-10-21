@@ -162,7 +162,7 @@
                             </c:if>
                         </td>
                         <td>
-                            <button type="button" onclick="showEditForm(${user.id})" class="btn btn-edit">Sửa</button>
+                            <button type="button" onclick="showEditForm('${user.id}')" class="btn btn-edit">Sửa</button>
                             <form action="${pageContext.request.contextPath}/admin/deleteUser/${user.id}" method="post"
                                 style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa user này?');">
                                 <button type="submit" class="btn btn-delete">Xóa</button>
@@ -191,7 +191,7 @@
                                     <option value="false" ${!user.active ? 'selected' : '' }>Ngưng hoạt động</option>
                                 </select>
                                 <button type="submit" class="btn btn-save">Lưu</button>
-                                <button type="button" onclick="hideEditForm(${user.id})"
+                                <button type="button" onclick="hideEditForm('${user.id}')"
                                     class="btn btn-cancel">Hủy</button>
                             </form>
                         </td>

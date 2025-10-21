@@ -156,7 +156,6 @@ public class ProductServiceImpl implements ProductService {
 
         String url = "/uploads/products/" + filename;
 
-        // persist image record
         var img = com.proj.webprojrct.product.entity.ProductImage.builder()
                 .url(url)
                 .product(p)

@@ -1,34 +1,12 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:url value="/css/header.css" var="headerCss" />
+<link rel="stylesheet" href="${headerCss}" />
 
-        <div class="navbar navbar-expand-lg navbar-dark" style="background-color: #dcda60;">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="${pageContext.request.contextPath}/">My bài làm giữa kì</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/">Trang Chủ</a>
-                        </li>
-
-                        <c:choose>
-                            <c:when test="${sessionScope.user == null}">
-                                <li class="nav-item">
-                                    <a class="nav-link" href="${pageContext.request.contextPath}/login">Đăng nhập</a>
-                                </li>
-                            </c:when>
-
-
-                            <c:otherwise>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
-                                </li>
-                            </c:otherwise>
-                        </c:choose>
-                    </ul>
-                </div>
-            </div>
-        </div>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a href="${pageContext.request.contextPath}/home" class="brand">
+      <img src="${pageContext.request.contextPath}/image/cellphone-store-logo.svg" alt="Logo" class="brand-logo">
+      <span class="brand-text">CellPhone Store</span>
+    </a>
+  </div>
+</header>

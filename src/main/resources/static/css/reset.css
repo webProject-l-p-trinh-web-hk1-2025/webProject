@@ -1,0 +1,181 @@
+:root {
+  --primary: #e60012;
+  --primary-dark: #c3000f;
+  --muted: #777;
+  --card-bg: #fff;
+}
+
+body.reset-page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+}
+
+/* HEADER */
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 10px 16px;
+}
+
+.header-bar img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.header-bar h5 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+/* LAYOUT CHÍNH */
+.login-two-col {
+  display: flex;
+  min-height: calc(100vh - 80px);
+}
+
+/* LEFT SIDE */
+.promo-col {
+  flex: 1;
+  background: #fff;
+  padding: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-right: 1px solid #eee;
+}
+
+.promo-inner {
+  max-width: 480px;
+}
+
+.promo-title {
+  color: var(--primary);
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+.promo-sub {
+  color: #333;
+  font-size: 17px;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.promo-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: #555;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.promo-benefits li {
+  margin-bottom: 6px;
+}
+
+/* RIGHT SIDE */
+.form-col {
+  flex: 1;
+  background-color: #fff;
+  padding: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-wrap {
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-title {
+  color: #111;
+  font-weight: 700;
+  margin-bottom: 24px;
+  font-size: 26px;
+}
+
+.form-group label {
+  color: #444;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.form-control:focus {
+  border-color: var(--primary);
+  box-shadow: none;
+  outline: none;
+}
+
+.btn-login {
+  background: var(--primary);
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: 700;
+  color: white;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.btn-login:hover {
+  background: var(--primary-dark);
+}
+
+.divider {
+  text-align: center;
+  margin: 18px 0;
+  color: var(--muted);
+}
+
+.register-link a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .login-two-col {
+    flex-direction: column;
+  }
+
+  .promo-col {
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    padding: 40px 20px;
+  }
+
+  .form-col {
+    padding: 40px 20px;
+  }
+
+  .promo-title {
+    font-size: 32px;
+  }
+}

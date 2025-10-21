@@ -4,7 +4,11 @@
     <!-- Admin pages use admin decorator -->
     <mapping path="/admin" decorator="admin.jsp"/>
     <mapping path="/admin/*" decorator="admin.jsp"/>
-    
+       <!-- Trang không sử dụng header và footer web -->
+    <mapping path="/login" decorator="none.jsp"/>
+    <mapping path="/register" decorator="none.jsp"/>
+    <mapping path="/resetPassword" decorator="none.jsp"/>
+
     <!-- exclude phần này vì chưa có template cho login register -->
     <mapping path="/login" exclude="true"/>
     <mapping path="/register" exclude="true"/>

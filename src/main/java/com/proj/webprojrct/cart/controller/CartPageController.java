@@ -8,11 +8,19 @@ import com.proj.webprojrct.user.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.server.ResponseStatusException;
+import com.proj.webprojrct.user.repository.UserRepository;
+import com.proj.webprojrct.user.entity.User;
 
 import java.security.Principal;
+
+import org.springframework.http.HttpStatus;
 
 @Controller
 public class CartPageController {
@@ -24,25 +32,22 @@ public class CartPageController {
     private UserRepository userRepository;
 
     @GetMapping("/cart")
-    public String cartPage(Model model, Principal principal, HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
-        
-        // Nếu không có userId trong session, lấy từ principal (phone number là username)
-        if (userId == null && principal != null) {
-            String phone = principal.getName(); // Username = phone number
-            User user = userRepository.findByPhone(phone)
-                    .orElse(null);
-            if (user != null) {
-                userId = user.getId();
-                session.setAttribute("userId", userId); // Cache vào session
-            }
+    public String cartPage(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
         }
-        
+        User user = userRepository.findByPhone(authentication.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!"));
+        Long userId = (user != null) ? user.getId() : null;
+
         if (userId == null) {
             // Chưa đăng nhập, chuyển về trang đăng nhập
             return "redirect:/login";
         }
-        
+
         CartResponse cart = cartService.getCartByUserId(userId);
         model.addAttribute("cart", cart);
         return "cart";

@@ -1,9 +1,14 @@
 package com.proj.webprojrct.product.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.proj.webprojrct.product.service.ProductService;
 import com.proj.webprojrct.product.dto.response.ProductResponse;
@@ -18,22 +23,46 @@ public class ProductPageController {
     }
 
     @GetMapping("/product_list")
-    public String list() { 
-        return "product_list"; 
+    public String list() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        }
+        return "product_list";
     }
 
     @GetMapping("/product_detail")
-    public String detail(Model model) { 
-        return "product_detail"; 
+    public String detail(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        }
+        return "product_detail";
     }
 
     @GetMapping("/admin/products/edit")
-    public String edit() { 
-        return "product_edit"; 
+    public String edit() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        }
+        return "product_edit";
     }
 
     @GetMapping("/admin/products/edit/{id}")
     public String editById(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        }
         ProductResponse p = productService.getById(id);
         model.addAttribute("product", p);
         return "product_edit";
@@ -41,6 +70,12 @@ public class ProductPageController {
 
     @GetMapping("/shop")
     public String shop() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        }
         return "shop";
     }
 }

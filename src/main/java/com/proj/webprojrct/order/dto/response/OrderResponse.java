@@ -17,6 +17,6 @@ public class OrderResponse {
     private String status;
     private BigDecimal totalAmount;
     private String shippingAddress;
-    private LocalDateTime createdAt;
+    private String createdAt;
     private List<OrderItemResponse> items;
 }

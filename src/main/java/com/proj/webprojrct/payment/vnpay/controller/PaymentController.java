@@ -47,7 +47,16 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @GetMapping("/create_payment")
-    public ResponseEntity<?> createPayment(@RequestParam("orderId") Long orderId, HttpServletRequest request) throws UnsupportedEncodingException {
+    public ResponseEntity<?> createPayment(@RequestParam("orderId") Long orderId, @RequestParam("method") String method, HttpServletRequest request) throws UnsupportedEncodingException {
+        if (method == "COD") {
+            paymentService.createPaymentCOD(orderId);
+            PaymentResDto codResponse = new PaymentResDto();
+            codResponse.setStatus("OK");
+            codResponse.setMessage("Tạo đơn hàng COD thành công!");
+            codResponse.setURL("/order/success/" + orderId); // URL trang thành công của bạn
+            return ResponseEntity.status(HttpStatus.OK).body(codResponse);
+        }
+
         PaymentResDto paymentResDto = paymentService.createPaymentUrl(orderId, request);
         return ResponseEntity.status(HttpStatus.OK).body(paymentResDto);
     }

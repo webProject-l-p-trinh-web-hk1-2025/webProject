@@ -25,7 +25,7 @@ public class OrderController {
     public ResponseEntity<?> createOrder(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody OrderRequest request) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ResponseMessage("Vui lòng đăng nhập để tạo đơn hàng!"));
+                    .body(new ResponseMessage("Vui lòng đăng nhập để tạo đơn hàng!"));
         }
         OrderResponse order = orderService.createOrder(userDetails.getUser().getId(), request);
         return ResponseEntity.ok(order);
@@ -36,7 +36,7 @@ public class OrderController {
     public ResponseEntity<?> getOrder(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long orderId) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ResponseMessage("Vui lòng đăng nhập để xem đơn hàng!"));
+                    .body(new ResponseMessage("Vui lòng đăng nhập để xem đơn hàng!"));
         }
         OrderResponse order = orderService.getOrderById(orderId);
         // TODO: Kiểm tra order.userId == userDetails.getUser().getId() để bảo mật
@@ -48,7 +48,7 @@ public class OrderController {
     public ResponseEntity<?> getOrdersByUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ResponseMessage("Vui lòng đăng nhập để xem danh sách đơn hàng!"));
+                    .body(new ResponseMessage("Vui lòng đăng nhập để xem danh sách đơn hàng!"));
         }
         List<OrderResponse> orders = orderService.getOrdersByUserId(userDetails.getUser().getId());
         return ResponseEntity.ok(orders);
@@ -59,7 +59,7 @@ public class OrderController {
     public ResponseEntity<ResponseMessage> cancelOrder(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long orderId) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ResponseMessage("Vui lòng đăng nhập để hủy đơn hàng!"));
+                    .body(new ResponseMessage("Vui lòng đăng nhập để hủy đơn hàng!"));
         }
         // TODO: Kiểm tra order thuộc về user trước khi hủy
         orderService.cancelOrder(orderId);

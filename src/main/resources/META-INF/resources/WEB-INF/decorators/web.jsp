@@ -5,6 +5,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Trang User</title>
+        <sitemesh:write property="head" />
     </head>
 
     <body>

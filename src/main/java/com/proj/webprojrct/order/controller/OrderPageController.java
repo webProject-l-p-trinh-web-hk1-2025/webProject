@@ -1,13 +1,65 @@
 package com.proj.webprojrct.order.controller;
 
+import com.proj.webprojrct.order.dto.response.OrderResponse;
+import com.proj.webprojrct.order.service.OrderService;
+import com.proj.webprojrct.common.config.security.CustomUserDetails;
+import com.proj.webprojrct.payment.entity.Payment;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
+@RequestMapping("/order")
 public class OrderPageController {
-    
-    @GetMapping("/order")
-    public String orderPage() {
-        return "order";
+
+    @Autowired
+    private OrderService orderService;
+
+    @GetMapping("/create")
+    public String createOrderPage(@AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("user", userDetails.getUser());
+        return "order_create"; // JSP: order_create.jsp
+    }
+
+    // Trang chi tiết đơn hàng theo orderId
+    @GetMapping("/{orderId}")
+    public String viewOrder(@PathVariable Long orderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        OrderResponse order = orderService.getOrderById(orderId);
+        Payment statusPayment = orderService.updateOrderPayment(orderId);
+
+        // Bảo mật: chỉ user tạo đơn mới xem được
+        if (!order.getUserId().equals(userDetails.getUser().getId())) {
+            return "redirect:/shop";
+        }
+        model.addAttribute("statusPayment", statusPayment);
+        model.addAttribute("order", order);
+        model.addAttribute("user", userDetails.getUser());
+        return "order_detail"; // JSP: order_detail.jsp
+    }
+
+    // Trang danh sách đơn hàng của user
+    @GetMapping
+    public String listOrders(@AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("orders", orderService.getOrdersByUserId(userDetails.getUser().getId()));
+        return "order_list"; // JSP: order_list.jsp
     }
 }

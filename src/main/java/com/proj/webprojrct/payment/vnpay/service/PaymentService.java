@@ -31,6 +31,7 @@ import lombok.*;
 import org.springframework.stereotype.Service;
 
 import com.nimbusds.jose.shaded.gson.JsonObject;
+import com.nimbusds.jose.shaded.gson.JsonParser;
 import com.proj.webprojrct.payment.vnpay.config.Config;
 import com.proj.webprojrct.payment.dto.response.PaymentResDto;
 import com.proj.webprojrct.payment.entity.Payment;
@@ -49,6 +50,7 @@ public class PaymentService {
     private final OrderRepository orderRepository;
 
     public PaymentResDto createPaymentUrl(Long orderId, HttpServletRequest request) throws UnsupportedEncodingException {
+
         String orderType = "other";
 
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng (Order) với ID: " + orderId));
@@ -116,6 +118,7 @@ public class PaymentService {
 
         Payment payment = Payment.builder()
                 .method("VNPAY")
+                .orderId(orderId)
                 .amount(BigDecimal.valueOf(amount / 100.0))
                 .status("PENDING")
                 .paidAt(vnp_CreateDate)
@@ -257,6 +260,54 @@ public class PaymentService {
                     response.append(output);
                 }
             }
+            String res = response.toString(); // Dòng code của bạn
+
+            // 1. Parse chuỗi JSON response
+            JsonObject responseJson = JsonParser.parseString(res).getAsJsonObject();
+
+            // 2. Lấy mã trạng thái giao dịch
+            String transactionStatus = "UNDEFINED"; // Đặt mã mặc định
+            if (responseJson.has("vnp_TransactionStatus")) {
+                transactionStatus = responseJson.get("vnp_TransactionStatus").getAsString();
+            }
+
+            // 3. Lấy đối tượng Payment
+            Payment payment = paymentRepository.findByOrderId(orderId);
+
+            // 4. Ánh xạ mã VNPAY sang trạng thái của bạn
+            String appStatus;
+            switch (transactionStatus) {
+                case "00":
+                    appStatus = "SUCCESS";
+                    break;
+                case "01":
+                    appStatus = "PENDING";
+                    break;
+                case "02":
+                    appStatus = "FAILED";
+                    break;
+                case "04":
+                    appStatus = "REVERSED";
+                    break;
+                case "05":
+                    appStatus = "REFUND_PENDING";
+                    break;
+                case "06":
+                    appStatus = "REFUND_PROCESSING";
+                    break;
+                case "07":
+                    appStatus = "FRAUD_SUSPECTED";
+                    break;
+                case "09":
+                    appStatus = "REFUND_FAILED";
+                    break;
+                default:
+                    appStatus = "UNKNOWN";
+                    break;
+            }
+
+            payment.setStatus(appStatus);
+            paymentRepository.save(payment);
             return response.toString();
         } catch (Exception e) {
             e.printStackTrace();
@@ -347,6 +398,19 @@ public class PaymentService {
         in.close();
         System.out.println(response.toString());
         return response.toString();
+    }
+
+    public void createPaymentCOD(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng (Order) với ID: " + orderId));
+
+        Payment payment = Payment.builder()
+                .method("COD")
+                .orderId(orderId)
+                .amount(order.getTotalAmount())
+                .status("PENDING")
+                .paidAt(LocalDateTime.now().toString())
+                .build();
+        paymentRepository.save(payment);
     }
 
     public Payment getPaymentById(Long id) {

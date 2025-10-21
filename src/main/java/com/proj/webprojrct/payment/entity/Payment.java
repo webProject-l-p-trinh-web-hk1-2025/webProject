@@ -30,9 +30,9 @@ public class Payment {
     @Column(name = "payment_id")
     private Long paymentId;
 
-    // @OneToOne
-    // @JoinColumn(name = "order_id", nullable = false, unique = true)
-    // private Order order;
+    @Column(name = "order_id", nullable = false, unique = true)
+    private long orderId;
+
     @Column(name = "method", length = 50)
     private String method;
 

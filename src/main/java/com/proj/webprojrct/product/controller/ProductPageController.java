@@ -78,4 +78,17 @@ public class ProductPageController {
         }
         return "shop";
     }
+
+    @GetMapping("/products")
+    public String products(Model model) {
+        // Có thể thêm logic load products vào model nếu cần
+        return "product_list";
+    }
+
+    @GetMapping("/product/{id}")
+    public String productDetail(@PathVariable Long id, Model model) {
+        ProductResponse product = productService.getById(id);
+        model.addAttribute("product", product);
+        return "product_detail";
+    }
 }

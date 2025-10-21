@@ -1,12 +1,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-    <%@ page contentType="text/html;charset=UTF-8" %>
-        <html>
-
-        <head>
-            <title>Reset Password</title>
-        </head>
-
-        <body>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<html>
+<head>
+    <title>Reset Password</title>
+</head>
+<body>
             <h2>Đặt lại mật khẩu</h2>
             <c:if test="${not empty error}">
                 <div style="color: red;">${error}</div>

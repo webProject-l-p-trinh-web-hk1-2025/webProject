@@ -1,12 +1,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-    <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-        <html>
-
-        <head>
-            <title>Xác thực OTP</title>
-        </head>
-
-        <body>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Xác thực OTP</title>
+</head>
+<body>
             <h2>OTP Verification</h2>
 
             <c:if test="${not empty error}">

@@ -388,17 +388,17 @@
             let cart = [];
 
             function loadCart() {
-                fetch('/api/cart', {
+                fetch('${pageContext.request.contextPath}/api/cart', {
                     method: 'GET',
                     credentials: 'include'
                 })
                     .then(function (response) {
                         if (!response.ok) {
                             if (response.status === 401 || response.status === 403) {
-                                window.location.href = '/login';
-                                throw new Error('Chua dang nhap');
+                                window.location.href = '${pageContext.request.contextPath}/login';
+                                throw new Error('Chưa đăng nhập');
                             }
-                            throw new Error('Khong the tai gio hang');
+                            throw new Error('Không thể tải giỏ hàng');
                         }
                         return response.json();
                     })
@@ -577,7 +577,7 @@
             }
 
             function updateCartItem(itemId, quantity) {
-                fetch('/api/cart/update/' + itemId, {
+                fetch('${pageContext.request.contextPath}/api/cart/update/' + itemId, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -586,7 +586,7 @@
                     body: JSON.stringify({ quantity: quantity })
                 })
                     .then(function (response) {
-                        if (!response.ok) throw new Error('Khong the cap nhat');
+                        if (!response.ok) throw new Error('Không thể cập nhật');
                         return response.json();
                     })
                     .then(function () {
@@ -604,20 +604,33 @@
             }
 
             function removeItem(itemId) {
-                if (!confirm('Ban co chac muon xoa san pham nay?')) return;
+                if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
 
-                fetch('/api/cart/remove/' + itemId, {
+                // Tìm item trong cart để lấy productId
+                var item = cart.find(function (i) { return i.id === itemId; });
+                if (!item) {
+                    showMessage('Không tìm thấy sản phẩm', 'error');
+                    return;
+                }
+
+                fetch('${pageContext.request.contextPath}/api/cart/remove/' + item.productId, {
                     method: 'DELETE',
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 })
                     .then(function (response) {
-                        if (!response.ok) throw new Error('Khong the xoa');
-                        showMessage('Da xoa san pham khoi gio hang', 'success');
-                        loadCart();
+                        if (!response.ok) throw new Error('Không thể xóa');
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        showMessage('Đã xóa sản phẩm khỏi giỏ hàng', 'success');
+                        loadCart(); // Reload lại giỏ hàng
                     })
                     .catch(function (error) {
                         console.error('Error:', error);
-                        showMessage('Loi khi xoa san pham', 'error');
+                        showMessage('Lỗi khi xóa sản phẩm: ' + error.message, 'error');
                     });
             }
 

@@ -1,8 +1,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-    <%@ page contentType="text/html;charset=UTF-8" %>
-        <html>
-
-        <body>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<html>
+<head>
+    <title>Register</title>
+</head>
+<body>
             <h2>Đăng ký tài khoản</h2>
 
             <c:if test="${not empty error}">

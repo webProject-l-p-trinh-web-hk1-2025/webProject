@@ -14,6 +14,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -22,8 +23,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
+import org.eclipse.tags.shaded.org.apache.regexp.recompile;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import lombok.*;
@@ -35,7 +38,9 @@ import com.nimbusds.jose.shaded.gson.JsonParser;
 import com.proj.webprojrct.payment.vnpay.config.Config;
 import com.proj.webprojrct.payment.dto.response.PaymentResDto;
 import com.proj.webprojrct.payment.entity.Payment;
+import com.proj.webprojrct.payment.entity.PaymentUrlVnpay;
 import com.proj.webprojrct.payment.repository.PaymentRepository;
+import com.proj.webprojrct.payment.repository.PaymentUrlVnpayRepository;
 import com.twilio.twiml.voice.Pay;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -48,6 +53,8 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
 
     private final OrderRepository orderRepository;
+
+    private final PaymentUrlVnpayRepository paymentUrlVnpayRepository;
 
     public PaymentResDto createPaymentUrl(Long orderId, HttpServletRequest request) throws UnsupportedEncodingException {
 
@@ -116,14 +123,37 @@ public class PaymentService {
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = Config.vnp_PayUrl + "?" + queryUrl;
 
-        Payment payment = Payment.builder()
-                .method("VNPAY")
-                .orderId(orderId)
-                .amount(BigDecimal.valueOf(amount / 100.0))
-                .status("PENDING")
-                .paidAt(vnp_CreateDate)
-                .build();
-        savePayment(payment);
+        System.out.println("URL: " + paymentUrl);
+        if (!paymentRepository.existsByOrderId(orderId)) {
+            Payment payment = Payment.builder()
+                    .method("VNPAY")
+                    .orderId(orderId)
+                    .amount(BigDecimal.valueOf(amount / 100.0))
+                    .status("PENDING")
+                    .paidAt(vnp_CreateDate)
+                    .build();
+            savePayment(payment);
+        }
+
+        PaymentUrlVnpay existing = paymentUrlVnpayRepository.findByOrderId(orderId);
+
+        PaymentUrlVnpay paymentUrlVnpay;
+        if (existing != null) {
+            paymentUrlVnpay = existing;
+            paymentUrlVnpay.setPaymentUrl(paymentUrl);
+            paymentUrlVnpay.setCreatedAt(vnp_CreateDate);
+            paymentUrlVnpay.setExpiresAt(vnp_ExpireDate);
+        } else {
+
+            paymentUrlVnpay = PaymentUrlVnpay.builder()
+                    .orderId(orderId)
+                    .paymentUrl(paymentUrl)
+                    .createdAt(vnp_CreateDate)
+                    .expiresAt(vnp_ExpireDate)
+                    .build();
+        }
+
+        paymentUrlVnpayRepository.save(paymentUrlVnpay);
 
         PaymentResDto paymentResDto = new PaymentResDto();
         paymentResDto.setStatus("OK");
@@ -402,15 +432,26 @@ public class PaymentService {
 
     public void createPaymentCOD(Long orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng (Order) với ID: " + orderId));
-
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String createdAt = formatter.format(cld.getTime());
         Payment payment = Payment.builder()
                 .method("COD")
                 .orderId(orderId)
                 .amount(order.getTotalAmount())
                 .status("PENDING")
-                .paidAt(LocalDateTime.now().toString())
+                .paidAt(createdAt)
                 .build();
         paymentRepository.save(payment);
+    }
+
+    public PaymentResDto getUrlVnpayPayment(Long orderId) {
+        PaymentUrlVnpay paymentUrl = paymentUrlVnpayRepository.findByOrderId(orderId);
+        PaymentResDto paymentResDto = new PaymentResDto();
+        paymentResDto.setStatus("OK");
+        paymentResDto.setMessage("Tiếp tục thanh toán.");
+        paymentResDto.setURL(paymentUrl.getPaymentUrl());
+        return paymentResDto;
     }
 
     public Payment getPaymentById(Long id) {
@@ -427,5 +468,29 @@ public class PaymentService {
 
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
+    }
+
+    public boolean getPaymentByOrderId(Long orderId) {
+        // Kiểm tra có order không
+        if (!paymentRepository.existsByOrderId(orderId)) {
+            return false;
+        }
+
+        // Lấy paymentUrl tương ứng
+        PaymentUrlVnpay paymentUrl = paymentUrlVnpayRepository.findByOrderId(orderId);
+        if (paymentUrl == null) {
+            return false;
+        }
+
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+            LocalDateTime expiresAt = LocalDateTime.parse(paymentUrl.getExpiresAt(), formatter);
+
+            return expiresAt.isAfter(LocalDateTime.now());
+        } catch (Exception e) {
+            // log lỗi parse format
+            e.printStackTrace();
+            return false;
+        }
     }
 }

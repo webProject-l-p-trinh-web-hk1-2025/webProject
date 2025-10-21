@@ -17,6 +17,8 @@ import java.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,9 +50,15 @@ public class PaymentController {
 
     @GetMapping("/create_payment")
     public ResponseEntity<?> createPayment(@RequestParam("orderId") Long orderId, @RequestParam("method") String method, HttpServletRequest request) throws UnsupportedEncodingException {
-        System.out.print(method + "99999999999");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("vui lòng đăng nhập để thực hiện thanh toán.");
+        }
+        if (paymentService.getPaymentByOrderId(orderId)) {
+            PaymentResDto res = paymentService.getUrlVnpayPayment(orderId);
+            return ResponseEntity.status(HttpStatus.OK).body(res);
+        }
         if ("COD".equalsIgnoreCase(method)) {
-            System.out.print("88888888888");
             paymentService.createPaymentCOD(orderId);
             PaymentResDto codResponse = new PaymentResDto();
             codResponse.setStatus("OK");
@@ -73,6 +81,10 @@ public class PaymentController {
     public ResponseEntity<String> queryTransaction(
             @RequestParam("order_id") long orderId,
             HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("vui lòng đăng nhập để thực hiện.");
+        }
         try {
             String result = paymentService.handleQuery(orderId, request);
             return ResponseEntity.ok(result);
@@ -88,6 +100,10 @@ public class PaymentController {
             @RequestParam("trantype") String trantype,
             @RequestParam("percent") int percent,
             HttpServletRequest request) throws MalformedURLException, ProtocolException, IOException, Exception {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("vui lòng đăng nhập để thực hiện.");
+        }
 
         String result = paymentService.handleRefund(orderId, trantype, percent, request);
         return ResponseEntity.ok(result);

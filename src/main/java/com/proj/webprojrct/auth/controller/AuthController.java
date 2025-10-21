@@ -23,9 +23,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.proj.webprojrct.auth.dto.request.ChangePassRequest;
@@ -68,7 +68,8 @@ public class AuthController {
     public String login(@ModelAttribute LoginRequest loginRequest,
             HttpServletResponse response,
             HttpSession session,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) { //login
         try {
             LoginResponse loginResponse = authService.handleLogin(
                     loginRequest.getPhone(),
@@ -94,8 +95,10 @@ public class AuthController {
             return "redirect:/home";
 
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "login";
+            //model.addAttribute("error", e.getMessage());
+            //return "login";
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/login"; //giữ lại model login
         }
     }
 
@@ -186,7 +189,7 @@ public class AuthController {
     }
 
     @PostMapping("/doregister")
-    public String register(@ModelAttribute RegisterRequest request, Model model) {
+    public String register(@ModelAttribute RegisterRequest request, Model model, RedirectAttributes redirectAttributes) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
@@ -195,11 +198,15 @@ public class AuthController {
 
         try {
             authService.registerUser(request);
-            model.addAttribute("message", "Đăng ký thành công! Vui lòng đăng nhập.");
-            return "register";
+            redirectAttributes.addFlashAttribute("message", "Đăng ký thành công! Vui lòng đăng nhập.");
+            return "redirect:/register";
         } catch (RuntimeException e) {
-            model.addAttribute("error", e.getMessage());
-            return "register";
+            // preserve entered values except passwords
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("fullName", request.getFullName());
+            redirectAttributes.addFlashAttribute("phone", request.getPhone());
+            redirectAttributes.addFlashAttribute("email", request.getEmail());
+            return "redirect:/register";
         }
     }
 
@@ -213,32 +220,47 @@ public class AuthController {
     }
 
     @PostMapping("/doResetPassword")
-    public String resetPassword(@RequestParam String input, Model model) {
+    // public String resetPassword(@RequestParam String input, Model model) {
+    public String resetPassword(@RequestParam String input, Model model, RedirectAttributes redirectAttributes) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
             return "redirect:/home"; // người dùng đã đăng nhập
         }
 
         if (input == null || input.isEmpty()) {
-            model.addAttribute("error", "Vui lòng nhập email hoặc số điện thoại.");
-            return "resetPassword";
+            redirectAttributes.addFlashAttribute("error", "Vui lòng nhập email hoặc số điện thoại.");
+            //return "resetPassword";
+            redirectAttributes.addFlashAttribute("input", input);
+            return "redirect:/resetPassword";
         }
 
         if (input.contains("@")) {
             boolean result = authService.EmailResetPasswordHandle(input, model);
             if (!result) {
-                return "resetPassword";
+                //return "resetPassword";
+
+                // giải quyết email cài model.error
+                if (model.containsAttribute("error")) {
+                    redirectAttributes.addFlashAttribute("error", model.asMap().get("error"));
+                }
+                redirectAttributes.addFlashAttribute("input", input);
+                return "redirect:/resetPassword";
             }
-            model.addAttribute("message", "Mật khẩu mới đã được gửi qua email. Vui lòng kiểm tra email của bạn.");
+            redirectAttributes.addFlashAttribute("message", "Mật khẩu mới đã được gửi qua email. Vui lòng kiểm tra email của bạn.");
         } else {
             boolean result = authService.PhoneResetPasswordHandle(input, model);
             if (!result) {
-                return "resetPassword";
+                if (model.containsAttribute("error")) {
+                    redirectAttributes.addFlashAttribute("error", model.asMap().get("error"));
+                }
+                redirectAttributes.addFlashAttribute("input", input);
+                return "redirect:/resetPassword";
             }
-            model.addAttribute("message", "Mật khẩu mới đã được gửi qua SMS. Vui lòng kiểm tra điện thoại của bạn.");
+            redirectAttributes.addFlashAttribute("message", "Mật khẩu mới đã được gửi qua SMS. Vui lòng kiểm tra điện thoại của bạn.");
         }
 
-        return "resetPassword";
+        return "redirect:/resetPassword";
+        //return "resetPassword";
     }
 
     @PostMapping("/change-password")

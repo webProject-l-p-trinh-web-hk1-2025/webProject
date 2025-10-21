@@ -1,0 +1,151 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
+<%@ page import="org.springframework.security.core.Authentication" %>
+<%@ page import="org.springframework.security.authentication.AnonymousAuthenticationToken" %>
+<%
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    boolean isAuthenticated = auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken);
+    request.setAttribute("isUserAuthenticated", isAuthenticated);
+%>
+
+<!-- HEADER -->
+<header>
+    <!-- TOP HEADER -->
+    <div id="top-header">
+        <div class="container">
+            <ul class="header-links pull-left">
+                <li><a href="#"><i class="fa fa-phone"></i> +84 123-456-789</a></li>
+                <li><a href="#"><i class="fa fa-envelope-o"></i> contact@phonestore.vn</a></li>
+                <li><a href="#"><i class="fa fa-map-marker"></i> 268 Lý Thường Kiệt, Quận 10, TP.HCM</a></li>
+            </ul>
+            <ul class="header-links pull-right">
+                <li><a href="#"><i class="fa fa-dollar"></i> VNĐ</a></li>
+                <c:choose>
+                    <c:when test="${isUserAuthenticated}">
+                        <li><a href="${pageContext.request.contextPath}/profile">
+                            <i class="fa fa-user-o"></i> Tài khoản của tôi
+                        </a></li>
+                        <li>
+                            <form action="${pageContext.request.contextPath}/dologout" method="post" style="display: inline;">
+                                <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer;">
+                                    <i class="fa fa-sign-out"></i> Đăng xuất
+                                </button>
+                            </form>
+                        </li>
+                    </c:when>
+                    <c:otherwise>
+                        <li><a href="${pageContext.request.contextPath}/login">
+                            <i class="fa fa-user-o"></i> Đăng nhập
+                        </a></li>
+                        <li><a href="${pageContext.request.contextPath}/register">
+                            <i class="fa fa-user-plus"></i> Đăng ký
+                        </a></li>
+                    </c:otherwise>
+                </c:choose>
+            </ul>
+        </div>
+    </div>
+    <!-- /TOP HEADER -->
+
+    <!-- MAIN HEADER -->
+    <div id="header">
+        <div class="container">
+            <div class="row">
+                <!-- LOGO -->
+                <div class="col-md-3">
+                    <div class="header-logo">
+                        <a href="${pageContext.request.contextPath}/" class="logo">
+                            <h2 style="color: #D10024; margin: 15px 0;">PhoneStore</h2>
+                        </a>
+                    </div>
+                </div>
+                <!-- /LOGO -->
+
+                <!-- SEARCH BAR -->
+                <div class="col-md-6">
+                    <div class="header-search">
+                        <form action="${pageContext.request.contextPath}/search" method="get">
+                            <select class="input-select" name="category">
+                                <option value="">Tất cả danh mục</option>
+                                <c:forEach items="${categories}" var="cat">
+                                    <option value="${cat.id}">${cat.name}</option>
+                                </c:forEach>
+                            </select>
+                            <input class="input" name="q" placeholder="Tìm kiếm sản phẩm...">
+                            <button class="search-btn" type="submit">Tìm kiếm</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- /SEARCH BAR -->
+
+                <!-- ACCOUNT -->
+                <div class="col-md-3 clearfix">
+                    <div class="header-ctn">
+                        <!-- Wishlist -->
+                        <div>
+                            <a href="${pageContext.request.contextPath}/wishlist">
+                                <i class="fa fa-heart-o"></i>
+                                <span>Yêu thích</span>
+                                <div class="qty">0</div>
+                            </a>
+                        </div>
+                        <!-- /Wishlist -->
+
+                        <!-- Cart -->
+                        <div>
+                            <%
+                                org.springframework.security.core.Authentication cartAuth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                                boolean isCartAuthenticated = cartAuth != null && cartAuth.isAuthenticated() && !(cartAuth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
+                                String cartUrl = isCartAuthenticated ? request.getContextPath() + "/cart" : request.getContextPath() + "/login";
+                            %>
+                            <a href="<%= cartUrl %>">
+                                <i class="fa fa-shopping-cart"></i>
+                                <span>Giỏ hàng</span>
+                                <div class="qty" id="cart-qty">0</div>
+                            </a>
+                        </div>
+                        <!-- /Cart -->
+
+                        <!-- Menu Toggle -->
+                        <div class="menu-toggle">
+                            <a href="#">
+                                <i class="fa fa-bars"></i>
+                                <span>Menu</span>
+                            </a>
+                        </div>
+                        <!-- /Menu Toggle -->
+                    </div>
+                </div>
+                <!-- /ACCOUNT -->
+            </div>
+        </div>
+    </div>
+    <!-- /MAIN HEADER -->
+</header>
+<!-- /HEADER -->
+
+<!-- NAVIGATION -->
+<nav id="navigation">
+    <div class="container">
+        <div id="responsive-nav">
+            <ul class="main-nav nav navbar-nav">
+                <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
+                <li><a href="${pageContext.request.contextPath}/products">Sản phẩm</a></li>
+                <li><a href="${pageContext.request.contextPath}/deals">Khuyến mãi</a></li>
+                <c:if test="${isUserAuthenticated}">
+                    <%
+                        Authentication navAuth = SecurityContextHolder.getContext().getAuthentication();
+                        boolean isAdmin = navAuth.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                        request.setAttribute("isAdmin", isAdmin);
+                    %>
+                    <c:if test="${isAdmin}">
+                        <li><a href="${pageContext.request.contextPath}/admin">Quản trị</a></li>
+                    </c:if>
+                </c:if>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- /NAVIGATION -->

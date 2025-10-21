@@ -1,528 +1,168 @@
-"use strict";
+(function($) {
+	"use strict"
 
-const chatPage = document.querySelector("#chat-page");
-const messageForm = document.querySelector("#messageForm");
-const messageInput = document.querySelector("#message");
-const fileInput = document.querySelector("#fileInput");
-const chatArea = document.querySelector("#chat-messages");
-const logout = document.querySelector("#logout");
+	// Mobile Nav toggle
+	$('.menu-toggle > a').on('click', function (e) {
+		e.preventDefault();
+		$('#responsive-nav').toggleClass('active');
+	})
 
-let stompClient = null;
-let nickname = null;
-let fullname = null;
-let selectedUserId = null;
-let currentRole = "USER";
+	// Fix cart dropdown from closing
+	$('.cart-dropdown').on('click', function (e) {
+		e.stopPropagation();
+	});
 
-// ------------------------- Auth & connect -------------------------
-async function initAuth() {
-  try {
-    const resp = await fetch("/api/me");
-    if (!resp.ok) return showAuthError();
-    const info = await resp.json();
-    if (info && info.authenticated) {
-      nickname = info.phone || info.email || "user" + info.id;
-      fullname = info.fullName || nickname;
-      currentRole = (info.role || "USER").toUpperCase();
+	/////////////////////////////////////////
 
-      if (chatPage) chatPage.classList.remove("hidden");
-      const connectedFullname = document.querySelector(
-        "#connected-user-fullname"
-      );
-      if (connectedFullname) connectedFullname.textContent = fullname;
+	// Products Slick
+	$('.products-slick').each(function() {
+		var $this = $(this),
+				$nav = $this.attr('data-nav');
 
-      const socket = new SockJS("/ws");
-      stompClient = Stomp.over(socket);
-      stompClient.connect({}, onConnected, onError);
-      return;
-    }
-  } catch (err) {
-    console.debug("initAuth: /api/me failed", err);
-  }
-  showAuthError();
-}
+		$this.slick({
+			slidesToShow: 4,
+			slidesToScroll: 1,
+			autoplay: true,
+			infinite: true,
+			speed: 300,
+			dots: false,
+			arrows: true,
+			appendArrows: $nav ? $nav : false,
+			responsive: [{
+	        breakpoint: 991,
+	        settings: {
+	          slidesToShow: 2,
+	          slidesToScroll: 1,
+	        }
+	      },
+	      {
+	        breakpoint: 480,
+	        settings: {
+	          slidesToShow: 1,
+	          slidesToScroll: 1,
+	        }
+	      },
+	    ]
+		});
+	});
 
-function showAuthError() {
-  // create a small banner to inform the user that authentication is required
-  const existing = document.getElementById("auth-error-banner");
-  if (existing) return;
-  const banner = document.createElement("div");
-  banner.id = "auth-error-banner";
-  banner.style.background = "#ffdddd";
-  banner.style.color = "#800";
-  banner.style.padding = "12px";
-  banner.style.margin = "8px";
-  banner.style.border = "1px solid #f5c2c2";
-  banner.textContent = "Authentication failed. Please login to use chat.";
-  document.body.insertBefore(banner, document.body.firstChild);
-}
+	// Products Widget Slick
+	$('.products-widget-slick').each(function() {
+		var $this = $(this),
+				$nav = $this.attr('data-nav');
 
-function onConnected() {
-  stompClient.subscribe(`/user/${nickname}/queue/messages`, onMessageReceived);
-  stompClient.subscribe(`/user/public`, onMessageReceived);
-  stompClient.send(
-    "/app/user.addUser",
-    {},
-    JSON.stringify({
-      nickName: nickname,
-      fullName: fullname,
-      status: "ONLINE",
-      role: currentRole,
-    })
-  );
+		$this.slick({
+			infinite: true,
+			autoplay: true,
+			speed: 300,
+			dots: false,
+			arrows: true,
+			appendArrows: $nav ? $nav : false,
+		});
+	});
 
-  document.querySelector("#connected-user-fullname").textContent = fullname;
-  findAndDisplayConnectedUsers().then(() => {
-    if (currentRole === "ADMIN") {
-      loadAdminConversations().catch((e) =>
-        console.debug("loadAdminConversations failed", e)
-      );
-    }
-    if (currentRole !== "ADMIN") {
-      const adminElem = Array.from(
-        document.querySelectorAll(".user-item")
-      ).find((el) => (el.dataset.role || "").toUpperCase() === "ADMIN");
-      if (adminElem) adminElem.click();
-    }
+	/////////////////////////////////////////
+
+	// Product Main img Slick
+	$('#product-main-img').slick({
+    infinite: true,
+    speed: 300,
+    dots: false,
+    arrows: true,
+    fade: true,
+    asNavFor: '#product-imgs',
   });
-}
 
-function onError() {
-  console.error("Could not connect to WebSocket server.");
-}
-
-// ------------------------- Users list -------------------------
-async function findAndDisplayConnectedUsers() {
-  const connectedUsersResponse = await fetch("/users");
-  let connectedUsers = await connectedUsersResponse.json();
-
-  connectedUsers = connectedUsers.filter((user) => user.nickName !== nickname);
-
-  if (currentRole !== "ADMIN") {
-    connectedUsers = connectedUsers.filter(
-      (user) => (user.role || "").toUpperCase() === "ADMIN"
-    );
-
-    try {
-      const adminsResp = await fetch("/users/admins");
-      if (adminsResp.ok) {
-        const admins = await adminsResp.json();
-        admins.forEach((a) => {
-          const adminObj = normalizeUserRaw(a);
-
-          if (!connectedUsers.find((u) => u.nickName === adminObj.nickName)) {
-            adminObj.status = "OFFLINE";
-            connectedUsers.push(adminObj);
-          }
-        });
-      }
-    } catch (e) {
-      console.debug("Could not fetch /users/admins", e);
-    }
-  }
-
-  const connectedUsersList = document.getElementById("connectedUsers");
-  connectedUsersList.innerHTML = "";
-
-  connectedUsers.forEach((user, idx) => {
-    appendUserElement(user, connectedUsersList);
-    if (idx < connectedUsers.length - 1) {
-      const separator = document.createElement("li");
-      separator.classList.add("separator");
-      connectedUsersList.appendChild(separator);
-    }
+	// Product imgs Slick
+  $('#product-imgs').slick({
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    arrows: true,
+    centerMode: true,
+    focusOnSelect: true,
+		centerPadding: 0,
+		vertical: true,
+    asNavFor: '#product-main-img',
+		responsive: [{
+        breakpoint: 991,
+        settings: {
+					vertical: false,
+					arrows: false,
+					dots: true,
+        }
+      },
+    ]
   });
-}
 
-function appendUserElement(user, connectedUsersList) {
-  const listItem = document.createElement("li");
-  listItem.classList.add("user-item");
-  listItem.id = user.nickName;
+	// Product img zoom
+	var zoomMainProduct = document.getElementById('product-main-img');
+	if (zoomMainProduct) {
+		$('#product-main-img .product-preview').zoom();
+	}
 
-  listItem.dataset.role = (user.role || "USER").toUpperCase();
+	/////////////////////////////////////////
 
-  const userImage = document.createElement("img");
-  userImage.src = "../img/user_icon.png";
+	// Input number
+	$('.input-number').each(function() {
+		var $this = $(this),
+		$input = $this.find('input[type="number"]'),
+		up = $this.find('.qty-up'),
+		down = $this.find('.qty-down');
 
-  userImage.alt = user.fullName + (user.nickName ? ` (${user.nickName})` : "");
+		down.on('click', function () {
+			var value = parseInt($input.val()) - 1;
+			value = value < 1 ? 1 : value;
+			$input.val(value);
+			$input.change();
+			updatePriceSlider($this , value)
+		})
 
-  const usernameSpan = document.createElement("span");
+		up.on('click', function () {
+			var value = parseInt($input.val()) + 1;
+			$input.val(value);
+			$input.change();
+			updatePriceSlider($this , value)
+		})
+	});
 
-  if ((currentRole || "").toUpperCase() === "ADMIN") {
-    usernameSpan.textContent = user.fullName || "";
+	var priceInputMax = document.getElementById('price-max'),
+			priceInputMin = document.getElementById('price-min');
 
-    if (user.nickName && user.nickName !== user.fullName) {
-      const phoneSpan = document.createElement("small");
-      phoneSpan.classList.add("user-phone");
-      phoneSpan.textContent = ` (${user.nickName})`;
-      usernameSpan.appendChild(phoneSpan);
-    }
-  } else {
-    usernameSpan.textContent = user.fullName || user.nickName || "";
-  }
+	priceInputMax.addEventListener('change', function(){
+		updatePriceSlider($(this).parent() , this.value)
+	});
 
-  const receivedMsgs = document.createElement("span");
-  receivedMsgs.textContent = "0";
-  receivedMsgs.classList.add("nbr-msg", "hidden");
+	priceInputMin.addEventListener('change', function(){
+		updatePriceSlider($(this).parent() , this.value)
+	});
 
-  listItem.appendChild(userImage);
-  listItem.appendChild(usernameSpan);
-  listItem.appendChild(receivedMsgs);
+	function updatePriceSlider(elem , value) {
+		if ( elem.hasClass('price-min') ) {
+			console.log('min')
+			priceSlider.noUiSlider.set([value, null]);
+		} else if ( elem.hasClass('price-max')) {
+			console.log('max')
+			priceSlider.noUiSlider.set([null, value]);
+		}
+	}
 
-  listItem.addEventListener("click", userItemClick);
+	// Price Slider
+	var priceSlider = document.getElementById('price-slider');
+	if (priceSlider) {
+		noUiSlider.create(priceSlider, {
+			start: [1, 999],
+			connect: true,
+			step: 1,
+			range: {
+				'min': 1,
+				'max': 999
+			}
+		});
 
-  connectedUsersList.appendChild(listItem);
-}
+		priceSlider.noUiSlider.on('update', function( values, handle ) {
+			var value = values[handle];
+			handle ? priceInputMax.value = value : priceInputMin.value = value
+		});
+	}
 
-function userItemClick(event) {
-  document.querySelectorAll(".user-item").forEach((item) => {
-    item.classList.remove("active");
-  });
-  messageForm.classList.remove("hidden");
-
-  const clickedUser = event.currentTarget;
-  clickedUser.classList.add("active");
-
-  selectedUserId = clickedUser.getAttribute("id");
-
-  fetchAndDisplayUserChat().then();
-
-  const nbrMsg = clickedUser.querySelector(".nbr-msg");
-  if (nbrMsg) {
-    nbrMsg.classList.add("hidden");
-    nbrMsg.textContent = "0";
-  }
-}
-
-async function loadAdminConversations() {
-  if (!nickname) return;
-  try {
-    const resp = await fetch(`/conversations/${nickname}`);
-    if (!resp.ok) return;
-    const senders = await resp.json();
-    for (const sender of senders) {
-      await ensureUserItem(sender);
-    }
-  } catch (e) {
-    console.debug("loadAdminConversations error", e);
-  }
-}
-
-async function ensureUserItem(nick) {
-  if (!nick) return;
-
-  if (document.getElementById(nick)) return;
-
-  try {
-    const resp = await fetch(`/users/${encodeURIComponent(nick)}`);
-    if (!resp.ok) {
-      appendUserElement(
-        { nickName: nick, fullName: nick, role: "USER", status: "OFFLINE" },
-        document.getElementById("connectedUsers")
-      );
-      return;
-    }
-    const u = await resp.json();
-
-    const obj = normalizeUserRaw(u);
-    obj.status = "OFFLINE";
-    appendUserElement(obj, document.getElementById("connectedUsers"));
-  } catch (e) {
-    console.debug("ensureUserItem failed", e);
-    appendUserElement(
-      { nickName: nick, fullName: nick, role: "USER", status: "OFFLINE" },
-      document.getElementById("connectedUsers")
-    );
-  }
-}
-
-function normalizeUserRaw(raw) {
-  if (!raw)
-    return { nickName: "", fullName: "", role: "USER", status: "OFFLINE" };
-  const nick =
-    raw.nickName || raw.phone || raw.email || (raw.id ? "user" + raw.id : "");
-  const full = raw.fullName || raw.fullname || raw.name || nick || "";
-  return {
-    nickName: nick,
-    fullName: full,
-    role: (raw.role || "USER").toUpperCase(),
-    status: raw.status || "OFFLINE",
-  };
-}
-
-// ------------------------- Message rendering -------------------------
-function displayMessage(senderId, content, timestamp) {
-  const messageContainer = document.createElement("div");
-  messageContainer.classList.add("message");
-  if (senderId === nickname) {
-    messageContainer.classList.add("sender");
-  } else {
-    messageContainer.classList.add("receiver");
-  }
-  const message = document.createElement("p");
-  message.textContent = content;
-  messageContainer.appendChild(message);
-  const ts = document.createElement("div");
-  ts.classList.add("msg-ts");
-  ts.style.fontSize = "0.8rem";
-  ts.style.color = "#666";
-  ts.style.marginTop = "4px";
-  ts.textContent = "";
-  messageContainer.appendChild(ts);
-  chatArea.appendChild(messageContainer);
-  if (timestamp) ts.textContent = formatTimestamp(timestamp);
-  return messageContainer;
-}
-
-function displayMediaMessage(senderId, mediaPath, mediaType) {
-  const container = document.createElement("div");
-  container.classList.add("message");
-  if (senderId === nickname) container.classList.add("sender");
-  else container.classList.add("receiver");
-
-  if ((mediaType || "").startsWith("image/")) {
-    const img = document.createElement("img");
-    img.src = `/media/${encodeURIComponent(mediaPath)}`;
-    img.alt = "image";
-    img.style.maxWidth = "320px";
-    img.style.cursor = "pointer";
-    img.addEventListener("click", () => openMediaModal(mediaPath, mediaType));
-    container.appendChild(img);
-  } else if ((mediaType || "").startsWith("video/")) {
-    const video = document.createElement("video");
-    video.src = `/media/${encodeURIComponent(mediaPath)}`;
-    video.controls = true;
-    video.style.maxWidth = "480px";
-    video.style.cursor = "pointer";
-    video.addEventListener("click", () => openMediaModal(mediaPath, mediaType));
-    container.appendChild(video);
-  } else {
-    const link = document.createElement("a");
-    link.href = `/media/${encodeURIComponent(mediaPath)}`;
-    link.textContent = "Download file";
-    container.appendChild(link);
-  }
-
-  const ts = document.createElement("div");
-  ts.classList.add("msg-ts");
-  ts.style.fontSize = "0.8rem";
-  ts.style.color = "#666";
-  ts.style.marginTop = "4px";
-  ts.textContent = "";
-  container.appendChild(ts);
-
-  chatArea.appendChild(container);
-  return container;
-}
-
-function formatTimestamp(dateStrOrMillis) {
-  if (!dateStrOrMillis) return "";
-  const d =
-    typeof dateStrOrMillis === "number"
-      ? new Date(dateStrOrMillis)
-      : new Date(dateStrOrMillis);
-
-  const now = new Date();
-  const sameDay = d.toDateString() === now.toDateString();
-  if (sameDay) {
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  }
-  return d.toLocaleString([], {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function openMediaModal(mediaPath, mediaType) {
-  let modal = document.getElementById("mediaModal");
-  let modalContent = document.getElementById("mediaModalContent");
-  if (!modal || !modalContent) return;
-  modalContent.innerHTML = "";
-  if ((mediaType || "").startsWith("image/")) {
-    const img = document.createElement("img");
-    img.src = `/media/${encodeURIComponent(mediaPath)}`;
-    img.style.maxWidth = "90vw";
-    img.style.maxHeight = "90vh";
-    modalContent.appendChild(img);
-  } else if ((mediaType || "").startsWith("video/")) {
-    const video = document.createElement("video");
-    video.src = `/media/${encodeURIComponent(mediaPath)}`;
-    video.controls = true;
-    video.autoplay = true;
-    video.style.maxWidth = "90vw";
-    video.style.maxHeight = "90vh";
-    modalContent.appendChild(video);
-  } else {
-    const link = document.createElement("a");
-    link.href = `/media/${encodeURIComponent(mediaPath)}`;
-    link.textContent = "Download file";
-    modalContent.appendChild(link);
-  }
-  modal.classList.remove("hidden");
-}
-
-function closeMediaModal() {
-  const modal = document.getElementById("mediaModal");
-  const modalContent = document.getElementById("mediaModalContent");
-  if (!modal) return;
-  modal.classList.add("hidden");
-  if (modalContent) modalContent.innerHTML = "";
-}
-
-async function fetchAndDisplayUserChat() {
-  const userChatResponse = await fetch(
-    `/messages/${nickname}/${selectedUserId}`
-  );
-  const userChat = await userChatResponse.json();
-  chatArea.innerHTML = "";
-  userChat.forEach((chat) => {
-    if (chat.mediaPath) {
-      const el = displayMediaMessage(
-        chat.senderId,
-        chat.mediaPath,
-        chat.mediaType
-      );
-      if (el) {
-        const ts = el.querySelector(".msg-ts");
-        if (ts) ts.textContent = formatTimestamp(chat.timestamp);
-      }
-    } else {
-      const el = displayMessage(chat.senderId, chat.content, chat.timestamp);
-      if (el) {
-      }
-    }
-  });
-  chatArea.scrollTop = chatArea.scrollHeight;
-}
-
-// ------------------------- Send message / upload -------------------------
-async function sendMessage(event) {
-  event.preventDefault();
-
-  if (!stompClient || !selectedUserId) return;
-
-  const messageContent = messageInput.value.trim();
-  const file = fileInput ? fileInput.files[0] : null;
-  if (file) {
-    const form = new FormData();
-    form.append("file", file);
-    try {
-      const resp = await fetch("/api/media/upload", {
-        method: "POST",
-        body: form,
-      });
-      if (resp.ok) {
-        const media = await resp.json();
-        const chatMessage = {
-          senderId: nickname,
-          recipientId: selectedUserId,
-          content: messageContent || "",
-          mediaPath: media.path,
-          mediaType: media.contentType,
-          timestamp: new Date().toISOString(),
-        };
-        stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
-
-        if (chatMessage.mediaPath)
-          displayMediaMessage(
-            nickname,
-            chatMessage.mediaPath,
-            chatMessage.mediaType
-          );
-        messageInput.value = "";
-        if (fileInput) fileInput.value = null;
-      } else {
-        console.warn("media upload failed");
-      }
-    } catch (err) {
-      console.error("upload error", err);
-    }
-    chatArea.scrollTop = chatArea.scrollHeight;
-    return;
-  }
-
-  if (messageContent) {
-    const chatMessage = {
-      senderId: nickname,
-      recipientId: selectedUserId,
-      content: messageContent,
-      timestamp: new Date().toISOString(),
-    };
-    stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
-    const el = displayMessage(nickname, messageContent);
-    if (el) {
-      const tsEl = el.querySelector(".msg-ts");
-      if (tsEl) tsEl.textContent = formatTimestamp(new Date());
-    }
-    messageInput.value = "";
-    chatArea.scrollTop = chatArea.scrollHeight;
-  }
-}
-
-// ------------------------- On message receive -------------------------
-async function onMessageReceived(payload) {
-  console.debug("Message received", payload);
-
-  const message = JSON.parse(payload.body);
-  const senderId = message.senderId;
-  const senderElem = document.getElementById(senderId);
-
-  if (selectedUserId && selectedUserId === senderId) {
-    if (message.mediaPath) {
-      const el = displayMediaMessage(
-        senderId,
-        message.mediaPath,
-        message.mediaType
-      );
-      if (el) {
-        const ts = el.querySelector(".msg-ts");
-        if (ts) ts.textContent = formatTimestamp(message.timestamp);
-      }
-    } else if (message.content) {
-      const el = displayMessage(senderId, message.content, message.timestamp);
-      if (el) {
-      }
-    }
-
-    chatArea.scrollTop = chatArea.scrollHeight;
-
-    if (senderElem) {
-      const nbr = senderElem.querySelector(".nbr-msg");
-      if (nbr) {
-        nbr.classList.add("hidden");
-        nbr.textContent = "0";
-      }
-    }
-
-    return;
-  }
-
-  if (senderElem) {
-    const nbrMsg = senderElem.querySelector(".nbr-msg");
-    if (nbrMsg) {
-      let count = parseInt(nbrMsg.textContent) || 0;
-      nbrMsg.textContent = count + 1;
-      nbrMsg.classList.remove("hidden");
-    }
-  }
-}
-
-function onLogout() {
-  stompClient.send(
-    "/app/user.disconnectUser",
-    {},
-    JSON.stringify({
-      nickName: nickname,
-      fullName: fullname,
-      status: "OFFLINE",
-    })
-  );
-  window.location.reload();
-}
-messageForm.addEventListener("submit", sendMessage);
-logout.addEventListener("click", onLogout);
-window.onbeforeunload = () => onLogout();
-
-initAuth();
+})(jQuery);

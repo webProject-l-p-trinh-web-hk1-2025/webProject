@@ -228,7 +228,6 @@ public class PaymentService {
             result.put("responseMessage", responseMessages.getOrDefault(responseCode, "Không xác định"));
             result.put("transactionStatus", transactionStatus);
             result.put("transactionMessage", statusMessages.getOrDefault(transactionStatus, "Không xác định"));
-
         } else {
             // Chữ ký không hợp lệ
             result.put("error", "Chữ ký không hợp lệ");
@@ -468,6 +467,10 @@ public class PaymentService {
 
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
+    }
+
+    public Payment getPaymentByOrderId(long orderId) {
+        return paymentRepository.findByOrderId(orderId);
     }
 
     public boolean getPaymentByOrderId(Long orderId) {

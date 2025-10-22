@@ -174,42 +174,142 @@
                                     </tbody>
                                 </table>
 
-                                <c:if test="${order.status == 'PENDING'}">
-                                    <div class="payment-section">
+                                <c:choose>
+
+                                    <c:when test="${statusPayment.status == null}">
+                                        <div
+                                            style="margin-top: 20px; text-align: center; color: #d70018; font-weight: bold;">
+                                            Giao dịch chưa được tạo. Vui lòng tạo giao dịch và khi thanh toán.
+                                        </div>
+                                        <div class="payment-section">
+                                            <div style="margin-bottom: 15px;">
+                                                <label for="payment-method"
+                                                    style="font-size: 18px; margin-right: 10px;">
+                                                    <strong>Chọn phương thức thanh toán:</strong>
+                                                </label>
+                                                <select id="payment-method">
+                                                    <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                                                    <option value="VNPAY">Thanh toán qua VNPAY</option>
+                                                </select>
+                                            </div>
+
+                                            <a href="/order" class="btn-link" style="background: #d70018;">Quay lại</a>
+
+                                            <button id="confirm-purchase-btn"
+                                                onclick="confirmPurchase(${order.orderId})">
+                                                Xác nhận mua hàng
+                                            </button>
+                                        </div>
+                                    </c:when>
+                                    <c:when
+                                        test="${statusPayment.status == 'PENDING' && statusPayment.method == 'COD'}">
+                                        <div class="payment-section">
+                                            <div style="margin-bottom: 15px;">
+                                                <label for="payment-method"
+                                                    style="font-size: 18px; margin-right: 10px;">
+                                                    <strong> Đã đặt đơn hàng với phương thức thanh toán COD</strong>
+                                                </label>
+                                            </div>
+                                            <a href="/order" class="btn-link" style="background: #d70018;">Quay lại</a>
+                                        </div>
+                                    </c:when>
+
+                                    <c:when test="${statusPayment.status == 'PENDING'}">
+                                        <div class="payment-section">
+                                            <div style="margin-bottom: 15px;">
+                                                <label for="payment-method"
+                                                    style="font-size: 18px; margin-right: 10px;">
+                                                    <strong>Chọn phương thức thanh toán:</strong>
+                                                </label>
+                                                <select id="payment-method">
+                                                    <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                                                    <option value="VNPAY">Thanh toán qua VNPAY</option>
+                                                </select>
+                                            </div>
+
+                                            <a href="/order" class="btn-link" style="background: #d70018;">Quay lại</a>
+
+                                            <button id="confirm-purchase-btn"
+                                                onclick="confirmPurchase(${order.orderId})">
+                                                Tiếp tục thanh toán
+                                            </button>
+                                        </div>
+                                    </c:when>
+                                    <c:when test="${statusPayment.status == 'SUCCESS'}">
+                                        <div
+                                            style="margin-top: 20px; text-align: center; color: green; font-weight: bold;">
+                                            Thanh toán đã hoàn tất!
+                                        </div>
+                                        <div style="margin-top: 15px; text-align: center;">
+                                            <a href="/order" class="btn-link" style="background: #d70018;">Quay lại danh
+                                                sách đơn hàng</a>
+                                        </div>
+                                    </c:when>
+
+                                    <c:otherwise>
+                                        <div style="margin-top: 20px; text-align: center; color: #555;">
+                                            Trạng thái giao dịch: ${statusPayment.status}
+                                        </div>
                                         <div style="margin-bottom: 15px;">
                                             <label for="payment-method" style="font-size: 18px; margin-right: 10px;">
                                                 <strong>Chọn phương thức thanh toán:</strong>
                                             </label>
                                             <select id="payment-method">
-                                                <option value="COD">Thanh toán khi nhận hàng (COD)
-                                                </option>
+                                                <option value="COD">Thanh toán khi nhận hàng (COD)</option>
                                                 <option value="VNPAY">Thanh toán qua VNPAY</option>
                                             </select>
                                         </div>
 
                                         <a href="/order" class="btn-link" style="background: #d70018;">Quay lại</a>
 
-                                        <%-- Nút này gọi hàm JavaScript mới bên dưới --%>
-                                            <button id="confirm-purchase-btn"
-                                                onclick="confirmPurchase(${order.orderId})">
-                                                Xác nhận mua hàng
-                                            </button>
-                                    </div>
-                                </c:if>
+                                        <button id="confirm-purchase-btn" onclick="confirmPurchase(${order.orderId})">
+                                            Tạo lại giao dịch thanh toán
+                                        </button>
+                                    </c:otherwise>
+                                </c:choose>
+                                <div style="margin-top: 20px; text-align: center;">
+                                    <button id="refresh-status-btn"
+                                        style="padding: 12px 25px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;"
+                                        onclick="refreshTransactionStatus(${order.orderId})">
+                                        Làm mới trạng thái giao dịch
+                                    </button>
+                                </div>
 
-                                <%-- Nếu đơn hàng đã hoàn tất/hủy --%>
-                                    <c:if test="${order.status != 'PENDING'}">
-                                        <div style="margin-top: 20px; text-align: center;">
-                                            <a href="/order"
-                                                style="padding: 10px 20px; background: #d70018; color: white; text-decoration: none; border-radius: 5px;">
-                                                Quay lại danh sách đơn hàng
-                                            </a>
-                                        </div>
-                                    </c:if>
 
                 </div>
 
                 <script>
+                    function refreshTransactionStatus(orderId) {
+                        const btn = document.getElementById('refresh-status-btn');
+                        btn.disabled = true;
+                        btn.textContent = 'Đang làm mới...';
+                        debugger;
+                        fetch('/api/vnpay/payment/query', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'Authorization': 'Bearer ' + localStorage.getItem('accessToken') // nếu dùng JWT
+                            },
+                            body: `order_id=${orderId}`
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Lỗi khi làm mới trạng thái: ' + response.status);
+                                }
+                                return response.text();
+                            })
+                            .then(result => {
+                                console.log('Kết quả làm mới trạng thái:', result);
+                                // Reload lại trang để cập nhật trạng thái mới
+                                window.location.reload();
+                            })
+                            .catch(error => {
+                                console.error(error);
+                                alert('Có lỗi xảy ra: ' + error.message);
+                                btn.disabled = false;
+                                btn.textContent = 'Làm mới trạng thái giao dịch';
+                            });
+                    }
                     function confirmPurchase(orderId) {
                         const method = document.getElementById('payment-method').value;
                         const confirmBtn = document.getElementById('confirm-purchase-btn');
@@ -217,9 +317,6 @@
                         // Vô hiệu hóa nút để tránh nhấn đúp
                         confirmBtn.disabled = true;
                         confirmBtn.textContent = 'Đang xử lý...';
-                        console.log(`/api/vnpay/payment/create_payment?orderId=${orderId}&method=${method}`);
-                        console.log('Đang gọi API thanh toán cho orderId:', orderId, 'với phương thức:', method);
-                        debugger;
                         // Gọi API Controller duy nhất của bạn
                         // Sử dụng template literals (dấu `) để chèn biến vào URL
 

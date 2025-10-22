@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nimbusds.jose.shaded.gson.Gson;
 import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.proj.webprojrct.payment.dto.response.PaymentResDto;
+import com.proj.webprojrct.payment.entity.Payment;
 import com.proj.webprojrct.payment.vnpay.service.PaymentService;
+import com.twilio.http.Response;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +44,7 @@ import lombok.RequiredArgsConstructor;
  *
  * @author CTT VNPAY
  */
-@RestController
+@Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/vnpay/payment")
 public class PaymentController {
@@ -54,6 +57,7 @@ public class PaymentController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("vui lòng đăng nhập để thực hiện thanh toán.");
         }
+
         if (paymentService.getPaymentByOrderId(orderId)) {
             PaymentResDto res = paymentService.getUrlVnpayPayment(orderId);
             return ResponseEntity.status(HttpStatus.OK).body(res);
@@ -68,6 +72,7 @@ public class PaymentController {
         }
 
         PaymentResDto paymentResDto = paymentService.createPaymentUrl(orderId, request);
+
         return ResponseEntity.status(HttpStatus.OK).body(paymentResDto);
     }
 
@@ -84,6 +89,10 @@ public class PaymentController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("vui lòng đăng nhập để thực hiện.");
+        }
+        Payment payment = paymentService.getPaymentByOrderId(orderId);
+        if (payment.getMethod().equals("COD") || payment == null) {
+            return ResponseEntity.ok("ok");
         }
         try {
             String result = paymentService.handleQuery(orderId, request);

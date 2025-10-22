@@ -21,7 +21,7 @@ public class AdminStatsController {
     private AdminStatsService statsService;
 
     @GetMapping("/overview")
-    public Map<String, Long> overview() {
+    public Map<String, Object> overview() {
         return statsService.overview();
     }
 
@@ -38,5 +38,10 @@ public class AdminStatsController {
     @GetMapping("/top-products")
     public List<Map<String, Object>> topProducts(Integer limit) {
         return statsService.topProducts(limit);
+    }
+    
+    @GetMapping("/users-by-time")
+    public Map<String, Long> usersByTime(String period) {
+        return statsService.usersByTime(period);
     }
 }

@@ -25,11 +25,12 @@ public class CategoryPageController {
         return "category_list";
     }
 
-    @GetMapping("/admin/categories")
-    public String adminList() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return "category_list";
-    }
+    //Đem qua Admin
+    // @GetMapping("/admin/categories")
+    // public String adminList() {
+    //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    //     return "category_list";
+    // }
 
     @GetMapping("/category_detail")
     public String detail(Model model) {

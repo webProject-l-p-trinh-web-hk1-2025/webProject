@@ -6,7 +6,7 @@
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>Đăng nhập - CellPhone Store</title>
+      <title>Đăng nhập - CellPhoneStore</title>
 
       <!-- Bootstrap -->
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -23,7 +23,7 @@
 
       <div class="login-container">
         <div class="login-card">
-          <h2 class="text-center mb-4 text-danger">Đăng nhập CellPhone Store</h2>
+          <h2 class="text-center mb-4 text-danger">Đăng nhập </h2>
 
           <form action="<c:url value='/dologin' />" method="post">
             <c:if test="${not empty error}">

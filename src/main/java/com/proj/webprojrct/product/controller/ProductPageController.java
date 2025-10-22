@@ -79,12 +79,39 @@ public class ProductPageController {
     @GetMapping("/shop")
     public String shop(@RequestParam(required = false) List<Long> category, 
                       @RequestParam(required = false) List<String> brand,
+                      @RequestParam(required = false) String name,
                       @RequestParam(required = false, defaultValue = "popular") String sort,
                       @RequestParam(required = false, defaultValue = "12") int limit,
                       @RequestParam(required = false, defaultValue = "1") int page,
                       Model model) {
         try {
             List<ProductResponse> products = productService.getAll();
+            
+            // Lọc theo tên sản phẩm (search) với fuzzy matching
+            if (name != null && !name.trim().isEmpty()) {
+                String searchTerm = name.trim().toLowerCase();
+                String[] searchWords = searchTerm.split("\\s+");
+                
+                products = products.stream()
+                    .filter(p -> {
+                        if (p.getName() == null) return false;
+                        String productName = p.getName().toLowerCase();
+                        
+                        // Exact match
+                        if (productName.contains(searchTerm)) return true;
+                        
+                        // Check if any search word is in product name
+                        for (String word : searchWords) {
+                            if (word.length() >= 2 && productName.contains(word)) {
+                                return true;
+                            }
+                        }
+                        
+                        // Fuzzy matching for typos
+                        return isFuzzyMatch(productName, searchTerm);
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+            }
             
             // Lọc theo categories (có thể chọn nhiều)
             if (category != null && !category.isEmpty()) {
@@ -146,6 +173,7 @@ public class ProductPageController {
             model.addAttribute("brands", productService.getAllBrands());
             model.addAttribute("selectedCategories", category != null ? category : java.util.Collections.emptyList());
             model.addAttribute("selectedBrands", brand != null ? brand : java.util.Collections.emptyList());
+            model.addAttribute("searchName", name != null ? name : "");
             model.addAttribute("selectedSort", sort);
             model.addAttribute("selectedLimit", limit);
             model.addAttribute("currentPage", page);
@@ -171,4 +199,20 @@ public class ProductPageController {
         model.addAttribute("product", product);
         return "product_detail";
     }
+    
+    // Helper method for fuzzy matching
+    private boolean isFuzzyMatch(String productName, String searchTerm) {
+        if (searchTerm.length() < 3) return false;
+        
+        int searchIndex = 0;
+        for (int i = 0; i < productName.length() && searchIndex < searchTerm.length(); i++) {
+            if (productName.charAt(i) == searchTerm.charAt(searchIndex)) {
+                searchIndex++;
+            }
+        }
+        
+        // If we matched at least 70% of search term characters
+        return searchIndex >= (searchTerm.length() * 0.7);
+    }
 }
+

@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Giới thiệu - CellphoneZ</title>
+    <title>Giới thiệu - CellPhoneStore</title>
     <style>
         .about-section {
             background: white;
@@ -98,10 +98,10 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="about-section">
-                        <h2><i class="fa fa-info-circle"></i> Giới thiệu về CellphoneZ</h2>
+                        <h2><i class="fa fa-info-circle"></i> Giới thiệu về CellPhoneStore</h2>
                         
                         <p>
-                            Trang Web Bán Điện Thoại <strong>CellphoneZ</strong> là dự án được thiết kế và phát triển 
+                            Trang Web Bán Điện Thoại <strong>CellPhoneStore</strong> là dự án được thiết kế và phát triển 
                             bởi Nhóm 4 với mục đích tạo ra một nền tảng thương mại điện tử hiện đại, 
                             chuyên nghiệp cho việc mua bán điện thoại và phụ kiện.
                         </p>

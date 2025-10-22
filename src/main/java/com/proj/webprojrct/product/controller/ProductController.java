@@ -133,6 +133,87 @@ public class ProductController {
         return service.suggestNames(q, limit);
     }
 
+    @GetMapping("/search-suggestions")
+    public List<ProductResponse> searchSuggestions(
+            @RequestParam("q") String query, 
+            @RequestParam(value = "limit", defaultValue = "5") int limit) {
+        // Public endpoint - no authentication required
+        if (query == null || query.trim().isEmpty()) {
+            return List.of();
+        }
+        
+        String searchTerm = query.trim().toLowerCase();
+        
+        // Split search term into words for better matching
+        String[] searchWords = searchTerm.split("\\s+");
+        
+        return service.getAll().stream()
+                .filter(p -> {
+                    if (p.getName() == null) return false;
+                    String productName = p.getName().toLowerCase();
+                    
+                    // Check if product name contains the full search term
+                    if (productName.contains(searchTerm)) return true;
+                    
+                    // Check if product name contains any of the search words
+                    for (String word : searchWords) {
+                        if (word.length() >= 2 && productName.contains(word)) {
+                            return true;
+                        }
+                    }
+                    
+                    // Fuzzy matching: check if search term is similar to product name
+                    // Allow for typos or partial matches
+                    return isFuzzyMatch(productName, searchTerm);
+                })
+                .sorted((p1, p2) -> {
+                    // Sort by relevance
+                    String name1 = p1.getName().toLowerCase();
+                    String name2 = p2.getName().toLowerCase();
+                    
+                    // Exact match gets highest priority
+                    boolean exact1 = name1.contains(searchTerm);
+                    boolean exact2 = name2.contains(searchTerm);
+                    if (exact1 && !exact2) return -1;
+                    if (!exact1 && exact2) return 1;
+                    
+                    // Then by number of matching words
+                    int matches1 = countMatchingWords(name1, searchWords);
+                    int matches2 = countMatchingWords(name2, searchWords);
+                    if (matches1 != matches2) return matches2 - matches1;
+                    
+                    // Finally by name length (shorter names first)
+                    return name1.length() - name2.length();
+                })
+                .limit(limit)
+                .toList();
+    }
+    
+    private boolean isFuzzyMatch(String productName, String searchTerm) {
+        // Check if search term characters appear in order in product name
+        if (searchTerm.length() < 3) return false;
+        
+        int searchIndex = 0;
+        for (int i = 0; i < productName.length() && searchIndex < searchTerm.length(); i++) {
+            if (productName.charAt(i) == searchTerm.charAt(searchIndex)) {
+                searchIndex++;
+            }
+        }
+        
+        // If we matched at least 70% of search term characters
+        return searchIndex >= (searchTerm.length() * 0.7);
+    }
+    
+    private int countMatchingWords(String productName, String[] searchWords) {
+        int count = 0;
+        for (String word : searchWords) {
+            if (word.length() >= 2 && productName.contains(word)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     /* Cập nhật */
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ProductResponse update(@PathVariable Long id,

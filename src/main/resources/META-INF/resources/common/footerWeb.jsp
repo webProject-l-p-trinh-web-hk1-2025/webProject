@@ -77,7 +77,7 @@
                     </ul>
                     <span class="copyright">
                         Copyright &copy;<script>document.write(new Date().getFullYear());</script> 
-                        PhoneStore - Dự án Web bán điện thoại
+                        CellPhoneStore - Dự án Web bán điện thoại
                     </span>
                 </div>
             </div>

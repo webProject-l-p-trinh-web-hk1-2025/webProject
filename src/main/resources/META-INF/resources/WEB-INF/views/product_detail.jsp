@@ -511,7 +511,6 @@ function formatPrice(price) {
 async function addToCart(productId, quantity) {
   // Check if user is logged in
   if (!isUserLoggedIn) {
-    alert('Vui lòng đăng nhập để thêm vào giỏ hàng');
     window.location.href = ctx + '/login';
     return;
   }
@@ -527,13 +526,11 @@ async function addToCart(productId, quantity) {
     });
     
     if (response.ok) {
-      alert('Đã thêm vào giỏ hàng!');
       // Update cart count in header
       if (typeof updateGlobalCartCount === 'function') {
         updateGlobalCartCount();
       }
     } else if (response.status === 401 || response.status === 403) {
-      alert('Vui lòng đăng nhập để thêm vào giỏ hàng');
       window.location.href = ctx + '/login';
     } else {
       alert('Có lỗi xảy ra. Vui lòng thử lại.');
@@ -568,13 +565,11 @@ async function addToWishlist(productId) {
     if (response.ok) {
       if (isInWishlist) {
         // Remove from wishlist
-        alert('Đã xóa khỏi danh sách yêu thích!');
         icon.classList.remove('fa-heart');
         icon.classList.add('fa-heart-o');
         btn.style.color = '';
       } else {
         // Add to wishlist
-        alert('Đã thêm vào danh sách yêu thích!');
         icon.classList.remove('fa-heart-o');
         icon.classList.add('fa-heart');
         btn.style.color = '#d70018';
@@ -584,7 +579,6 @@ async function addToWishlist(productId) {
         updateGlobalWishlistCount();
       }
     } else if (response.status === 401 || response.status === 403) {
-      alert('Vui lòng đăng nhập để thao tác với danh sách yêu thích');
       window.location.href = ctx + '/login';
     } else {
       alert('Có lỗi xảy ra. Vui lòng thử lại.');
@@ -694,7 +688,6 @@ async function loadRelatedProducts(categoryId) {
 async function toggleRelatedWishlist(productId, button) {
   // Check if user is logged in
   if (!isUserLoggedIn) {
-    alert('Vui lòng đăng nhập để thao tác với danh sách yêu thích');
     window.location.href = ctx + '/login';
     return;
   }
@@ -724,20 +717,17 @@ async function toggleRelatedWishlist(productId, button) {
         icon.classList.remove('fa-heart');
         icon.classList.add('fa-heart-o');
         button.style.color = '';
-        alert('Đã xóa khỏi danh sách yêu thích!');
       } else {
         // Add to wishlist
         icon.classList.remove('fa-heart-o');
         icon.classList.add('fa-heart');
         button.style.color = '#d70018';
-        alert('Đã thêm vào danh sách yêu thích!');
       }
       // Update wishlist count in header
       if (typeof updateGlobalWishlistCount === 'function') {
         updateGlobalWishlistCount();
       }
     } else if (response.status === 401 || response.status === 403) {
-      alert('Vui lòng đăng nhập để thao tác với danh sách yêu thích');
       window.location.href = ctx + '/login';
     } else {
       alert('Có lỗi xảy ra. Vui lòng thử lại.');

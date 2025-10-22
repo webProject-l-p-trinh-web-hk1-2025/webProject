@@ -6,7 +6,7 @@
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>Đăng ký thành viên</title>
+      <title>Đăng ký thành viên - CellPhoneStore</title>
       <c:url value="/css/register.css" var="registerCss" />
       <link rel="stylesheet" href="${registerCss}" />
     </head>

@@ -15,9 +15,9 @@
     <div id="top-header">
         <div class="container">
             <ul class="header-links pull-left">
-                <li><a href="#"><i class="fa fa-phone"></i> +84 123-456-789</a></li>
-                <li><a href="#"><i class="fa fa-envelope-o"></i> contact@phonestore.vn</a></li>
-                <li><a href="#"><i class="fa fa-map-marker"></i> 268 Lý Thường Kiệt, Quận 10, TP.HCM</a></li>
+                <li><a href="https://zalo.me/0889251007" target="_blank"><i class="fa fa-phone"></i> +84 889-251-007</a></li>
+                <li><a href="mailto:kietccc21@gmail.com"><i class="fa fa-envelope-o"></i> kietccc21@gmail.com</a></li>
+                <li><a href="https://www.google.com/maps/place/Tr%C6%B0%E1%BB%9Dng+%C4%90%E1%BA%A1i+h%E1%BB%8Dc+S%C6%B0+ph%E1%BA%A1m+K%E1%BB%B9+thu%E1%BA%ADt+Th%C3%A0nh+ph%E1%BB%91+H%E1%BB%93+Ch%C3%AD+Minh/@10.8505683,106.7717721,17z/data=!4m6!3m5!1s0x31752763f23816ab:0x282f711441b6916f!8m2!3d10.8506324!4d106.7719131!16s%2Fm%2F02pz17z?entry=ttu&g_ep=EgoyMDI1MTAxNC4wIKXMDSoASAFQAw%3D%3D" target="_blank"><i class="fa fa-map-marker"></i> Trường ĐH Sư Phạm Kỹ Thuật - 1 Võ Văn Ngân, Linh Chiểu, Thủ Đức, TP.HCM</a></li>
             </ul>
             <ul class="header-links pull-right">
                 <li><a href="#"><i class="fa fa-dollar"></i> VNĐ</a></li>
@@ -132,7 +132,7 @@
         <div id="responsive-nav">
             <ul class="main-nav nav navbar-nav">
                 <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                <li><a href="${pageContext.request.contextPath}/products">Sản phẩm</a></li>
+                <li><a href="${pageContext.request.contextPath}/shop">Sản phẩm</a></li>
                 <li><a href="${pageContext.request.contextPath}/deals">Khuyến mãi</a></li>
                 <c:if test="${isUserAuthenticated}">
                     <%

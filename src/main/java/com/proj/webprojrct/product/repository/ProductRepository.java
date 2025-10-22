@@ -14,4 +14,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 	@org.springframework.data.jpa.repository.Query(value = "select distinct p.name from Product p where lower(p.name) like lower(concat('%', :q, '%')) order by p.name asc")
 	java.util.List<String> findDistinctNamesMatching(@org.springframework.data.repository.query.Param("q") String q, org.springframework.data.domain.Pageable pageable);
 
+	// Find products by category ID
+	java.util.List<Product> findByCategoryId(Long categoryId);
+
 }

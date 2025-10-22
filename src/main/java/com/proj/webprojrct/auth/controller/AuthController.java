@@ -5,6 +5,8 @@ import com.proj.webprojrct.user.entity.UserRole;
 import com.proj.webprojrct.common.config.security.JwtUtil;
 import com.proj.webprojrct.user.entity.User;
 import com.proj.webprojrct.user.repository.UserRepository;
+import com.proj.webprojrct.product.service.ProductService;
+import com.proj.webprojrct.category.service.CategoryService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,6 +54,8 @@ public class AuthController {
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
+    private final ProductService productService;
+    private final CategoryService categoryService;
 
     @GetMapping("/login")
     public String loginPage() {
@@ -104,13 +108,25 @@ public class AuthController {
 
     @GetMapping("/home")
     public String homePage(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
-            CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-            User user = userDetails.getUser();
-            model.addAttribute("username", user.getFullName());
-            model.addAttribute("role", user.getRole().name());
-            model.addAttribute("phone", user.getPhone());
+        try {
+            // Lấy thông tin user nếu đã đăng nhập
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
+                CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+                User user = userDetails.getUser();
+                model.addAttribute("currentUser", user);
+                model.addAttribute("username", user.getFullName());
+                model.addAttribute("role", user.getRole().name());
+                model.addAttribute("phone", user.getPhone());
+            }
+            
+            // Load đầy đủ data như trang chủ
+            model.addAttribute("products", productService.getAll());
+            model.addAttribute("categories", categoryService.getAll());
+            model.addAttribute("brands", productService.getAllBrands());
+            
+        } catch (Exception e) {
+            model.addAttribute("error", "Không thể tải dữ liệu: " + e.getMessage());
         }
         return "home";
     }

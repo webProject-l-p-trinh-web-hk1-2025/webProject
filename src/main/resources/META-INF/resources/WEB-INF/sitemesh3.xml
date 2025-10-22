@@ -16,11 +16,8 @@
     <mapping path="/verify-otp" exclude="true"/>
     <mapping path="/change-password" exclude="true"/>
     
-    <!-- Tạm exclude product pages vì chưa có template -->
-    <mapping path="/products" exclude="true"/>
-    <mapping path="/product/*" exclude="true"/>
+    <!-- Tạm exclude product_list page vì chưa có template -->
     <mapping path="/product_list" exclude="true"/>
-    <mapping path="/product_detail" exclude="true"/>
     
     <!-- Tạm exclude cart page vì chưa có template -->
     <mapping path="/cart" exclude="true"/>

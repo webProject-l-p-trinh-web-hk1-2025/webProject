@@ -102,6 +102,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductResponse> getByCategoryId(Long categoryId) {
+        List<Product> products = repo.findByCategoryId(categoryId);
+        return mapper.toResponseList(products);
+    }
+
+    @Override
     public Page<ProductResponse> search(String brand, String name, BigDecimal minPrice, BigDecimal maxPrice, int page, int size, String sort) {
         String[] parts = sort.split(",");
         Sort s = parts.length == 2 ? Sort.by(Sort.Direction.fromString(parts[1]), parts[0]) : Sort.by(Sort.Direction.DESC, "createdAt");

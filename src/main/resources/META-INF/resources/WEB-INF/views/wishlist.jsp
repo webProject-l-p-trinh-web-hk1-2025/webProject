@@ -17,42 +17,6 @@
             background-color: #f5f5f5;
         }
 
-        .header {
-            background: linear-gradient(135deg, #d70018 0%, #f05423 100%);
-            color: white;
-            padding: 15px 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .header-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-logo {
-            font-size: 24px;
-            font-weight: bold;
-            text-decoration: none;
-            color: white;
-        }
-
-        .btn-back {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .btn-back:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
         .container {
             max-width: 1200px;
             margin: 30px auto;
@@ -249,15 +213,8 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-container">
-            <a href="/" class="header-logo">CellphoneZ</a>
-            <a href="/" class="btn-back">← Về trang chủ</a>
-        </div>
-    </div>
-
     <div class="container">
-        <h1><i class="fa fa-heart"></i> Sản phẩm yêu thích</h1>
+        <h1><i class="fa fa-heart"></i> Sản phẩm yêu thích của bạn</h1>
         
         <div id="wishlistItemsContainer" class="wishlist-items">
             <!-- Wishlist items will be loaded here by JavaScript -->

@@ -68,24 +68,29 @@ public class ProductController {
 
     /* Xem tổng */
     @GetMapping
-    public List<ProductResponse> getAll() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+    public List<ProductResponse> getAll(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Integer limit) {
+        // Allow public access for product listing
+        List<ProductResponse> products;
+        
+        if (categoryId != null) {
+            products = service.getByCategoryId(categoryId);
+        } else {
+            products = service.getAll();
         }
-        return service.getAll();
+        
+        // Apply limit if specified
+        if (limit != null && limit > 0 && products.size() > limit) {
+            return products.subList(0, limit);
+        }
+        
+        return products;
     }
 
     @GetMapping("/{id}")
     public ProductResponse getById(@PathVariable Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
-        }
+        // Allow public access for viewing product details
         return service.getById(id);
     }
 

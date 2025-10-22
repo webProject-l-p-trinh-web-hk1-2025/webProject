@@ -14,7 +14,7 @@
     <body class="register-page">
       <jsp:include page="/common/header.jsp" />
       <div class="register-container">
-        <h1>Đăng ký trở tài khoản</h1>
+        <h1>Đăng ký tài khoản</h1>
 
         <c:if test="${not empty error}">
           <div class="auth-error" style="color:#c0392b;margin-bottom:12px;">${error}</div>

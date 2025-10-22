@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -138,6 +140,18 @@ public class Usercontroller {
         try {
             UserResponse userResponse = userService.handleGetUserProfile(authentication);
             model.addAttribute("user", userResponse);
+            // Also provide verification flags to the view (read from authenticated user)
+            try {
+                CustomUserDetails cud = (CustomUserDetails) authentication.getPrincipal();
+                com.proj.webprojrct.user.entity.User u = cud.getUser();
+                boolean verifyPhone = u.getVerifyPhone() != null && u.getVerifyPhone();
+                boolean verifyEmail = u.getVerifyEmail() != null && u.getVerifyEmail();
+                model.addAttribute("verifyPhone", verifyPhone);
+                model.addAttribute("verifyEmail", verifyEmail);
+            } catch (Exception ignored) {
+                model.addAttribute("verifyPhone", false);
+                model.addAttribute("verifyEmail", false);
+            }
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
         }
@@ -145,20 +159,53 @@ public class Usercontroller {
         return "profile";
     }
 
-    @GetMapping("/update-profile")
+    @GetMapping("/profile/orders")
+    public String getProfileOrders(Model model) {
+        // reuse existing order list page
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        try {
+            // Will be filled by OrderPageController if needed; here just forward to order list JSP
+            return "order_list";
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+            return "profile";
+        }
+    }
+
+    @GetMapping("/profile/update")
+    public String getProfileUpdate(Model model) {
+        // reuse existing update-profile endpoint/view
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        try {
+            UserResponse userResponse = userService.handleGetUserProfile(authentication);
+            model.addAttribute("user", userResponse);
+            return "profile_update";
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+            return "profile";
+        }
+    }
+
+    @GetMapping("/profile/offers")
+    public String getProfileOffers(Model model) {
+        // simple page listing offers; controller will pass 'offers' if available
+        return "profile_offers";
+    }
+
+    @GetMapping("/profile-update")
     public String updateUserProfile(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         try {
             UserResponse userResponse = userService.handleGetUserProfile(authentication);
             model.addAttribute("user", userResponse);
-            return "update-profile";
+            return "profile_update";
         } catch (RuntimeException e) {
             return "redirect:/login";
         }
     }
 
-    @PostMapping("/update-profile")
+    @PostMapping("/profile-update")
     public String handleUpdateUserProfile(
             @ModelAttribute UserUpdateRequest userReq,
             @RequestParam(value = "avt", required = false) MultipartFile avt,

@@ -237,6 +237,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- explicit main class to help the plugin locate the entry point -->
+                    <mainClass>com.proj.webprojrct.WebprojrctApplication</mainClass>
+                </configuration>
             </plugin>
 
         </plugins>

@@ -206,6 +206,7 @@ public class AuthController {
             redirectAttributes.addFlashAttribute("fullName", request.getFullName());
             redirectAttributes.addFlashAttribute("phone", request.getPhone());
             redirectAttributes.addFlashAttribute("email", request.getEmail());
+            redirectAttributes.addFlashAttribute("address", request.getAddress());
             return "redirect:/register";
         }
     }
@@ -263,7 +264,7 @@ public class AuthController {
         //return "resetPassword";
     }
 
-    @PostMapping("/change-password")
+    @PostMapping("/profile/change-password")
     public String changePassword(@ModelAttribute ChangePassRequest request, Model model) {
         String message;
         try {
@@ -276,7 +277,7 @@ public class AuthController {
         return "change-password";
     }
 
-    @GetMapping("/change-password")
+    @GetMapping("/profile/change-password")
     public String showChangePasswordForm(Model model) {
         model.addAttribute("changePassRequest", new ChangePassRequest());
         return "change-password";
@@ -294,50 +295,50 @@ public class AuthController {
     }
 
     @PostMapping("/send-otp-email")
-    public String sendOtpEmail(Model model) {
+    public String sendOtpEmail(Model model, RedirectAttributes redirectAttributes) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
             return "redirect:/home";
         }
         try {
             String msg = authService.sendOtpEmail();
-            model.addAttribute("success", msg);
+            redirectAttributes.addFlashAttribute("success", msg);
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
-        return "verify-otp";
+        return "redirect:/profile";
     }
 
     // Gửi OTP phone
     @PostMapping("/send-otp-phone")
-    public String sendOtpPhone(Model model) {
+    public String sendOtpPhone(Model model, RedirectAttributes redirectAttributes) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
             return "redirect:/home";
         }
         try {
             String msg = authService.sendOtpPhone();
-            model.addAttribute("success", msg);
+            redirectAttributes.addFlashAttribute("success", msg);
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
-        return "verify-otp";
+        return "redirect:/profile";
     }
 
     // Xác thực OTP
     @PostMapping("/verify-otp")
-    public String verifyOtp(@RequestParam("otp") String otpInput, Model model) {
+    public String verifyOtp(@RequestParam("otp") String otpInput, Model model, RedirectAttributes redirectAttributes) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
             return "redirect:/home";
         }
         try {
             String msg = authService.verifyOtp(otpInput);
-            model.addAttribute("success", msg);
+            redirectAttributes.addFlashAttribute("success", msg);
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
-        return "verify-otp";
+        return "redirect:/profile";
     }
 
 }

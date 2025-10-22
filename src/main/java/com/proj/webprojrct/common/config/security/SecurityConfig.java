@@ -55,7 +55,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/product/**", "/products", "/shop", "/cart", "/wishlist", "/css/**", "/js/**", "/fonts/**", "/img/**", "/favicon.ico", "/error", "/WEB-INF/views/**", "/WEB-INF/decorators/**", "/common/**").permitAll()
+                .requestMatchers("/", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/product/**", "/products", "/shop", "/cart", "/wishlist", "/css/**", "/js/**", "/fonts/**", "/img/**", "/uploads/**", "/favicon.ico", "/error", "/WEB-INF/views/**", "/WEB-INF/decorators/**", "/common/**").permitAll()
                 .requestMatchers("/api/products/**", "/api/categories/**", "/api/media/**", "/api/cart/**", "/api/favorite/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")

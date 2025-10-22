@@ -48,37 +48,69 @@
             </head>
 
             <body>
-                <div class="container">
-                    <h2>Đổi mật khẩu</h2>
+                <div id="profile-content">
+                    <div class="container py-3">
+                        <div class="card shadow-sm mx-auto" style="max-width:720px;">
+                            <div class="card-body">
+                                <h4 class="card-title mb-3">Đổi mật khẩu</h4>
 
-                    <!-- Hiển thị thông báo -->
-                    <c:if test="${not empty message}">
-                        <div class="${message eq 'Đổi mật khẩu thành công!' ? 'success' : 'error'}">
-                            ${message}
+                                <!-- Hiển thị thông báo -->
+                                <c:if test="${not empty message}">
+                                    <div class="alert ${message eq 'Đổi mật khẩu thành công!' ? 'alert-success' : 'alert-danger'}" role="alert">
+                                        ${message}
+                                    </div>
+                                </c:if>
+
+                                <!-- Form đổi mật khẩu -->
+                                <form:form method="post" action="${pageContext.request.contextPath}/profile/change-password" modelAttribute="changePassRequest" id="changePasswordForm">
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Mật khẩu cũ</label>
+                                        <form:password path="password" id="password" cssClass="form-control" required="true" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="newPassword" class="form-label">Mật khẩu mới</label>
+                                        <form:password path="newPassword" id="newPassword" cssClass="form-control" required="true" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="confirmNewPassword" class="form-label">Xác nhận mật khẩu mới</label>
+                                        <form:password path="confirmNewPassword" id="confirmNewPassword" cssClass="form-control" required="true" />
+                                        <div id="pwHelp" class="form-text text-danger mt-1" style="display:none">Mật khẩu xác nhận chưa khớp.</div>
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" id="changePassBtn" class="btn btn-primary">Đổi mật khẩu</button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="history.back()">Hủy</button>
+                                    </div>
+                                </form:form>
+                            </div>
                         </div>
-                    </c:if>
-
-                    <!-- Form đổi mật khẩu -->
-                    <form:form method="post" action="${pageContext.request.contextPath}/change-password"
-                        modelAttribute="changePassRequest">
-                        <div class="form-group">
-                            <label for="password">Mật khẩu cũ</label>
-                            <form:password path="password" id="password" required="true" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="newPassword">Mật khẩu mới</label>
-                            <form:password path="newPassword" id="newPassword" required="true" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="confirmNewPassword">Xác nhận mật khẩu mới</label>
-                            <form:password path="confirmNewPassword" id="confirmNewPassword" required="true" />
-                        </div>
-
-                        <button type="submit">Đổi mật khẩu</button>
-                    </form:form>
+                    </div>
                 </div>
+
+                <script>
+                    (function(){
+                        const newPw = document.getElementById('newPassword');
+                        const confirmPw = document.getElementById('confirmNewPassword');
+                        const help = document.getElementById('pwHelp');
+                        const submitBtn = document.getElementById('changePassBtn');
+
+                        function validateMatch(){
+                            const a = newPw && newPw.value ? newPw.value : '';
+                            const b = confirmPw && confirmPw.value ? confirmPw.value : '';
+                            if(!a && !b){ help.style.display='none'; submitBtn.disabled=false; return; }
+                            if(a !== b){ help.style.display='block'; submitBtn.disabled=true; }
+                            else { help.style.display='none'; submitBtn.disabled=false; }
+                        }
+
+                        if(newPw) newPw.addEventListener('input', validateMatch);
+                        if(confirmPw) confirmPw.addEventListener('input', validateMatch);
+
+                        // ensure validation runs when form injected
+                        document.addEventListener('DOMContentLoaded', validateMatch);
+                    })();
+                </script>
             </body>
 
             </html>

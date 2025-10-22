@@ -65,14 +65,15 @@
                 <!-- SEARCH BAR -->
                 <div class="col-md-6">
                     <div class="header-search">
-                        <form action="${pageContext.request.contextPath}/search" method="get">
+                        <!-- Submit to the products page and use 'name' param to match product search JS -->
+                        <form action="${pageContext.request.contextPath}/products" method="get">
                             <select class="input-select" name="category">
-                                <option value="">Tất cả danh mục</option>
+                                <option value="">Tất cả hãng điện thoại</option>
                                 <c:forEach items="${categories}" var="cat">
                                     <option value="${cat.id}">${cat.name}</option>
                                 </c:forEach>
                             </select>
-                            <input class="input" name="q" placeholder="Tìm kiếm sản phẩm...">
+                            <input class="input" name="name" placeholder="Tìm kiếm sản phẩm...">
                             <button class="search-btn" type="submit">Tìm kiếm</button>
                         </form>
                     </div>

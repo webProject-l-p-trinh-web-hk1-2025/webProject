@@ -13,20 +13,6 @@
 
 			<body>
 
-				<!-- BREADCRUMB -->
-				<div id="breadcrumb" class="section">
-					<div class="container">
-						<div class="row">
-							<div class="col-md-12">
-								<ul class="breadcrumb-tree">
-									<li class="active"><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- /BREADCRUMB -->
-
 				<!-- SECTION -->
 				<div class="section">
 					<div class="container">

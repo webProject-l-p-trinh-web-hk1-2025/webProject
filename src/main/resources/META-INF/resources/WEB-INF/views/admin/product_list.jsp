@@ -8,6 +8,25 @@
       <link rel="stylesheet" href="<c:url value='/css/admin-dashboard.css'/>" />
       <link rel="stylesheet" href="<c:url value='/css/products_admin.css'/>" />
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+      <style>
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        table th, table td {
+          padding: 8px;
+          border: 1px solid #ddd;
+        }
+        .thumb {
+          max-width: 70px;
+          max-height: 70px;
+          object-fit: contain;
+        }
+        .btn {
+          margin-right: 5px;
+          display: inline-block;
+        }
+      </style>
     </head>
 
     <body>
@@ -95,7 +114,7 @@
                 <div class="card-title">Danh sách sản phẩm</div>
               </div>
               <div class="card-body">
-                <table>
+                <table class="table table-striped">
                   <thead>
                     <tr>
                       <th style="width:80px;">Ảnh</th>
@@ -104,7 +123,7 @@
                       <th>Giá</th>
                       <th>Tồn</th>
                       <th>Ngày tạo</th>
-                      <th style="width:180px;">Thao tác</th>
+                      <th style="width:250px;">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody id="tbody"></tbody>
@@ -193,28 +212,7 @@
           }
         }
 
-        //add to cart function
-        async function addToCart(productId, quantity = 1) {
-          try {
-            const res = await fetch(ctx + '/api/cart/add', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ productId: productId, quantity: quantity })
-            });
-
-            if (!res.ok) {
-              const txt = await res.text().catch(() => '');
-              throw new Error('HTTP ' + res.status + ' - ' + txt);
-            }
-
-            const data = await res.json();
-            alert(data.message || 'Đã thêm vào giỏ thành công!');
-            // TODO: update số lượng giỏ hàng trên header nếu cần
-          } catch (e) {
-            console.error(e);
-            alert('Lỗi khi thêm vào giỏ: ' + (e.message || e.toString()));
-          }
-        }
+        // Cart functionality has been removed
 
         function renderPagination(totalPages, current) {
           const container = document.getElementById('pagination');
@@ -266,17 +264,18 @@
             var createdAt = p.createdAt ? new Date(p.createdAt).toLocaleDateString('vi-VN') : '';
             return (
               '<tr>' +
-              '<td class="text-center"><img src="' + imgSrc + '" class="thumb"></td>' +
+              '<td class="text-center"><img src="' + imgSrc + '" class="thumb" style="max-width:70px; max-height:70px;"></td>' +
               '<td>' + name + '</td>' +
               '<td>' + brand + '</td>' +
               '<td class="text-end">' + price + '</td>' +
               '<td class="text-center">' + stock + '</td>' +
               '<td class="text-center">' + createdAt + '</td>' +
-              '<td class="text-center">' +
-              '<a href="' + ctx + '/product_detail?id=' + p.id + '" class="btn btn-sm btn-outline-secondary me-1">Xem</a>' +
-              '<a href="' + ctx + '/admin/products/edit/' + p.id + '" class="btn btn-sm btn-outline-primary me-1">Sửa</a>' +
+              '<td>' +
+              '<div class="d-flex justify-content-between">' +
+              '<a href="' + ctx + '/product_detail?id=' + p.id + '" class="btn btn-sm btn-outline-secondary">Xem</a>' +
+              '<a href="' + ctx + '/admin/products/edit/' + p.id + '" class="btn btn-sm btn-outline-primary">Sửa</a>' +
               '<button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(' + p.id + ')">Xóa</button>' +
-              '<button class="btn btn-sm btn-outline-success" onclick="addToCart(' + p.id + ', 1)">Thêm vào giỏ</button>' +
+              '</div>' +
               '</td>' +
               '</tr>'
             );

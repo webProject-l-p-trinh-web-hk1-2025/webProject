@@ -1,11 +1,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> <%@ page
 contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
 <html>
   <head>
     <title>Chi tiết danh mục</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="stylesheet" href="<c:url value='/css/admin-dashboard.css'/>" />
     <link rel="stylesheet" href="<c:url value='/css/categories_admin.css'/>" />
+    <link rel="stylesheet" href="<c:url value='/css/category_detail.css'/>" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"

@@ -1,5 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> <%@ page
 contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
 <html>
   <head>
     <title>Danh sách danh mục</title>
@@ -72,6 +73,42 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
               >
                 <i class="fas fa-plus"></i> Thêm danh mục
               </a>
+              <button class="btn btn-outline" id="showAllBtn">
+                <i class="fas fa-list"></i> Hiển thị tất cả
+              </button>
+            </div>
+          </div>
+
+          <!-- Bộ lọc -->
+          <div class="filter-container">
+            <div class="filter-group">
+              <label>Tên danh mục</label>
+              <input
+                id="name"
+                class="filter-input"
+                placeholder="Tìm theo tên"
+                type="text"
+                autocomplete="off"
+              />
+              <div
+                id="suggestions"
+                class="position-absolute"
+                style="
+                  z-index: 1200;
+                  width: 100%;
+                  display: none;
+                  max-height: 320px;
+                  overflow: auto;
+                "
+              ></div>
+            </div>
+            <div class="filter-group">
+              <label>Sắp xếp</label>
+              <select id="sort" class="filter-input">
+                <option value="createdAt,desc">Mới nhất</option>
+                <option value="name,asc">Tên: A → Z</option>
+                <option value="name,desc">Tên: Z → A</option>
+              </select>
             </div>
           </div>
 

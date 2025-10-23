@@ -27,6 +27,12 @@ public class AdminDocumentController {
 
     @Autowired
     private DocumentService documentService;
+      @GetMapping
+    public String show(Model model) {
+        List<Document> documents = documentService.getAllDocuments();
+        model.addAttribute("documents", documents);
+        return "admin/document_list";
+    }
 
     @GetMapping({"/all", "/list"})
     public String showAllDocuments(Model model) {
@@ -35,7 +41,7 @@ public class AdminDocumentController {
         return "admin/document_list";
     }
 
-    @GetMapping("/create")
+    @GetMapping({"/create", "/new"})
     public String showCreateForm(Model model) {
         model.addAttribute("document", null);
         model.addAttribute("formAction", "/admin/document/create");
@@ -49,7 +55,7 @@ public class AdminDocumentController {
         try {
             documentService.createDocument(dto, images == null ? List.of() : images);
             model.addAttribute("success", "Tạo Document thành công!");
-            return "redirect:/admin/document/list";
+            return "redirect:/admin/document";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             return "admin/document_form";
@@ -77,7 +83,7 @@ public class AdminDocumentController {
             Model model) {
         documentService.updateDocument(id, dto, images == null ? List.of() : images);
         model.addAttribute("success", "Cập nhật document thành công!");
-        return "redirect:/admin/document/list";
+        return "redirect:/admin/document";
     }
 
     @PostMapping("/upload-image")

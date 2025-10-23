@@ -83,6 +83,9 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
               <a href="${pageContext.request.contextPath}/admin/categories"><i class="fas fa-tag"></i><span class="nav-text">Categories</span></a>
             </li>
             <li>
+              <a href="${pageContext.request.contextPath}/admin/document"><i class="fas fa-file-alt"></i><span class="nav-text">Documents</span></a>
+            </li>
+            <li>
               <a href="${pageContext.request.contextPath}/admin/chat"><i class="fas fa-comments"></i><span class="nav-text">Chat</span></a>
             </li>
           </ul>

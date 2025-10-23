@@ -30,51 +30,55 @@ public class ProductPageController {
         this.productService = productService;
     }
 
-    @GetMapping("/product_list")
-    public String list() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    // //admin
+    // @GetMapping("/product_list")
+    // public String list() {
+    //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
-        }
-        return "product_list";
-    }
+    //     if (authentication == null || !authentication.isAuthenticated()
+    //             || authentication instanceof AnonymousAuthenticationToken) {
+    //         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+    //     }
+    //     return "product_list";
+    // }
 
-    @GetMapping("/product_detail")
-    public String detail(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    //admin
+    // @GetMapping("/product_detail")
+    // public String detail(Model model) {
+    //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
-        }
-        return "product_detail";
-    }
+    //     if (authentication == null || !authentication.isAuthenticated()
+    //             || authentication instanceof AnonymousAuthenticationToken) {
+    //         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+    //     }
+    //     return "product_detail";
+    // }
 
-    @GetMapping("/admin/products/edit")
-    public String edit() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    // //admin
+    // @GetMapping("/admin/products/edit")
+    // public String edit() {
+    //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
-        }
-        return "product_edit";
-    }
+    //     if (authentication == null || !authentication.isAuthenticated()
+    //             || authentication instanceof AnonymousAuthenticationToken) {
+    //         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+    //     }
+    //     return "product_edit";
+    // }
 
-    @GetMapping("/admin/products/edit/{id}")
-    public String editById(@PathVariable Long id, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    // //admin
+    // @GetMapping("/admin/products/edit/{id}")
+    // public String editById(@PathVariable Long id, Model model) {
+    //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
-        }
-        ProductResponse p = productService.getById(id);
-        model.addAttribute("product", p);
-        return "product_edit";
-    }
+    //     if (authentication == null || !authentication.isAuthenticated()
+    //             || authentication instanceof AnonymousAuthenticationToken) {
+    //         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+    //     }
+    //     ProductResponse p = productService.getById(id);
+    //     model.addAttribute("product", p);
+    //     return "product_edit";
+    // }
 
     @GetMapping("/shop")
     public String shop(@RequestParam(required = false) List<Long> category, 
@@ -187,12 +191,13 @@ public class ProductPageController {
         return "shop";
     }
 
-    @GetMapping("/products")
-    public String products(Model model) {
-        // Có thể thêm logic load products vào model nếu cần
-        return "product_list";
-    }
-
+    // //admin
+    // @GetMapping("/products")
+    // public String products(Model model) {
+    //     // Có thể thêm logic load products vào model nếu cần
+    //     return "product_list";
+    // }
+    //user
     @GetMapping("/product/{id}")
     public String productDetail(@PathVariable Long id, Model model) {
         ProductResponse product = productService.getById(id);

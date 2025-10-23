@@ -1,282 +1,506 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-        <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết đơn hàng - CellPhoneStore</title>
+    <style>
+/* Order Detail Page Styles */
+.order-detail-title {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+}
 
-            <html>
+.order-status-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+}
 
-            <head>
-                <title>Chi tiết đơn hàng</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 20px;
-                        background: #f8f8f8;
-                    }
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
 
-                    .container {
-                        max-width: 900px;
-                        margin: auto;
-                        background: #fff;
-                        padding: 20px;
-                        border-radius: 8px;
-                    }
+.status-success {
+    background: #d4edda;
+    color: #155724;
+}
 
-                    h1 {
-                        color: #d70018;
-                    }
+.status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
 
-                    .order-info,
-                    .user-info {
-                        margin-bottom: 20px;
-                    }
+.info-card {
+    background: white;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
 
-                    .order-info div,
-                    .user-info div {
-                        margin-bottom: 5px;
-                    }
+.info-card h3 {
+    color: #d70018;
+    font-size: 20px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
 
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 10px;
-                    }
+.info-row {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
 
-                    th,
-                    td {
-                        border: 1px solid #ddd;
-                        padding: 8px;
-                        text-align: center;
-                    }
+.info-row:last-child {
+    border-bottom: none;
+}
 
-                    th {
-                        background-color: #f2f2f2;
-                    }
+.info-label {
+    font-weight: 600;
+    color: #555;
+    min-width: 150px;
+}
 
-                    .product-img {
-                        width: 80px;
-                        height: 80px;
-                        object-fit: cover;
-                        border-radius: 4px;
-                    }
+.info-value {
+    color: #333;
+    flex: 1;
+}
 
-                    .status {
-                        font-weight: bold;
-                    }
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
 
-                    /* CSS cho phần thanh toán */
-                    .payment-section {
-                        margin-top: 30px;
-                        text-align: center;
-                        border-top: 1px solid #eee;
-                        padding-top: 20px;
-                    }
+.product-table th {
+    background: #f8f9fa;
+    color: #333;
+    font-weight: 600;
+    padding: 15px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+}
 
-                    .payment-section select {
-                        padding: 10px;
-                        font-size: 16px;
-                        border-radius: 5px;
-                        border: 1px solid #ccc;
-                    }
+.product-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
 
-                    .payment-section button,
-                    .payment-section .btn-link {
-                        padding: 12px 25px;
-                        text-decoration: none;
-                        border-radius: 5px;
-                        margin-left: 10px;
-                        font-size: 16px;
-                        cursor: pointer;
-                        border: none;
-                        font-weight: bold;
-                    }
+.product-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
 
-                    .btn-link {
-                        display: inline-block;
-                        background: #555;
-                        color: white;
-                    }
+.product-name {
+    font-weight: 600;
+    color: #333;
+}
 
-                    #confirm-purchase-btn {
-                        background: #28a745;
-                        /* Màu xanh lá */
-                        color: white;
-                    }
+.product-price {
+    color: #d70018;
+    font-weight: 600;
+}
 
-                    #confirm-purchase-btn:disabled {
-                        background: #aaa;
-                        cursor: not-allowed;
-                    }
-                </style>
-            </head>
+.total-row {
+    background: #f8f9fa;
+    font-weight: 700;
+    font-size: 18px;
+    color: #d70018;
+}
 
-            <body>
-                <div class="container">
-                    <h1>Chi tiết đơn hàng #${order.orderId}</h1>
+.payment-section {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    margin-top: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
 
-                    <%-- Thông tin người nhận --%>
-                        <div class="user-info">
-                            <h3>Thông tin người nhận</h3>
-                            <div><strong>Họ tên:</strong> ${user.fullName}</div>
-                            <div><strong>Email:</strong> ${user.email}</div>
-                            <div><strong>Số điện thoại:</strong> ${user.phone}</div>
-                            <div><strong>Địa chỉ giao hàng:</strong> ${order.shippingAddress}</div>
-                        </div>
+.payment-method-select {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin: 20px 0;
+    transition: border-color 0.3s;
+}
 
-                        <%-- Thông tin đơn hàng --%>
-                            <div class="order-info">
-                                <h3>Thông tin đơn hàng</h3>
-                                <div><strong>Trạng thái:</strong> <span class="status">${order.status}</span></div>
-                                <div><strong>Ngày tạo:</strong> ${order.createdAt}</div>
-                                <div><strong>Tổng tiền:</strong>
-                                    <fmt:formatNumber value="${order.totalAmount}" type="currency" currencySymbol="₫" />
-                                </div>
+.payment-method-select:focus {
+    outline: none;
+    border-color: #d70018;
+}
+
+.btn-action {
+    padding: 14px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin: 10px 5px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #d70018 0%, #f05423 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(215, 0, 24, 0.3);
+}
+
+.btn-primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+}
+
+.alert-message {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-weight: 600;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 18px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-success i {
+    font-size: 20px;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+    padding: 18px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-warning i {
+    font-size: 20px;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    padding: 18px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-info i {
+    font-size: 20px;
+}
+    </style>
+</head>
+<body>
+
+<!-- BREADCRUMB -->
+<div id="breadcrumb" class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="breadcrumb-tree">
+                    <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
+                    <li><a href="${pageContext.request.contextPath}/order">Đơn hàng</a></li>
+                    <li class="active">Chi tiết đơn hàng #${order.orderId}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /BREADCRUMB -->
+
+<!-- ORDER DETAIL SECTION -->
+<div class="section">
+    <div class="container">
+        <h1 class="order-detail-title">
+            <i class="fa fa-file-text-o"></i> Chi tiết đơn hàng #${order.orderId}
+        </h1>
+
+        <div class="row">
+            <!-- Left Column - Order Info -->
+            <div class="col-md-8">
+                <!-- User Information -->
+                <div class="info-card">
+                    <h3><i class="fa fa-user"></i> Thông tin người nhận</h3>
+                    <div class="info-row">
+                        <span class="info-label">Họ tên:</span>
+                        <span class="info-value">${user.fullName}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">${user.email}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Số điện thoại:</span>
+                        <span class="info-value">${user.phone}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Địa chỉ giao hàng:</span>
+                        <span class="info-value">${order.shippingAddress}</span>
+                    </div>
+                </div>
+
+                <!-- Products Table -->
+                <div class="info-card">
+                    <h3><i class="fa fa-shopping-bag"></i> Sản phẩm trong đơn hàng</h3>
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">Ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th style="width: 120px; text-align: center;">Đơn giá</th>
+                                <th style="width: 80px; text-align: center;">SL</th>
+                                <th style="width: 140px; text-align: right;">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="item" items="${order.items}">
+                                <tr>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${not empty item.productImageUrl}">
+                                                <img class="product-img" src="${pageContext.request.contextPath}${item.productImageUrl}" alt="${item.productName}" />
+                                            </c:when>
+                                            <c:otherwise>
+                                                <img class="product-img" src="${pageContext.request.contextPath}/images/no-image.png" alt="No Image" />
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <div class="product-name">${item.productName}</div>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="product-price">
+                                            <fmt:formatNumber value="${item.price}" type="number" groupingUsed="true" />₫
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center;">${item.quantity}</td>
+                                    <td style="text-align: right;">
+                                        <span class="product-price">
+                                            <fmt:formatNumber value="${item.price * item.quantity}" type="number" groupingUsed="true" />₫
+                                        </span>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            <tr class="total-row">
+                                <td colspan="4" style="text-align: right; padding-right: 20px;">Tổng cộng:</td>
+                                <td style="text-align: right;">
+                                    <fmt:formatNumber value="${order.totalAmount}" type="number" groupingUsed="true" />₫
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right Column - Order Status & Payment -->
+            <div class="col-md-4">
+                <div class="info-card">
+                    <h3><i class="fa fa-info-circle"></i> Thông tin đơn hàng</h3>
+                    <div class="info-row">
+                        <span class="info-label">Mã đơn hàng:</span>
+                        <span class="info-value">#${order.orderId}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Trạng thái:</span>
+                        <span class="info-value">
+                            <span class="order-status-badge status-${order.status == 'SUCCESS' ? 'success' : 'pending'}">
+                                ${order.status}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Ngày tạo:</span>
+                        <span class="info-value">${order.createdAt}</span>
+                    </div>
+                    <div class="info-row" style="border-top: 2px solid #d70018; padding-top: 15px; margin-top: 15px;">
+                        <span class="info-label" style="font-size: 18px;">Tổng tiền:</span>
+                        <span class="info-value" style="font-size: 20px; color: #d70018; font-weight: 700;">
+                            <fmt:formatNumber value="${order.totalAmount}" type="number" groupingUsed="true" />₫
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Payment Section -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="info-card payment-section">
+                    <c:choose>
+                        <c:when test="${statusPayment.status == null}">
+                            <div class="alert-warning">
+                                <i class="fa fa-exclamation-circle"></i>
+                                Giao dịch chưa được tạo. Vui lòng chọn phương thức thanh toán và xác nhận.
+                            </div>
+                            
+                            <h3><i class="fa fa-credit-card"></i> Chọn phương thức thanh toán</h3>
+                            <div class="payment-method-select">
+                                <select id="payment-method" class="form-control">
+                                    <option value="COD">💵 Thanh toán khi nhận hàng (COD)</option>
+                                    <option value="VNPAY">💳 Thanh toán qua VNPAY</option>
+                                </select>
                             </div>
 
-                            <%-- Sản phẩm trong đơn hàng --%>
-                                <h3>Sản phẩm trong đơn hàng</h3>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Ảnh</th>
-                                            <th>Tên sản phẩm</th>
-                                            <th>Đơn giá</th>
-                                            <th>Số lượng</th>
-                                            <th>Thành tiền</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <c:forEach var="item" items="${order.items}">
-                                            <tr>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${not empty item.productImageUrl}">
-                                                            <img class="product-img" src="${item.productImageUrl}"
-                                                                alt="${item.productName}" />
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <img class="product-img" src="/images/no-image.png"
-                                                                alt="No Image" />
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>${item.productName}</td>
-                                                <td>
-                                                    <fmt:formatNumber value="${item.price}" type="currency"
-                                                        currencySymbol="₫" />
-                                                </td>
-                                                <td>${item.quantity}</td>
-                                                <td>
-                                                    <fmt:formatNumber value="${item.price * item.quantity}"
-                                                        type="currency" currencySymbol="₫" />
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
+                            <div class="payment-actions">
+                                <a href="${pageContext.request.contextPath}/order" class="btn btn-secondary">
+                                    <i class="fa fa-arrow-left"></i> Quay lại
+                                </a>
+                                <button id="confirm-purchase-btn" class="btn btn-primary" onclick="confirmPurchase(${order.orderId})">
+                                    <i class="fa fa-check-circle"></i> Xác nhận mua hàng
+                                </button>
+                            </div>
+                        </c:when>
 
-                                <c:choose>
+                        <c:when test="${statusPayment.status == 'PENDING' && statusPayment.method == 'COD'}">
+                            <div class="alert-info">
+                                <i class="fa fa-info-circle"></i>
+                                Đơn hàng đã được đặt thành công với phương thức thanh toán khi nhận hàng (COD).
+                            </div>
+                            <div class="payment-actions">
+                                <a href="${pageContext.request.contextPath}/order" class="btn btn-primary">
+                                    <i class="fa fa-list"></i> Quay lại danh sách đơn hàng
+                                </a>
+                            </div>
+                        </c:when>
 
-                                    <c:when test="${statusPayment.status == null}">
-                                        <div
-                                            style="margin-top: 20px; text-align: center; color: #d70018; font-weight: bold;">
-                                            Giao dịch chưa được tạo. Vui lòng tạo giao dịch và khi thanh toán.
-                                        </div>
-                                        <div class="payment-section">
-                                            <div style="margin-bottom: 15px;">
-                                                <label for="payment-method"
-                                                    style="font-size: 18px; margin-right: 10px;">
-                                                    <strong>Chọn phương thức thanh toán:</strong>
-                                                </label>
-                                                <select id="payment-method">
-                                                    <option value="COD">Thanh toán khi nhận hàng (COD)</option>
-                                                    <option value="VNPAY">Thanh toán qua VNPAY</option>
-                                                </select>
-                                            </div>
+                        <c:when test="${statusPayment.status == 'PENDING'}">
+                            <div class="alert-warning">
+                                <i class="fa fa-clock-o"></i>
+                                Đơn hàng đang chờ thanh toán. Vui lòng hoàn tất thanh toán.
+                            </div>
 
-                                            <a href="/order" class="btn-link" style="background: #d70018;">Quay lại</a>
+                            <h3><i class="fa fa-credit-card"></i> Chọn phương thức thanh toán</h3>
+                            <div class="payment-method-select">
+                                <select id="payment-method" class="form-control">
+                                    <option value="COD">💵 Thanh toán khi nhận hàng (COD)</option>
+                                    <option value="VNPAY">💳 Thanh toán qua VNPAY</option>
+                                </select>
+                            </div>
 
-                                            <button id="confirm-purchase-btn"
-                                                onclick="confirmPurchase(${order.orderId})">
-                                                Xác nhận mua hàng
-                                            </button>
-                                        </div>
-                                    </c:when>
-                                    <c:when
-                                        test="${statusPayment.status == 'PENDING' && statusPayment.method == 'COD'}">
-                                        <div class="payment-section">
-                                            <div style="margin-bottom: 15px;">
-                                                <label for="payment-method"
-                                                    style="font-size: 18px; margin-right: 10px;">
-                                                    <strong> Đã đặt đơn hàng với phương thức thanh toán COD</strong>
-                                                </label>
-                                            </div>
-                                            <a href="/order" class="btn-link" style="background: #d70018;">Quay lại</a>
-                                        </div>
-                                    </c:when>
+                            <div class="payment-actions">
+                                <a href="${pageContext.request.contextPath}/order" class="btn btn-secondary">
+                                    <i class="fa fa-arrow-left"></i> Quay lại
+                                </a>
+                                <button id="confirm-purchase-btn" class="btn btn-primary" onclick="confirmPurchase(${order.orderId})">
+                                    <i class="fa fa-credit-card"></i> Tiếp tục thanh toán
+                                </button>
+                            </div>
+                        </c:when>
 
-                                    <c:when test="${statusPayment.status == 'PENDING'}">
-                                        <div class="payment-section">
-                                            <div style="margin-bottom: 15px;">
-                                                <label for="payment-method"
-                                                    style="font-size: 18px; margin-right: 10px;">
-                                                    <strong>Chọn phương thức thanh toán:</strong>
-                                                </label>
-                                                <select id="payment-method">
-                                                    <option value="COD">Thanh toán khi nhận hàng (COD)</option>
-                                                    <option value="VNPAY">Thanh toán qua VNPAY</option>
-                                                </select>
-                                            </div>
+                        <c:when test="${statusPayment.status == 'SUCCESS'}">
+                            <div class="alert-success">
+                                <i class="fa fa-check-circle"></i>
+                                Thanh toán đã hoàn tất! Cảm ơn bạn đã mua hàng.
+                            </div>
+                            <div class="payment-actions">
+                                <a href="${pageContext.request.contextPath}/order" class="btn btn-primary">
+                                    <i class="fa fa-list"></i> Quay lại danh sách đơn hàng
+                                </a>
+                            </div>
+                        </c:when>
 
-                                            <a href="/order" class="btn-link" style="background: #d70018;">Quay lại</a>
+                        <c:otherwise>
+                            <div class="alert-info">
+                                <i class="fa fa-info-circle"></i>
+                                Trạng thái giao dịch: <strong>${statusPayment.status}</strong>
+                            </div>
 
-                                            <button id="confirm-purchase-btn"
-                                                onclick="confirmPurchase(${order.orderId})">
-                                                Tiếp tục thanh toán
-                                            </button>
-                                        </div>
-                                    </c:when>
-                                    <c:when test="${statusPayment.status == 'SUCCESS'}">
-                                        <div
-                                            style="margin-top: 20px; text-align: center; color: green; font-weight: bold;">
-                                            Thanh toán đã hoàn tất!
-                                        </div>
-                                        <div style="margin-top: 15px; text-align: center;">
-                                            <a href="/order" class="btn-link" style="background: #d70018;">Quay lại danh
-                                                sách đơn hàng</a>
-                                        </div>
-                                    </c:when>
+                            <h3><i class="fa fa-credit-card"></i> Chọn phương thức thanh toán</h3>
+                            <div class="payment-method-select">
+                                <select id="payment-method" class="form-control">
+                                    <option value="COD">💵 Thanh toán khi nhận hàng (COD)</option>
+                                    <option value="VNPAY">💳 Thanh toán qua VNPAY</option>
+                                </select>
+                            </div>
 
-                                    <c:otherwise>
-                                        <div style="margin-top: 20px; text-align: center; color: #555;">
-                                            Trạng thái giao dịch: ${statusPayment.status}
-                                        </div>
-                                        <div style="margin-bottom: 15px;">
-                                            <label for="payment-method" style="font-size: 18px; margin-right: 10px;">
-                                                <strong>Chọn phương thức thanh toán:</strong>
-                                            </label>
-                                            <select id="payment-method">
-                                                <option value="COD">Thanh toán khi nhận hàng (COD)</option>
-                                                <option value="VNPAY">Thanh toán qua VNPAY</option>
-                                            </select>
-                                        </div>
+                            <div class="payment-actions">
+                                <a href="${pageContext.request.contextPath}/order" class="btn btn-secondary">
+                                    <i class="fa fa-arrow-left"></i> Quay lại
+                                </a>
+                                <button id="confirm-purchase-btn" class="btn btn-primary" onclick="confirmPurchase(${order.orderId})">
+                                    <i class="fa fa-refresh"></i> Tạo lại giao dịch thanh toán
+                                </button>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
 
-                                        <a href="/order" class="btn-link" style="background: #d70018;">Quay lại</a>
-
-                                        <button id="confirm-purchase-btn" onclick="confirmPurchase(${order.orderId})">
-                                            Tạo lại giao dịch thanh toán
-                                        </button>
-                                    </c:otherwise>
-                                </c:choose>
-                                <div style="margin-top: 20px; text-align: center;">
-                                    <button id="refresh-status-btn"
-                                        style="padding: 12px 25px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;"
-                                        onclick="refreshTransactionStatus(${order.orderId})">
-                                        Làm mới trạng thái giao dịch
-                                    </button>
-                                </div>
-
-
+                    <div class="payment-actions" style="margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                        <button id="refresh-status-btn" class="btn btn-action" onclick="refreshTransactionStatus(${order.orderId})">
+                            <i class="fa fa-refresh"></i> Làm mới trạng thái giao dịch
+                        </button>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /ORDER DETAIL SECTION -->
 
                 <script>
                     function refreshTransactionStatus(orderId) {
@@ -399,6 +623,8 @@
                         }
                     }
                 </script>
+                
+                <!-- Disable sticky header for this page -->
             </body>
 
             </html>

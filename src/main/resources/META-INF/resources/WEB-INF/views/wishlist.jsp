@@ -35,21 +35,6 @@
             </div>
         </div>
 
-        <!-- Select All Box -->
-        <div class="row" id="selectAllContainer" style="display: none;">
-            <div class="col-md-12">
-                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                    <label style="margin: 0; cursor: pointer; font-weight: 500; color: #856404;">
-                        <input type="checkbox" id="selectAllCheckbox" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;">
-                        Chọn tất cả sản phẩm
-                    </label>
-                    <button id="btnDeleteSelected" class="primary-btn" style="background: #dc3545; padding: 8px 20px; display: none;" onclick="deleteSelectedItems()">
-                        <i class="fa fa-trash"></i> Xóa đã chọn
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- Wishlist Items -->
         <div class="row" id="wishlistContainer">
             <!-- Items will be loaded by JavaScript -->
@@ -121,18 +106,15 @@ function loadWishlist() {
 function renderWishlist() {
     const container = document.getElementById('wishlistContainer');
     const emptyState = document.getElementById('emptyWishlist');
-    const selectAllContainer = document.getElementById('selectAllContainer');
 
     if (!wishlistData || wishlistData.length === 0) {
         container.style.display = 'none';
         emptyState.style.display = 'block';
-        selectAllContainer.style.display = 'none';
         return;
     }
 
     container.style.display = 'flex';
     emptyState.style.display = 'none';
-    selectAllContainer.style.display = 'block';
 
     let html = '';
     wishlistData.forEach(function(item) {
@@ -151,9 +133,6 @@ function renderWishlist() {
         html += 
             '<div class="col-md-3 col-xs-6">' +
                 '<div class="product" style="position: relative;">' +
-                    '<div style="position: absolute; top: 10px; left: 10px; z-index: 10; background: white; border-radius: 4px; padding: 5px;">' +
-                        '<input type="checkbox" class="wishlist-checkbox" data-product-id="' + item.productId + '" onchange="updateDeleteButton()" style="width: 20px; height: 20px; cursor: pointer;">' +
-                    '</div>' +
                     '<div class="product-img">' +
                         '<img src="' + imgSrc + '" alt="' + item.productName + '" style="max-height: 250px; object-fit: contain;">' +
                         stockLabel +
@@ -165,6 +144,10 @@ function renderWishlist() {
                         '</h3>' +
                         '<h4 class="product-price">' + formatPrice(item.productPrice) + '</h4>' +
                         '<div class="product-btns">' +
+                            '<button class="add-to-wishlist" onclick="removeFromWishlist(' + item.productId + ')" style="background: #D10024;">' +
+                                '<i class="fa fa-heart"></i>' +
+                                '<span class="tooltipp">Xóa khỏi yêu thích</span>' +
+                            '</button>' +
                             '<a href="' + ctx + '/product/' + item.productId + '" class="quick-view">' +
                                 '<i class="fa fa-eye"></i>' +
                                 '<span class="tooltipp">Xem chi tiết</span>' +
@@ -179,18 +162,6 @@ function renderWishlist() {
     });
 
     container.innerHTML = html;
-    
-    // Setup select all checkbox
-    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-    if (selectAllCheckbox) {
-        selectAllCheckbox.onchange = function() {
-            const checkboxes = document.querySelectorAll('.wishlist-checkbox');
-            checkboxes.forEach(function(cb) {
-                cb.checked = selectAllCheckbox.checked;
-            });
-            updateDeleteButton();
-        };
-    }
 }
 
 function addToCartFromWishlist(productId) {
@@ -228,65 +199,7 @@ function addToCartFromWishlist(productId) {
     });
 }
 
-function updateDeleteButton() {
-    const checkboxes = document.querySelectorAll('.wishlist-checkbox:checked');
-    const deleteBtn = document.getElementById('deleteSelectedBtn');
-    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-    
-    if (deleteBtn) {
-        deleteBtn.style.display = checkboxes.length > 0 ? 'inline-block' : 'none';
-    }
-    
-    // Update select all checkbox state
-    if (selectAllCheckbox) {
-        const allCheckboxes = document.querySelectorAll('.wishlist-checkbox');
-        selectAllCheckbox.checked = allCheckboxes.length > 0 && checkboxes.length === allCheckboxes.length;
-    }
-}
-
-function deleteSelectedItems() {
-    const checkboxes = document.querySelectorAll('.wishlist-checkbox:checked');
-    if (checkboxes.length === 0) {
-        return;
-    }
-
-    const productIds = [];
-    checkboxes.forEach(function(cb) {
-        productIds.push(cb.getAttribute('data-product-id'));
-    });
-
-    // Delete all selected items
-    const deletePromises = productIds.map(function(productId) {
-        return fetch(ctx + '/api/favorite/remove/' + productId, {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-    });
-
-    Promise.all(deletePromises)
-        .then(function(responses) {
-            const allOk = responses.every(function(response) {
-                return response.ok;
-            });
-            if (!allOk) {
-                throw new Error('Một số sản phẩm không thể xóa');
-            }
-            // Update wishlist count in header
-            if (typeof updateGlobalWishlistCount === 'function') {
-                updateGlobalWishlistCount();
-            }
-            // Reload wishlist
-            loadWishlist();
-        })
-        .catch(function(error) {
-            alert('Có lỗi: ' + error.message);
-        });
-}
-
-function removeFromWishlist(productId, button) {
+function removeFromWishlist(productId) {
     fetch(ctx + '/api/favorite/remove/' + productId, {
         method: 'DELETE',
         credentials: 'include',

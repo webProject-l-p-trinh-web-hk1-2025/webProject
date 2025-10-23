@@ -16,4 +16,9 @@ public interface OrderService {
     void cancelOrder(Long orderId);
 
     Payment updateOrderPayment(Long orderId);
+    
+    // Get user statistics
+    int getTotalOrdersByUserId(Long userId);
+    
+    double getTotalSpentByUserId(Long userId);
 }

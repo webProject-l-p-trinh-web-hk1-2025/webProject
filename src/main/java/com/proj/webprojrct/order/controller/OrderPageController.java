@@ -69,7 +69,22 @@ public class OrderPageController {
 
     @GetMapping("/success/{orderId}")
     public String orderSuccess(@PathVariable Long orderId, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        OrderResponse order = orderService.getOrderById(orderId);
+        
+        // Security check: only order creator can view success page
+        if (!order.getUserId().equals(userDetails.getUser().getId())) {
+            return "redirect:/shop";
+        }
+
         model.addAttribute("orderId", orderId);
+        model.addAttribute("order", order);
+        model.addAttribute("user", userDetails.getUser());
         return "order_success";
     }
 }

@@ -348,6 +348,12 @@ function formatPrice(price) {
 
 // ========== STICKY HEADER ON SCROLL ==========
 window.addEventListener('DOMContentLoaded', function() {
+    // Skip sticky header on order and cart pages
+    var currentPath = window.location.pathname;
+    if (currentPath.includes('/order/') || currentPath.includes('/cart')) {
+        return; // Don't apply sticky header on order and cart pages
+    }
+    
     var header = document.querySelector('header');
     var navigation = document.getElementById('navigation');
     var headerHeight = header ? header.offsetHeight : 0;

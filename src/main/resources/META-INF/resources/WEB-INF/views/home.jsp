@@ -8,7 +8,7 @@
                 <meta charset="utf-8">
                 <meta http-equiv="X-UA-Compatible" content="IE=edge">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>CellphoneZ - Trang chủ</title>
+                <title>CellPhoneStore - Trang chủ</title>
             </head>
 
             <body>
@@ -365,7 +365,6 @@
 
                     function addToCart(productId) {
                         if (!IS_LOGGED_IN) {
-                            alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
                             window.location.href = '${pageContext.request.contextPath}/login';
                             return;
                         }
@@ -381,12 +380,10 @@
                                 else throw new Error('Có lỗi xảy ra');
                             })
                             .then(data => {
-                                alert('Đã thêm sản phẩm vào giỏ hàng!');
                                 if (typeof updateGlobalCartCount === 'function') updateGlobalCartCount();
                             })
                             .catch(error => {
                                 if (error.message === 'Unauthorized') {
-                                    alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
                                     window.location.href = '${pageContext.request.contextPath}/login';
                                 } else {
                                     alert('Có lỗi: ' + error.message);
@@ -396,7 +393,6 @@
 
                     function toggleFavorite(productId, button) {
                         if (!IS_LOGGED_IN) {
-                            alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích!');
                             window.location.href = '${pageContext.request.contextPath}/login';
                             return;
                         }
@@ -422,18 +418,15 @@
                                     icon.classList.remove('fa-heart');
                                     icon.classList.add('fa-heart-o');
                                     button.style.color = '';
-                                    alert('Đã xóa khỏi danh sách yêu thích!');
                                 } else {
                                     icon.classList.remove('fa-heart-o');
                                     icon.classList.add('fa-heart');
                                     button.style.color = '#d70018';
-                                    alert('Đã thêm vào danh sách yêu thích!');
                                 }
                                 if (typeof updateGlobalWishlistCount === 'function') updateGlobalWishlistCount();
                             })
                             .catch(error => {
                                 if (error.message === 'Unauthorized') {
-                                    alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
                                     window.location.href = '${pageContext.request.contextPath}/login';
                                 } else {
                                     alert('Có lỗi: ' + error.message);

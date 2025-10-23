@@ -19,4 +19,9 @@ public interface OrderService {
     Payment updateOrderPayment(Long orderId);
 
     Order getOrderByOrderId(Long orderId);
+
+    // Get user statistics
+    int getTotalOrdersByUserId(Long userId);
+
+    double getTotalSpentByUserId(Long userId);
 }

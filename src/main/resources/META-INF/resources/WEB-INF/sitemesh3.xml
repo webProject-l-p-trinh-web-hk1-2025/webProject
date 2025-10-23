@@ -22,9 +22,6 @@
     <!-- Tạm exclude product_list page vì chưa có template -->
     <mapping path="/product_list" exclude="true"/>
     
-    <!-- Tạm exclude cart page vì chưa có template -->
-    <mapping path="/cart" exclude="true"/>
-    
     <!-- All other pages use web decorator -->
     <mapping path="/*" decorator="web.jsp"/>
 </sitemesh>

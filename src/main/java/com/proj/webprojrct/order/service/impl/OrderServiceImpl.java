@@ -16,6 +16,7 @@ import com.proj.webprojrct.user.entity.User;
 import com.proj.webprojrct.user.repository.UserRepository;
 import com.proj.webprojrct.product.repository.ProductRepository;
 import com.proj.webprojrct.product.repository.ProductImageRepository;
+import com.proj.webprojrct.email.emailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.proj.webprojrct.payment.vnpay.service.PaymentService;
@@ -46,6 +47,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    @Autowired
+    private emailService emailService;
+
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     @Override
@@ -53,6 +57,7 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // TODO: UNCOMMENT THIS LINE WHEN PHONE VERIFICATION IS READY
         // if (!user.getVerifyPhone()) {
         //     throw new RuntimeException("Chưa xác thực số điện thoại.");
         // }
@@ -60,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
         order.setUser(user);
         order.setStatus("PENDING");
         order.setTotalAmount(request.getTotalAmount());
-        order.setShippingAddress(request.getShippingAddress());
+        order.setShippingAddress(request.getShippingAddress()); // Use address from request
         order.setCreatedAt(LocalDateTime.now());
         order = orderRepository.save(order);
 
@@ -76,7 +81,56 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
+        // Send order confirmation email
+        try {
+            sendOrderConfirmationEmail(user, savedOrder, request.getOrderItems());
+        } catch (Exception e) {
+            // Log error but don't fail the order
+            System.err.println("Failed to send order confirmation email: " + e.getMessage());
+        }
+
         return getOrderById(savedOrder.getId());
+    }
+
+    private void sendOrderConfirmationEmail(User user, Order order, List<OrderRequest.OrderItemRequest> items) {
+        StringBuilder emailBody = new StringBuilder();
+        emailBody.append("Xin chào ").append(user.getFullName()).append(",\n\n");
+        emailBody.append("Cảm ơn bạn đã đặt hàng tại CellPhoneStore!\n\n");
+        emailBody.append("Chi tiết đơn hàng #").append(order.getId()).append(":\n");
+        emailBody.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+
+        // Add order items
+        for (OrderRequest.OrderItemRequest item : items) {
+            Product product = productRepository.findById(item.getProductId()).orElse(null);
+            if (product != null) {
+                double itemPrice = item.getPrice().doubleValue();
+                double itemTotal = itemPrice * item.getQuantity();
+                emailBody.append(String.format("• %s\n", product.getName()));
+                emailBody.append(String.format("  Số lượng: %d x %,.0fđ = %,.0fđ\n\n",
+                        item.getQuantity(), itemPrice, itemTotal));
+            }
+        }
+
+        emailBody.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        emailBody.append(String.format("Tổng tiền: %,.0fđ\n\n", order.getTotalAmount().doubleValue()));
+
+        // Add shipping info
+        emailBody.append("Thông tin giao hàng:\n");
+        emailBody.append("Người nhận: ").append(user.getFullName()).append("\n");
+        emailBody.append("Số điện thoại: ").append(user.getPhone()).append("\n");
+        emailBody.append("Địa chỉ: ").append(order.getShippingAddress()).append("\n\n");
+
+        emailBody.append("Đơn hàng sẽ được giao trong 2-3 ngày làm việc.\n");
+        emailBody.append("Chúng tôi sẽ liên hệ với bạn để xác nhận đơn hàng.\n\n");
+        emailBody.append("Cảm ơn bạn đã tin tưởng CellPhoneStore!\n\n");
+        emailBody.append("---\n");
+        emailBody.append("CellPhoneStore\n");
+        emailBody.append("Email: kietccc21@gmail.com\n");
+        emailBody.append("Hotline: +84 889-251-007");
+
+        emailService.sendEmail(user.getEmail(),
+                "Xác nhận đơn hàng #" + order.getId() + " - CellPhoneStore",
+                emailBody.toString());
     }
 
     @Override
@@ -124,6 +178,9 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Order> orders = orderRepository.findByUser(user);
+
+        // Sắp xếp đơn hàng theo thời gian tạo giảm dần (mới nhất trước)
+        orders.sort((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
 
         return orders.stream().map(order -> {
             List<OrderItem> items = orderItemRepository.findByOrder(order);
@@ -180,7 +237,26 @@ public class OrderServiceImpl implements OrderService {
             return null;
         }
         return existingPayment;
+    }
 
+    @Override
+    public int getTotalOrdersByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<Order> orders = orderRepository.findByUser(user);
+        return orders.size();
+    }
+
+    @Override
+    public double getTotalSpentByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<Order> orders = orderRepository.findByUser(user);
+
+        return orders.stream()
+                .filter(order -> !"CANCELLED".equals(order.getStatus())) // Exclude cancelled orders
+                .mapToDouble(order -> order.getTotalAmount().doubleValue())
+                .sum();
     }
 
     @Override
@@ -188,4 +264,5 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
     }
+
 }

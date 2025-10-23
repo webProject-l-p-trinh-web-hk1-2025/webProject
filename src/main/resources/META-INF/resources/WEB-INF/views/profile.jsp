@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -54,11 +55,13 @@
 
             <div class="profile-stats">
                 <div class="card-sm text-center">
-                    <div style="font-size:18px;font-weight:600">2</div>
+                    <div style="font-size:18px;font-weight:600">${totalOrders}</div>
                     <div class="text-muted" style="font-size:14px">Tổng số đơn hàng đã mua</div>
                 </div>
                 <div class="card-sm text-center">
-                    <div style="font-size:18px;font-weight:600">37.245.000đ</div>
+                    <div style="font-size:18px;font-weight:600">
+                        <fmt:formatNumber value="${totalSpent}" pattern="#,###"/>đ
+                    </div>
                     <div class="text-muted" style="font-size:14px">Tổng tiền tích luỹ</div>
                 </div>
             </div>

@@ -23,6 +23,7 @@ import com.proj.webprojrct.user.dto.request.UserUpdateRequest;
 import com.proj.webprojrct.user.dto.response.UserResponse;
 import com.proj.webprojrct.user.entity.User;
 import com.proj.webprojrct.user.service.UserService;
+import com.proj.webprojrct.order.service.OrderService;
 
 import lombok.NoArgsConstructor;
 
@@ -37,6 +38,9 @@ public class Usercontroller {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OrderService orderService;
 
     // @GetMapping("/admin/users")
     // public String getAllAdminUsers(Model model, Authentication authentication) {
@@ -140,15 +144,28 @@ public class Usercontroller {
         try {
             UserResponse userResponse = userService.handleGetUserProfile(authentication);
             model.addAttribute("user", userResponse);
-            // Also provide verification flags to the view (read from authenticated user)
+            
+            // Get user statistics
             try {
                 CustomUserDetails cud = (CustomUserDetails) authentication.getPrincipal();
                 com.proj.webprojrct.user.entity.User u = cud.getUser();
+                Long userId = u.getId();
+                
+                // Get total orders and total spent
+                int totalOrders = orderService.getTotalOrdersByUserId(userId);
+                double totalSpent = orderService.getTotalSpentByUserId(userId);
+                
+                model.addAttribute("totalOrders", totalOrders);
+                model.addAttribute("totalSpent", totalSpent);
+                
+                // Verification flags
                 boolean verifyPhone = u.getVerifyPhone() != null && u.getVerifyPhone();
                 boolean verifyEmail = u.getVerifyEmail() != null && u.getVerifyEmail();
                 model.addAttribute("verifyPhone", verifyPhone);
                 model.addAttribute("verifyEmail", verifyEmail);
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                model.addAttribute("totalOrders", 0);
+                model.addAttribute("totalSpent", 0.0);
                 model.addAttribute("verifyPhone", false);
                 model.addAttribute("verifyEmail", false);
             }
@@ -161,15 +178,16 @@ public class Usercontroller {
 
     @GetMapping("/profile/orders")
     public String getProfileOrders(Model model) {
-        // reuse existing order list page
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        try {
-            // Will be filled by OrderPageController if needed; here just forward to order list JSP
-            return "order_list";
-        } catch (RuntimeException e) {
-            model.addAttribute("error", e.getMessage());
-            return "profile";
-        }
+        CustomUserDetails cud = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = cud.getUser().getId();
+        
+        // Get user's orders (already sorted newest first in service)
+        var orders = orderService.getOrdersByUserId(userId);
+        model.addAttribute("orders", orders);
+        model.addAttribute("hideHeader", true); // Hide breadcrumb
+        
+        return "order_list";
     }
 
     @GetMapping("/profile/update")

@@ -8,7 +8,7 @@
 				<meta charset="utf-8">
 				<meta http-equiv="X-UA-Compatible" content="IE=edge">
 				<meta name="viewport" content="width=device-width, initial-scale=1">
-				<title>Sản phẩm - CellphoneZ</title>
+				<title>Sản phẩm - CellPhoneStore</title>
 			</head>
 
 			<body>
@@ -76,6 +76,21 @@
 
 							<!-- STORE -->
 							<div id="store" class="col-md-9">
+								<!-- Search result info -->
+								<c:if test="${not empty searchName}">
+									<div class="alert alert-info" style="margin-bottom: 20px;">
+										<i class="fa fa-search"></i> 
+										Kết quả tìm kiếm cho: <strong>"${searchName}"</strong>
+										<c:if test="${totalProducts == 0}">
+											- Không tìm thấy sản phẩm nào
+										</c:if>
+										<c:if test="${totalProducts > 0}">
+											- Tìm thấy ${totalProducts} sản phẩm
+										</c:if>
+									</div>
+								</c:if>
+								<!-- /Search result info -->
+								
 								<!-- store top filter -->
 								<div class="store-filter clearfix">
 									<div class="store-sort">
@@ -257,6 +272,12 @@ function buildFilterUrl(newPage) {
 	var url = '${pageContext.request.contextPath}/shop?';
 	var params = [];
 	
+	// Thêm search name nếu có
+	var searchName = '${searchName}';
+	if (searchName && searchName.trim() !== '') {
+		params.push('name=' + encodeURIComponent(searchName));
+	}
+	
 	// Thêm categories được chọn
 	var categoryCheckboxes = document.querySelectorAll('.category-filter:checked');
 	categoryCheckboxes.forEach(function(checkbox) {
@@ -331,7 +352,6 @@ document.addEventListener('DOMContentLoaded', function() {
 					function addToCart(productId) {
 						if (!IS_LOGGED_IN) {
 							// Chưa đăng nhập, chuyển về trang login
-							alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
 							window.location.href = '${pageContext.request.contextPath}/login';
 							return;
 						}
@@ -358,7 +378,6 @@ document.addEventListener('DOMContentLoaded', function() {
 								}
 							})
 							.then(data => {
-								alert('Đã thêm sản phẩm vào giỏ hàng!');
 								// Cập nhật số lượng giỏ hàng trong header
 								if (typeof updateGlobalCartCount === 'function') {
 									updateGlobalCartCount();
@@ -366,7 +385,6 @@ document.addEventListener('DOMContentLoaded', function() {
 							})
 							.catch(error => {
 								if (error.message === 'Unauthorized') {
-									alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
 									window.location.href = '${pageContext.request.contextPath}/login';
 								} else {
 									alert('Có lỗi: ' + error.message);
@@ -414,7 +432,6 @@ document.addEventListener('DOMContentLoaded', function() {
 					// Toggle favorite (thêm/xóa yêu thích)
 					function toggleFavorite(productId, button) {
 						if (!IS_LOGGED_IN) {
-							alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích!');
 							window.location.href = '${pageContext.request.contextPath}/login';
 							return;
 						}
@@ -444,7 +461,6 @@ document.addEventListener('DOMContentLoaded', function() {
 									icon.classList.remove('fa-heart');
 									icon.classList.add('fa-heart-o');
 									button.style.color = '';
-									alert('Đã xóa khỏi danh sách yêu thích!');
 									// Cập nhật số lượng wishlist trong header
 									if (typeof updateGlobalWishlistCount === 'function') {
 										updateGlobalWishlistCount();
@@ -452,7 +468,6 @@ document.addEventListener('DOMContentLoaded', function() {
 								})
 								.catch(error => {
 									if (error.message === 'Unauthorized') {
-										alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
 										window.location.href = '${pageContext.request.contextPath}/login';
 									} else {
 										alert('Có lỗi: ' + error.message);
@@ -483,7 +498,6 @@ document.addEventListener('DOMContentLoaded', function() {
 									icon.classList.remove('fa-heart-o');
 									icon.classList.add('fa-heart');
 									button.style.color = '#d70018';
-									alert('Đã thêm vào danh sách yêu thích!');
 									// Cập nhật số lượng wishlist trong header
 									if (typeof updateGlobalWishlistCount === 'function') {
 										updateGlobalWishlistCount();
@@ -491,7 +505,6 @@ document.addEventListener('DOMContentLoaded', function() {
 								})
 								.catch(error => {
 									if (error.message === 'Unauthorized') {
-										alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
 										window.location.href = '${pageContext.request.contextPath}/login';
 									} else {
 										alert('Có lỗi: ' + error.message);

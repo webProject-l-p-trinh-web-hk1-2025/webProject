@@ -1,89 +1,113 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
         <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-
-            <html>
+            <!DOCTYPE html>
+            <html lang="vi">
 
             <head>
-                <title>Xác nhận đơn hàng</title>
+                <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Xác nhận đơn hàng - CellPhoneStore</title>
                 <style>
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-                        background-color: #f4f7f6;
-                        margin: 0;
-                        padding: 20px;
-                        display: flex;
-                        justify-content: center;
-                    }
-
-                    .container {
-                        max-width: 900px;
-                        width: 100%;
-                        background: #ffffff;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-                        overflow: hidden;
-                    }
-
-                    h1 {
-                        text-align: center;
+                    /* Order Page Styles */
+                    .order-title {
                         color: #333;
-                        padding: 20px 25px;
-                        margin: 0;
-                        border-bottom: 1px solid #eee;
-                    }
-
-                    .content {
-                        display: flex;
-                        flex-wrap: wrap;
-                        padding: 25px;
-                        gap: 25px;
-                    }
-
-                    .user-info,
-                    .order-summary {
-                        flex: 1;
-                        min-width: 300px;
-                    }
-
-                    h3 {
-                        color: #d70018;
-                        border-bottom: 2px solid #f0f0f0;
-                        padding-bottom: 10px;
-                        margin-top: 0;
-                    }
-
-                    .user-info p {
-                        margin: 10px 0;
-                        line-height: 1.6;
-                    }
-
-                    .user-info strong {
-                        color: #555;
-                        min-width: 100px;
-                        display: inline-block;
-                    }
-
-                    .user-info input[type="text"] {
-                        width: calc(100% - 20px);
-                        padding: 10px;
-                        border: 1px solid #ccc;
-                        border-radius: 5px;
-                        font-size: 15px;
-                    }
-
-                    .user-info label {
+                        margin-bottom: 30px;
+                        font-size: 28px;
                         font-weight: bold;
+                        text-align: center;
+                    }
+
+                    .order-form-section {
+                        background: white;
+                        border-radius: 8px;
+                        padding: 30px;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                        margin-bottom: 20px;
+                    }
+
+                    .form-section-title {
+                        font-size: 20px;
+                        font-weight: bold;
+                        margin-bottom: 20px;
+                        padding-bottom: 15px;
+                        border-bottom: 2px solid #e0e0e0;
+                        color: #333;
+                    }
+
+                    .form-group {
+                        margin-bottom: 20px;
+                    }
+
+                    .form-label {
                         display: block;
-                        margin-bottom: 5px;
+                        font-weight: 600;
                         color: #555;
+                        margin-bottom: 8px;
+                    }
+
+                    .form-label.required::after {
+                        content: ' *';
+                        color: #d70018;
+                    }
+
+                    .form-input,
+                    .form-textarea {
+                        width: 100%;
+                        padding: 12px 15px;
+                        border: 1px solid #ddd;
+                        border-radius: 6px;
+                        font-size: 14px;
+                        transition: all 0.3s;
+                        font-family: inherit;
+                    }
+
+                    .form-input:focus,
+                    .form-textarea:focus {
+                        outline: none;
+                        border-color: #d70018;
+                        box-shadow: 0 0 0 3px rgba(215, 0, 24, 0.1);
+                    }
+
+                    .form-input.error {
+                        border-color: #ff4444;
+                        background-color: #fff5f5;
+                    }
+
+                    .form-textarea {
+                        resize: vertical;
+                        min-height: 100px;
+                    }
+
+                    .error-message {
+                        color: #ff4444;
+                        font-size: 13px;
+                        margin-top: 5px;
+                        display: block;
+                    }
+
+                    .order-summary {
+                        background: white;
+                        border-radius: 8px;
+                        padding: 25px;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                        position: sticky;
+                        top: 20px;
+                    }
+
+                    .order-summary-title {
+                        font-size: 20px;
+                        font-weight: bold;
+                        margin-bottom: 20px;
+                        padding-bottom: 15px;
+                        border-bottom: 2px solid #e0e0e0;
+                        color: #333;
                     }
 
                     .order-item {
                         display: flex;
                         gap: 15px;
-                        padding: 12px 0;
+                        padding: 15px 0;
                         border-bottom: 1px solid #f0f0f0;
                         align-items: center;
                     }
@@ -104,107 +128,184 @@
 
                     .item-info {
                         font-size: 0.9em;
-                        color: #777;
+                        color: #666;
                         margin: 4px 0 0;
                     }
 
                     .item-price {
-                        font-weight: 600;
-                        color: #333;
+                        font-weight: bold;
+                        color: #d70018;
                         white-space: nowrap;
                     }
 
                     .total-summary {
                         margin-top: 20px;
-                        border-top: 2px solid #f0f0f0;
+                        border-top: 2px solid #e0e0e0;
                         padding-top: 15px;
-                        font-size: 1.4em;
+                        font-size: 18px;
                         font-weight: bold;
                         color: #d70018;
                         text-align: right;
                     }
 
-                    .button-container {
-                        padding: 25px;
-                        background-color: #f9f9f9;
-                        border-top: 1px solid #eee;
-                        text-align: right;
-                    }
-
-                    #confirm-btn {
-                        padding: 14px 28px;
-                        font-size: 17px;
-                        background: #28a745;
+                    .btn-place-order {
+                        width: 100%;
+                        padding: 15px;
+                        margin-top: 20px;
+                        background: linear-gradient(135deg, #d70018 0%, #f05423 100%);
                         color: white;
                         border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
+                        border-radius: 8px;
+                        font-size: 16px;
                         font-weight: bold;
-                        transition: background 0.2s;
+                        cursor: pointer;
+                        transition: all 0.3s;
                     }
 
-                    #confirm-btn:hover {
-                        background: #218838;
+                    .btn-place-order:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(215, 0, 24, 0.3);
                     }
 
-                    #confirm-btn:disabled {
+                    .btn-place-order:disabled {
                         background: #aaa;
                         cursor: not-allowed;
+                        transform: none;
+                        opacity: 0.6;
                     }
 
                     #message-container {
                         text-align: center;
-                        padding: 0 25px 10px;
+                        padding: 15px;
+                        margin-bottom: 20px;
                         font-weight: bold;
+                        border-radius: 6px;
+                        display: none;
                     }
 
                     .msg-success {
-                        color: #28a745;
+                        background: #d4edda;
+                        color: #155724;
+                        border: 1px solid #c3e6cb;
                     }
 
                     .msg-error {
-                        color: #dc3545;
+                        background: #f8d7da;
+                        color: #721c24;
+                        border: 1px solid #f5c6cb;
                     }
 
                     .msg-info {
-                        color: #007bff;
+                        background: #d1ecf1;
+                        color: #0c5460;
+                        border: 1px solid #bee5eb;
                     }
                 </style>
             </head>
 
             <body>
-                <div class="container">
-                    <h1>Xác nhận đơn hàng</h1>
 
-                    <div id="message-container"></div>
-
-                    <div class="content">
-                        <!-- Thông tin người dùng -->
-                        <div class="user-info">
-                            <h3>Thông tin giao hàng</h3>
-                            <p><strong>Khách hàng:</strong> ${user.fullName}</p>
-                            <p><strong>Email:</strong> ${user.email}</p>
-                            <p><strong>Số điện thoại:</strong> ${user.phone}</p>
-                            <div>
-                                <label for="shippingAddress">Địa chỉ giao hàng:</label>
-                                <input type="text" id="shippingAddress" value="${user.address}"
-                                    placeholder="Nhập địa chỉ của bạn">
+                <!-- BREADCRUMB -->
+                <div id="breadcrumb" class="section">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <ul class="breadcrumb-tree">
+                                    <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
+                                    <li><a href="${pageContext.request.contextPath}/cart">Giỏ hàng</a></li>
+                                    <li class="active">Xác nhận đơn hàng</li>
+                                </ul>
                             </div>
-                            <div id="shipping-address"></div>
                         </div>
-
-                        <!-- Tóm tắt đơn hàng -->
-                        <div class="order-summary">
-                            <h3>Tóm tắt đơn hàng</h3>
-                            <div id="order-items-list"></div>
-                            <div id="total" class="total-summary"></div>
-                        </div>
-                    </div>
-
-                    <div class="button-container">
-                        <button id="confirm-btn" onclick="confirmAndCreateOrder()">Xác nhận và Tạo đơn hàng</button>
                     </div>
                 </div>
+                <!-- /BREADCRUMB -->
+
+                <!-- ORDER PAGE -->
+                <div class="section">
+                    <div class="container">
+                        <h1 class="order-title"><i class="fa fa-shopping-bag"></i> Xác nhận đơn hàng</h1>
+
+                        <div id="message-container"></div>
+
+                        <div class="row">
+                            <!-- Order Form - User Info -->
+                            <div class="col-md-8">
+                                <div class="order-form-section">
+                                    <div class="form-section-title"><i class="fa fa-truck"></i> Thông tin giao hàng
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label required" for="fullName">Họ và tên người nhận</label>
+                                        <input type="text" id="fullName" class="form-input"
+                                            placeholder="Nhập họ và tên đầy đủ" value="${user.fullName}">
+                                        <span class="error-message" id="fullNameError"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label required" for="phone">Số điện thoại</label>
+                                        <input type="tel" id="phone" class="form-input" placeholder="Nhập số điện thoại"
+                                            value="${user.phone}">
+                                        <span class="error-message" id="phoneError"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label required">Tỉnh/Thành phố</label>
+                                        <select id="city" class="form-input">
+                                            <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                                        </select>
+                                        <span class="error-message" id="cityError"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label required">Quận/Huyện</label>
+                                        <select id="district" class="form-input" disabled>
+                                            <option value="">-- Chọn Quận/Huyện --</option>
+                                        </select>
+                                        <span class="error-message" id="districtError"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label required">Phường/Xã</label>
+                                        <select id="ward" class="form-input" disabled>
+                                            <option value="">-- Chọn Phường/Xã --</option>
+                                        </select>
+                                        <span class="error-message" id="wardError"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label required" for="streetAddress">Số nhà, tên đường</label>
+                                        <input type="text" id="streetAddress" class="form-input"
+                                            placeholder="Ví dụ: 123 Đường Lê Văn Việt" value="${user.address}">
+                                        <span class="error-message" id="streetError"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="notes">Ghi chú đơn hàng</label>
+                                        <textarea id="notes" class="form-textarea"
+                                            placeholder="Ghi chú thêm về đơn hàng (ví dụ: Giao hàng giờ hành chính, gọi trước khi giao...)"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Order Summary -->
+                            <div class="col-md-4">
+                                <div class="order-summary">
+                                    <div class="order-summary-title"><i class="fa fa-list-alt"></i> Tóm tắt đơn hàng
+                                    </div>
+
+                                    <div id="order-items-list"></div>
+                                    <div id="total" class="total-summary"></div>
+
+                                    <button id="confirm-btn" class="btn-place-order" onclick="confirmAndCreateOrder()">
+                                        <i class="fa fa-check-circle"></i> Xác nhận và Tạo đơn hàng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /ORDER PAGE -->
 
                 <script>
                     var pendingOrderData;
@@ -230,8 +331,8 @@
                         // 4. Lấy dữ liệu từ sessionStorage
                         const dataString = sessionStorage.getItem('pendingOrder');
                         if (!dataString) {
-                            alert('Không tìm thấy thông tin đơn hàng. Vui lòng thử lại.');
-                            window.location.href = '/cart'; // Trang giỏ hàng của bạn
+                            // Redirect immediately to cart if no pending order data
+                            window.location.replace('${pageContext.request.contextPath}/cart');
                             return;
                         }
                         console.log('Đã lấy được dataString từ sessionStorage:', dataString);
@@ -246,11 +347,11 @@
 
                         } catch (e) {
                             console.error("LỖI NGHIÊM TRỌNG KHI PARSE JSON:", e);
-                            alert('Lỗi đọc dữ liệu đơn hàng. Vui lòng quay lại giỏ hàng.');
+                            showMessage('Lỗi đọc dữ liệu đơn hàng. Vui lòng quay lại giỏ hàng.', 'msg-error');
                         }
                     });
 
-                    // HÀM MỚI (CHỐNG LỖI CÚ PHÁP)
+                    // HÀM RENDER ORDER SUMMARY
                     function renderOrderSummary(data) {
                         console.log('Đang chạy hàm renderOrderSummary...');
 
@@ -289,57 +390,288 @@
                         console.log('RENDER HOÀN TẤT!');
                     }
 
-                    // 9. Hàm xác nhận đơn hàng (giữ nguyên, không sửa)
+                    // ============ ĐỊA CHỈ VIỆT NAM API ============
+                    let addressData = {
+                        cities: [],
+                        districts: {},
+                        wards: {}
+                    };
+
+                    // Load danh sách tỉnh/thành phố khi trang load
+                    async function loadCities() {
+                        try {
+                            const response = await fetch('https://provinces.open-api.vn/api/p/');
+                            const cities = await response.json();
+
+                            addressData.cities = cities;
+
+                            const citySelect = document.getElementById('city');
+                            citySelect.innerHTML = '<option value="">-- Chọn Tỉnh/Thành phố --</option>';
+
+                            cities.forEach(city => {
+                                const option = document.createElement('option');
+                                option.value = city.code;
+                                option.textContent = city.name;
+                                citySelect.appendChild(option);
+                            });
+                        } catch (error) {
+                            console.error('Lỗi khi load danh sách tỉnh/thành phố:', error);
+                        }
+                    }
+
+                    // Load danh sách quận/huyện khi chọn tỉnh/thành phố
+                    async function loadDistricts(cityCode) {
+                        try {
+                            const response = await fetch('https://provinces.open-api.vn/api/p/' + cityCode + '?depth=2');
+                            const cityData = await response.json();
+
+                            addressData.districts[cityCode] = cityData.districts;
+
+                            const districtSelect = document.getElementById('district');
+                            const wardSelect = document.getElementById('ward');
+
+                            districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+                            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+                            cityData.districts.forEach(district => {
+                                const option = document.createElement('option');
+                                option.value = district.code;
+                                option.textContent = district.name;
+                                districtSelect.appendChild(option);
+                            });
+
+                            districtSelect.disabled = false;
+                            wardSelect.disabled = true;
+                        } catch (error) {
+                            console.error('Lỗi khi load danh sách quận/huyện:', error);
+                        }
+                    }
+
+                    // Load danh sách phường/xã khi chọn quận/huyện
+                    async function loadWards(districtCode) {
+                        try {
+                            const response = await fetch('https://provinces.open-api.vn/api/d/' + districtCode + '?depth=2');
+                            const districtData = await response.json();
+
+                            addressData.wards[districtCode] = districtData.wards;
+
+                            const wardSelect = document.getElementById('ward');
+                            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+                            districtData.wards.forEach(ward => {
+                                const option = document.createElement('option');
+                                option.value = ward.code;
+                                option.textContent = ward.name;
+                                wardSelect.appendChild(option);
+                            });
+
+                            wardSelect.disabled = false;
+                        } catch (error) {
+                            console.error('Lỗi khi load danh sách phường/xã:', error);
+                        }
+                    }
+
+                    // Xử lý sự kiện khi chọn tỉnh/thành phố
+                    document.getElementById('city').addEventListener('change', function () {
+                        const cityCode = this.value;
+                        document.getElementById('district').value = '';
+                        document.getElementById('ward').value = '';
+                        document.getElementById('ward').disabled = true;
+
+                        if (cityCode) {
+                            loadDistricts(cityCode);
+                        } else {
+                            document.getElementById('district').disabled = true;
+                            document.getElementById('district').innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+                            document.getElementById('ward').innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+                        }
+                    });
+
+                    // Xử lý sự kiện khi chọn quận/huyện
+                    document.getElementById('district').addEventListener('change', function () {
+                        const districtCode = this.value;
+                        document.getElementById('ward').value = '';
+
+                        if (districtCode) {
+                            loadWards(districtCode);
+                        } else {
+                            document.getElementById('ward').disabled = true;
+                            document.getElementById('ward').innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+                        }
+                    });
+
+                    // Load cities khi trang load
+                    loadCities();
+                    // ============ HẾT PHẦN ĐỊA CHỈ ============
+
+                    // HÀM XÁC NHẬN VÀ TẠO ĐƠN HÀNG
                     function confirmAndCreateOrder() {
-                        debugger;
                         if (!pendingOrderData) {
-                            alert('Lỗi: Dữ liệu đơn hàng không tồn tại.');
+                            showMessage('Lỗi: Dữ liệu đơn hàng không tồn tại.', 'msg-error');
                             return;
                         }
-                        const shippingAddress = document.getElementById('shippingAddress').value;
-                        if (!shippingAddress) {
-                            alert('Vui lòng nhập địa chỉ giao hàng.');
+
+                        // Validate form
+                        if (!validateForm()) {
+                            showMessage('Vui lòng điền đầy đủ thông tin giao hàng.', 'msg-error');
                             return;
                         }
-                        // ... (Code fetch API của bạn) ...
+
+                        const fullName = document.getElementById('fullName').value.trim();
+                        const phone = document.getElementById('phone').value.trim();
+                        const streetAddress = document.getElementById('streetAddress').value.trim();
+                        const notes = document.getElementById('notes').value.trim();
+
+                        // Lấy text của các dropdown đã chọn
+                        const citySelect = document.getElementById('city');
+                        const districtSelect = document.getElementById('district');
+                        const wardSelect = document.getElementById('ward');
+
+                        const cityName = citySelect.options[citySelect.selectedIndex].text;
+                        const districtName = districtSelect.options[districtSelect.selectedIndex].text;
+                        const wardName = wardSelect.options[wardSelect.selectedIndex].text;
+
+                        // Ghép địa chỉ đầy đủ
+                        const shippingAddress = streetAddress + ', ' + wardName + ', ' + districtName + ', ' + cityName;
+
                         confirmBtn.disabled = true;
-                        confirmBtn.textContent = 'Đang xử lý...';
+                        confirmBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang xử lý...';
                         showMessage('Đang tạo đơn hàng...', 'msg-info');
-                        pendingOrderData.shippingAddress = shippingAddress;
-                        fetch('/api/orders/create', {
+
+                        // Tạo orderRequest với đầy đủ thông tin
+                        var orderRequest = {
+                            orderItems: pendingOrderData.orderItems,
+                            totalAmount: pendingOrderData.totalAmount,
+                            shippingAddress: shippingAddress,
+                            fullName: fullName,
+                            phone: phone,
+                            notes: notes
+                        };
+
+                        console.log('Sending orderRequest:', orderRequest);
+
+                        fetch('${pageContext.request.contextPath}/api/orders/create', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify(pendingOrderData)
+                            body: JSON.stringify(orderRequest)
                         })
                             .then(function (response) {
                                 if (response.status === 401 || response.status === 403) {
-                                    window.location.href = '/login';
+                                    window.location.href = '${pageContext.request.contextPath}/login';
                                     throw new Error('Chưa đăng nhập hoặc không có quyền.');
                                 }
                                 if (!response.ok) {
-                                    throw new Error('Lỗi khi tạo đơn hàng. Mã lỗi: ' + response.status);
+                                    return response.text().then(function (text) {
+                                        console.error('Server error response:', text);
+                                        throw new Error('Lỗi khi tạo đơn hàng. Mã lỗi: ' + response.status);
+                                    });
                                 }
                                 return response.json();
                             })
                             .then(function (order) {
                                 showMessage('Tạo đơn hàng thành công! Mã đơn: ' + order.orderId, 'msg-success');
                                 sessionStorage.removeItem('pendingOrder');
-                                window.location.href = '/order/' + order.orderId;
+
+                                // Update cart count
+                                if (typeof updateGlobalCartCount === 'function') {
+                                    updateGlobalCartCount();
+                                }
+
+                                setTimeout(function () {
+                                    // Use replace instead of href to prevent back button from returning to order_create
+                                    window.location.replace('${pageContext.request.contextPath}/order/' + order.orderId);
+                                }, 1500);
                             })
                             .catch(function (error) {
                                 console.error('Error:', error);
                                 showMessage('Lỗi khi tạo đơn hàng: ' + error.message, 'msg-error');
                                 confirmBtn.disabled = false;
-                                confirmBtn.textContent = 'Xác nhận và Tạo đơn hàng';
+                                confirmBtn.innerHTML = '<i class="fa fa-check-circle"></i> Xác nhận và Tạo đơn hàng';
                             });
+                    }
+
+                    function validateForm() {
+                        var isValid = true;
+
+                        // Clear previous errors
+                        document.querySelectorAll('.error-message').forEach(function (el) {
+                            el.textContent = '';
+                        });
+                        document.querySelectorAll('.form-input').forEach(function (el) {
+                            el.classList.remove('error');
+                        });
+
+                        // Validate fullName
+                        const fullName = document.getElementById('fullName').value.trim();
+                        if (!fullName) {
+                            document.getElementById('fullNameError').textContent = 'Vui lòng nhập họ và tên';
+                            document.getElementById('fullName').classList.add('error');
+                            isValid = false;
+                        } else if (fullName.length < 3) {
+                            document.getElementById('fullNameError').textContent = 'Họ tên phải có ít nhất 3 ký tự';
+                            document.getElementById('fullName').classList.add('error');
+                            isValid = false;
+                        }
+
+                        // Validate phone
+                        const phone = document.getElementById('phone').value.trim();
+                        if (!phone) {
+                            document.getElementById('phoneError').textContent = 'Vui lòng nhập số điện thoại';
+                            document.getElementById('phone').classList.add('error');
+                            isValid = false;
+                        } else if (!/^[0-9]{10,11}$/.test(phone)) {
+                            document.getElementById('phoneError').textContent = 'Số điện thoại không hợp lệ (10-11 số)';
+                            document.getElementById('phone').classList.add('error');
+                            isValid = false;
+                        }
+
+                        // Validate city
+                        const city = document.getElementById('city').value;
+                        if (!city) {
+                            document.getElementById('cityError').textContent = 'Vui lòng chọn Tỉnh/Thành phố';
+                            document.getElementById('city').classList.add('error');
+                            isValid = false;
+                        }
+
+                        // Validate district
+                        const district = document.getElementById('district').value;
+                        if (!district) {
+                            document.getElementById('districtError').textContent = 'Vui lòng chọn Quận/Huyện';
+                            document.getElementById('district').classList.add('error');
+                            isValid = false;
+                        }
+
+                        // Validate ward
+                        const ward = document.getElementById('ward').value;
+                        if (!ward) {
+                            document.getElementById('wardError').textContent = 'Vui lòng chọn Phường/Xã';
+                            document.getElementById('ward').classList.add('error');
+                            isValid = false;
+                        }
+
+                        // Validate street address
+                        const streetAddress = document.getElementById('streetAddress').value.trim();
+                        if (!streetAddress) {
+                            document.getElementById('streetError').textContent = 'Vui lòng nhập số nhà, tên đường';
+                            document.getElementById('streetAddress').classList.add('error');
+                            isValid = false;
+                        } else if (streetAddress.length < 5) {
+                            document.getElementById('streetError').textContent = 'Địa chỉ quá ngắn, vui lòng nhập đầy đủ';
+                            document.getElementById('streetAddress').classList.add('error');
+                            isValid = false;
+                        }
+
+                        return isValid;
                     }
 
                     function showMessage(message, type) {
                         messageContainer.textContent = message;
                         messageContainer.className = type;
+                        messageContainer.style.display = 'block';
                     }
                 </script>
+
             </body>
 
             </html>

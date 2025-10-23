@@ -4,245 +4,503 @@
         <html>
 
         <head>
-            <title>Danh sách Users (Admin)</title>
-            <style>
-                table {
-                    border-collapse: collapse;
-                    width: 100%;
-                }
-
-                th,
-                td {
-                    border: 1px solid #ccc;
-                    padding: 8px;
-                    text-align: left;
-                }
-
-                th {
-                    background-color: #f2f2f2;
-                }
-
-                .btn {
-                    padding: 4px 8px;
-                    text-decoration: none;
-                    border: 1px solid #333;
-                    border-radius: 4px;
-                }
-
-                .btn-edit {
-                    background-color: #4CAF50;
-                    color: white;
-                    padding: 4px 8px;
-                    text-decoration: none;
-                    border: 1px solid #333;
-                    border-radius: 4px;
-                    transition: background-color 0.3s, transform 0.2s;
-                    cursor: pointer;
-                }
-
-                .btn-edit:hover {
-                    background-color: #45a049;
-                    transform: scale(1.05);
-                }
-
-                .btn-delete {
-                    background-color: #f44336;
-                    color: white;
-                }
-
-                .filter-input {
-                    width: 120px;
-                    margin-right: 5px;
-                }
-
-                .edit-form-row {
-                    background: #f9f9f9;
-                }
-
-                .edit-form-row input,
-                .edit-form-row select {
-                    margin-right: 5px;
-                    padding: 2px 4px;
-                }
-            </style>
+            <title>Quản lý người dùng</title>
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <link rel="stylesheet" href="<c:url value='/css/admin-dashboard.css'/>" />
+            <link rel="stylesheet" href="<c:url value='/css/users_admin.css'/>" />
+            <link rel="stylesheet" href="<c:url value='/css/user_forms.css'/>" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
         </head>
 
         <body>
-            <h2>Danh sách Users (Admin)</h2>
+            <!-- app layout with collapsible sidebar -->
+            <div class="app-layout">
+                <!-- Metismenu-style sidebar -->
+                <div class="quixnav sidebar" id="sidebar">
+                    <div class="quixnav-scroll">
+                        <button id="navToggle" class="nav-toggle-btn" title="Toggle sidebar">☰</button>
+                        <ul class="metismenu" id="menu">
+                            <li>
+                                <a href="${pageContext.request.contextPath}/admin/dashboard"><i class="icon icon-home"></i><span class="nav-text">Dashboard</span></a>
+                            </li>
+                            <li class="active">
+                                <a href="${pageContext.request.contextPath}/admin/users"><i class="fas fa-users"></i><span class="nav-text">Users</span></a>
+                            </li>
+                            <li>
+                                <a href="${pageContext.request.contextPath}/admin/products"><i class="fas fa-box"></i><span class="nav-text">Products</span></a>
+                            </li>
+                            <li>
+                                <a href="${pageContext.request.contextPath}/admin/categories"><i class="fas fa-tag"></i><span class="nav-text">Categories</span></a>
+                            </li>
+                            <li>
+                                <a href="${pageContext.request.contextPath}/admin/chat"><i class="fas fa-comments"></i><span class="nav-text">Chat</span></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-            <button type="button" class="btn btn-edit"
-                onclick="document.getElementById('createFormDiv').style.display='block';">
-                Tạo user mới
-            </button>
-            <br /><br />
+                <div class="main-content">
+                    <div class="container">
+                        <div class="page-title" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h2>Quản lý người dùng</h2>
+                            <button type="button" class="btn btn-success" onclick="showCreateForm()" style="height: 38px; display: flex; align-items: center; gap: 8px; padding: 0 15px;">
+                                <i class="fas fa-plus"></i> Tạo người dùng mới
+                            </button>
+                        </div>
+                        </div>
 
-            <!-- Form tạo user ẩn -->
-            <div id="createFormDiv"
-                style="display:none; background:#eef; padding:10px; border:1px solid #ccc; margin-bottom:10px;">
+                        <!-- Thông báo lỗi/thành công -->
+                        <c:if test="${not empty error}">
+                            <div class="alert alert-danger" style="padding: 12px; background: #ffebee; color: #c62828; margin-bottom: 15px; border-radius: 4px;">
+                                <i class="fas fa-exclamation-circle"></i> ${error}
+                            </div>
+                        </c:if>
 
-                <c:if test="${not empty error}">
-                    <p style="color:red">${error}</p>
-                </c:if>
+                        <c:if test="${not empty success}">
+                            <div class="alert alert-success" style="padding: 12px; background: #e8f5e9; color: #2e7d32; margin-bottom: 15px; border-radius: 4px;">
+                                <i class="fas fa-check-circle"></i> ${success}
+                            </div>
+                        </c:if>
 
-                <c:if test="${not empty success}">
-                    <p style="color:green">${success}</p>
-                </c:if>
+                        <!-- Form tạo user ẩn -->
+                        <div id="createFormDiv" style="display:none; background: white; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 5px;">
+                            <h3 style="margin-top: 0;">Tạo người dùng mới</h3>
+                            <form action="${pageContext.request.contextPath}/admin/createUser" method="post" id="createUserForm">
+                                <table style="width: 100%; border-collapse: separate; border-spacing: 0 10px;">
+                                    <tr>
+                                        <td style="width: 120px;"><label>Số điện thoại:</label></td>
+                                        <td><input type="text" name="phone" style="width: 100%; padding: 5px;" required /></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label>Họ và tên:</label></td>
+                                        <td><input type="text" name="fullname" style="width: 100%; padding: 5px;" required /></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label>Email:</label></td>
+                                        <td><input type="email" name="email" style="width: 100%; padding: 5px;" required /></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label>Vai trò:</label></td>
+                                        <td>
+                                            <select name="role" style="width: 100%; padding: 5px;" required>
+                                                <option value="ADMIN">ADMIN</option>
+                                                <option value="USER" selected>USER</option>
+                                                <option value="SELLER">SELLER</option>
+                                                <option value="GUEST">GUEST</option>
+                                                <option value="SHIPPER">SHIPPER</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" style="text-align: right; padding-top: 10px;">
+                                            <button type="button" onclick="document.getElementById('createFormDiv').style.display='none'" 
+                                                    style="padding: 6px 12px; background-color: #f0f0f0; border: 1px solid #ddd; margin-right: 10px; cursor: pointer;">Hủy</button>
+                                            <button type="submit" style="padding: 6px 12px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Tạo người dùng</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </form>
+                        </div>
 
-                <form action="${pageContext.request.contextPath}/admin/createUser" method="post">
-                    Phone: <input type="text" name="phone" required />
-                    Full Name: <input type="text" name="fullname" required />
-                    Email: <input type="email" name="email" required />
-                    Address: <input type="text" name="address" />
-                    Role:
-                    <select name="role" required>
-                        <option value="ADMIN">ADMIN</option>
-                        <option value="USER">USER</option>
-                        <option value="SELLER">SELLER</option>
-                        <option value="GUEST">GUEST</option>
-                        <option value="SHIPPER">SHIPPER</option>
-                    </select>
-                    Active:
-                    <select name="active" required>
-                        <option value="true">Đang hoạt động</option>
-                        <option value="false">Ngưng hoạt động</option>
-                    </select>
-                    <button type="submit" class="btn btn-save">Tạo</button>
-                    <button type="button" class="btn btn-cancel"
-                        onclick="document.getElementById('createFormDiv').style.display='none'">Hủy</button>
-                </form>
-            </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Danh sách người dùng</h3>
+                            </div>
+                            <div class="card-body">
+                                <!-- Bộ lọc client-side -->
+                                <div class="filter-container">
+                                    <div class="filter-group">
+                                        <label>Số điện thoại:</label>
+                                        <input type="text" id="filterPhone" class="filter-input" onkeyup="filterTable()">
+                                    </div>
+                                    <div class="filter-group">
+                                        <label>Họ và tên:</label>
+                                        <input type="text" id="filterFullname" class="filter-input" onkeyup="filterTable()">
+                                    </div>
+                                    <div class="filter-group">
+                                        <label>Email:</label>
+                                        <input type="text" id="filterEmail" class="filter-input" onkeyup="filterTable()">
+                                    </div>
+                                    <div class="filter-group">
+                                        <label>Vai trò:</label>
+                                        <select id="filterRole" onchange="filterTable()">
+                                            <option value="">-- Tất cả --</option>
+                                            <option value="ADMIN">ADMIN</option>
+                                            <option value="USER">USER</option>
+                                            <option value="SELLER">SELLER</option>
+                                            <option value="GUEST">GUEST</option>
+                                            <option value="SHIPPER">SHIPPER</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <label>Trạng thái:</label>
+                                        <select id="filterActive" onchange="filterTable()">
+                                            <option value="">-- Tất cả --</option>
+                                            <option value="true">Đang hoạt động</option>
+                                            <option value="false">Ngưng hoạt động</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-            <!-- Bộ lọc client-side -->
-            <label>Phone:</label><input type="text" id="filterPhone" class="filter-input" onkeyup="filterTable()">
-            <label>Full Name:</label><input type="text" id="filterFullname" class="filter-input"
-                onkeyup="filterTable()">
-            <label>Email:</label><input type="text" id="filterEmail" class="filter-input" onkeyup="filterTable()">
-            <label>Role:</label>
-            <select id="filterRole" onchange="filterTable()">
-                <option value="">--All--</option>
-                <option value="ADMIN">ADMIN</option>
-                <option value="USER">USER</option>
-                <option value="SELLER">SELLER</option>
-                <option value="GUEST">GUEST</option>
-                <option value="SHIPPER">SHIPPER</option>
-            </select>
-            <label>Active:</label>
-            <select id="filterActive" onchange="filterTable()">
-                <option value="">--All--</option>
-                <option value="true">Đang hoạt động</option>
-                <option value="false">Ngưng hoạt động</option>
-            </select>
-
-            <br /><br />
-
-            <table id="usersTable">
-                <tr>
-                    <th>ID</th>
-                    <th>Phone</th>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Address</th>
-                    <th>Role</th>
-                    <th>Active</th>
-                    <th>Avatar</th>
-                    <th>Hành động</th>
-                </tr>
-                <c:forEach var="user" items="${users}">
+            <table id="usersTable" style="width: 100%; border-collapse: collapse;">
+                <thead>
                     <tr>
-                        <td>${user.id}</td>
-                        <td>${user.phone}</td>
-                        <td>${user.fullname}</td>
-                        <td>${user.email}</td>
-                        <td>${user.address}</td>
-                        <td>${user.role}</td>
-                        <td>${user.active}</td>
-                        <td>
-                            <c:if test="${not empty user.avatarUrl}">
-                                <img src="${pageContext.request.contextPath}${user.avatarUrl}" width="50" height="50" />
-                            </c:if>
-                        </td>
-                        <td>
-                            <button type="button" onclick="showEditForm('${user.id}')" class="btn btn-edit">Sửa</button>
-                            <form action="${pageContext.request.contextPath}/admin/deleteUser/${user.id}" method="post"
-                                style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa user này?');">
-                                <button type="submit" class="btn btn-delete">Xóa</button>
-                            </form>
-                        </td>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd; background-color: #f5f5f5;">ID</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd; background-color: #f5f5f5;">Avatar</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd; background-color: #f5f5f5;">Số điện thoại</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd; background-color: #f5f5f5;">Họ và tên</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd; background-color: #f5f5f5;">Email</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd; background-color: #f5f5f5;">Địa chỉ</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd; background-color: #f5f5f5;">Vai trò</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd; background-color: #f5f5f5;">Trạng thái</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd; background-color: #f5f5f5;">Hành động</th>
                     </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="user" items="${users.content}">
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${not empty user.avatarUrl}">
+                                        <img src="${pageContext.request.contextPath}${user.avatarUrl}" class="avatar" alt="${user.fullname}" />
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #757575;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>${user.phone}</td>
+                            <td><strong>${user.fullname}</strong></td>
+                            <td>${user.email}</td>
+                            <td>${user.address}</td>
+                            <td>
+                                <span class="badge ${user.role == 'ADMIN' ? 'badge-danger' : 'badge-success'}">${user.role}</span>
+                            </td>
+                            <td>
+                                <span class="badge ${user.active ? 'badge-success' : 'badge-danger'}">
+                                    ${user.active ? 'Đang hoạt động' : 'Ngưng hoạt động'}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button type="button" onclick="showEditForm('${user.id}')" class="btn action-btn btn-edit">
+                                        <i class="fas fa-edit"></i> Sửa
+                                    </button>
+                                    <form action="${pageContext.request.contextPath}/admin/deleteUser/${user.id}" method="post"
+                                        style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa người dùng này?');">
+                                        <button type="submit" class="btn action-btn btn-delete">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
 
-                    <!-- Form ẩn sửa user -->
-                    <tr id="editFormRow-${user.id}" class="edit-form-row" style="display:none;">
-                        <td colspan="9">
-                            <form action="${pageContext.request.contextPath}/admin/updateUser/${user.id}" method="post">
-                                Full Name: <input type="text" name="fullname" value="${user.fullname}" required />
-                                Email: <input type="email" name="email" value="${user.email}" required />
-                                Address: <input type="text" name="address" value="${user.address}" />
-                                Role:
-                                <select name="role" required>
-                                    <option value="ADMIN" ${user.role=='ADMIN' ? 'selected' : '' }>ADMIN</option>
-                                    <option value="USER" ${user.role=='USER' ? 'selected' : '' }>USER</option>
-                                    <option value="SELLER" ${user.role=='SELLER' ? 'selected' : '' }>SELLER</option>
-                                    <option value="GUEST" ${user.role=='GUEST' ? 'selected' : '' }>GUEST</option>
-                                    <option value="SHIPPER" ${user.role=='SHIPPER' ? 'selected' : '' }>SHIPPER</option>
-                                </select>
-                                Active:
-                                <select name="active" required>
-                                    <option value="true" ${user.active ? 'selected' : '' }>Đang hoạt động</option>
-                                    <option value="false" ${!user.active ? 'selected' : '' }>Ngưng hoạt động</option>
-                                </select>
-                                <button type="submit" class="btn btn-save">Lưu</button>
-                                <button type="button" onclick="hideEditForm('${user.id}')"
-                                    class="btn btn-cancel">Hủy</button>
-                            </form>
-                        </td>
-                    </tr>
-
-                </c:forEach>
+                        <!-- Form ẩn sửa user -->
+                        <tr id="editFormRow-${user.id}" class="edit-form-row" style="display:none;">
+                            <td colspan="9">
+                                <form action="${pageContext.request.contextPath}/admin/updateUser/${user.id}" method="post">
+                                    <table style="width: 100%; border-collapse: separate; border-spacing: 0 10px;">
+                                        <tr>
+                                            <td style="width: 120px;"><label>Họ và tên:</label></td>
+                                            <td><input type="text" name="fullname" value="${user.fullname}" style="width: 100%; padding: 5px;" required /></td>
+                                        </tr>
+                                        <tr>
+                                            <td><label>Email:</label></td>
+                                            <td><input type="email" name="email" value="${user.email}" style="width: 100%; padding: 5px;" required /></td>
+                                        </tr>
+                                        <tr>
+                                            <td><label>Địa chỉ:</label></td>
+                                            <td><input type="text" name="address" value="${user.address}" style="width: 100%; padding: 5px;" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td><label>Vai trò:</label></td>
+                                            <td>
+                                                <select name="role" style="width: 100%; padding: 5px;" required>
+                                                    <option value="ADMIN" ${user.role=='ADMIN' ? 'selected' : '' }>ADMIN</option>
+                                                    <option value="USER" ${user.role=='USER' ? 'selected' : '' }>USER</option>
+                                                    <option value="SELLER" ${user.role=='SELLER' ? 'selected' : '' }>SELLER</option>
+                                                    <option value="GUEST" ${user.role=='GUEST' ? 'selected' : '' }>GUEST</option>
+                                                    <option value="SHIPPER" ${user.role=='SHIPPER' ? 'selected' : '' }>SHIPPER</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label>Trạng thái:</label></td>
+                                            <td>
+                                                <select name="active" style="width: 100%; padding: 5px;" required>
+                                                    <option value="true" ${user.active ? 'selected' : '' }>Đang hoạt động</option>
+                                                    <option value="false" ${!user.active ? 'selected' : '' }>Ngưng hoạt động</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" style="text-align: right; padding-top: 10px;">
+                                                <button type="button" onclick="hideEditForm('${user.id}')" class="btn btn-outline" style="margin-right: 10px;">Hủy</button>
+                                                <button type="submit" class="btn btn-success">Lưu thay đổi</button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </form>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
             </table>
+            
+                <!-- Pagination controls -->
+            <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <!-- Left side: Empty space or info text -->
+                <div style="min-width: 150px;">
+                    <span style="color: #666;">Tổng: ${users.totalElements} người dùng</span>
+                </div>
+                
+                <!-- Center: Pagination -->
+                <div style="display: flex; justify-content: center;">
+                    <ul class="pagination" style="display: flex; list-style: none; padding: 0; margin: 0;">
+                        <c:choose>
+                            <c:when test="${users.first}">
+                                <li style="margin: 0 2px;">
+                                    <a href="#" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #aaa; cursor: not-allowed;">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li style="margin: 0 2px;">
+                                    <a href="#" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #aaa; cursor: not-allowed;">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li style="margin: 0 2px;">
+                                    <a href="?page=0&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li style="margin: 0 2px;">
+                                    <a href="?page=${users.number - 1}&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+                        
+                        <c:forEach begin="${Math.max(0, users.number - 2)}" end="${Math.min(users.totalPages - 1, users.number + 2)}" var="i">
+                            <c:choose>
+                                <c:when test="${i == users.number}">
+                                    <li style="margin: 0 2px;">
+                                        <a href="?page=${i}&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; background-color: #007bff; color: white;">
+                                            ${i + 1}
+                                        </a>
+                                    </li>
+                                </c:when>
+                                <c:otherwise>
+                                    <li style="margin: 0 2px;">
+                                        <a href="?page=${i}&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
+                                            ${i + 1}
+                                        </a>
+                                    </li>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+                        
+                        <c:choose>
+                            <c:when test="${users.last}">
+                                <li style="margin: 0 2px;">
+                                    <a href="#" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #aaa; cursor: not-allowed;">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li style="margin: 0 2px;">
+                                    <a href="#" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #aaa; cursor: not-allowed;">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li style="margin: 0 2px;">
+                                    <a href="?page=${users.number + 1}&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li style="margin: 0 2px;">
+                                    <a href="?page=${users.totalPages - 1}&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+                    </ul>
+                </div>
+                
+                <!-- Right side: Page size selector -->
+                <div>
+                    <select id="pageSizeSelector" onchange="changePageSize(this.value)" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                        <option value="5" ${users.size == 5 ? 'selected' : ''}>5 dòng</option>
+                        <option value="10" ${users.size == 10 ? 'selected' : ''}>10 dòng</option>
+                        <option value="20" ${users.size == 20 ? 'selected' : ''}>20 dòng</option>
+                        <option value="50" ${users.size == 50 ? 'selected' : ''}>50 dòng</option>
+                    </select>
+                </div>
+            </div>                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <script>
                 function filterTable() {
+                    // Get filter values
                     let phone = document.getElementById('filterPhone').value.toLowerCase();
                     let fullname = document.getElementById('filterFullname').value.toLowerCase();
                     let email = document.getElementById('filterEmail').value.toLowerCase();
                     let role = document.getElementById('filterRole').value;
                     let active = document.getElementById('filterActive').value;
-
-                    let table = document.getElementById('usersTable');
-                    let tr = table.getElementsByTagName('tr');
-
-                    for (let i = 1; i < tr.length; i++) { // bỏ header
-                        // Skip edit form rows
-                        if (tr[i].classList.contains('edit-form-row')) continue;
-
-                        let tdPhone = tr[i].getElementsByTagName('td')[1].textContent.toLowerCase();
-                        let tdFullname = tr[i].getElementsByTagName('td')[2].textContent.toLowerCase();
-                        let tdEmail = tr[i].getElementsByTagName('td')[3].textContent.toLowerCase();
-                        let tdRole = tr[i].getElementsByTagName('td')[5].textContent;
-                        let tdActive = tr[i].getElementsByTagName('td')[6].textContent.toLowerCase() === 'true' ? 'true' : 'false';
-
-                        let show = true;
-                        if (phone && !tdPhone.includes(phone)) show = false;
-                        if (fullname && !tdFullname.includes(fullname)) show = false;
-                        if (email && !tdEmail.includes(email)) show = false;
-                        if (role && tdRole !== role) show = false;
-                        if (active && tdActive !== active) show = false;
-
-                        tr[i].style.display = show ? '' : 'none';
-
-                        // hide corresponding edit form if row is hidden
-                        let editRow = document.getElementById('editFormRow-' + tr[i].getElementsByTagName('td')[0].textContent);
-                        if (editRow) editRow.style.display = 'none';
-                    }
+                    
+                    // Create URL with current search params
+                    const url = new URL(window.location);
+                    
+                    // Preserve pagination parameters
+                    let page = url.searchParams.get('page') || '0';
+                    let size = url.searchParams.get('size') || '10';
+                    
+                    // Add filter parameters
+                    if (phone) url.searchParams.set('phone', phone);
+                    else url.searchParams.delete('phone');
+                    
+                    if (fullname) url.searchParams.set('fullname', fullname);
+                    else url.searchParams.delete('fullname');
+                    
+                    if (email) url.searchParams.set('email', email);
+                    else url.searchParams.delete('email');
+                    
+                    if (role) url.searchParams.set('role', role);
+                    else url.searchParams.delete('role');
+                    
+                    if (active) url.searchParams.set('active', active);
+                    else url.searchParams.delete('active');
+                    
+                    // Preserve page size
+                    url.searchParams.set('size', size);
+                    
+                    // Reset to first page when filtering
+                    url.searchParams.set('page', '0');
+                    
+                    // Redirect to apply server-side filtering
+                    window.location.href = url.toString();
+                }
+                
+                // Mở form tạo mới
+                function showCreateForm() {
+                    document.getElementById('createFormDiv').style.display = 'block';
+                }
+                
+                // Đóng form tạo mới
+                function closeCreateForm() {
+                    document.getElementById('createFormDiv').style.display = 'none';
+                    document.getElementById('createUserForm').reset();
                 }
 
                 function showEditForm(userId) {
-                    document.getElementById('editFormRow-' + userId).style.display = '';
+                    // Hide all other edit forms first
+                    const allEditForms = document.querySelectorAll('.edit-form-row');
+                    allEditForms.forEach(form => form.style.display = 'none');
+                    
+                    // Show this form
+                    const editRow = document.getElementById('editFormRow-' + userId);
+                    editRow.style.display = '';
+                    
+                    // Scroll to the form
+                    editRow.scrollIntoView({behavior: 'smooth', block: 'center'});
                 }
 
                 function hideEditForm(userId) {
                     document.getElementById('editFormRow-' + userId).style.display = 'none';
                 }
+                
+                // sidebar toggle: wire toggle button, live toggle and persist state
+                (function () {
+                    const sidebar = document.getElementById('sidebar');
+                    const toggle = document.getElementById('navToggle');
+                    if (!sidebar || !toggle) return;
+
+                    function isCollapsed() {
+                        return localStorage.getItem('admin_sidebar_collapsed') === '1';
+                    }
+
+                    function apply() {
+                        const collapsed = isCollapsed();
+                        if (window.innerWidth <= 800) {
+                            sidebar.classList.toggle('open', collapsed);
+                            sidebar.classList.remove('collapsed');
+                        } else {
+                            sidebar.classList.toggle('collapsed', collapsed);
+                            sidebar.classList.remove('open');
+                        }
+                    }
+
+                    // initial apply
+                    apply();
+
+                    // toggle on click
+                    toggle.addEventListener('click', function () {
+                        const current = isCollapsed();
+                        localStorage.setItem('admin_sidebar_collapsed', current ? '0' : '1');
+                        apply();
+                    });
+
+                    // update on resize
+                    window.addEventListener('resize', apply);
+                })();
+                
+                // Hàm chuyển đổi kích thước trang
+                function changePageSize(size) {
+                    const url = new URL(window.location);
+                    url.searchParams.set('size', size);
+                    url.searchParams.set('page', '0'); // Reset về trang đầu tiên khi thay đổi kích thước
+                    window.location.href = url.toString();
+                }
+                
+                // Kiểm tra thông báo thành công từ URL
+                document.addEventListener('DOMContentLoaded', function() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const successMsg = urlParams.get('success');
+                    if (successMsg) {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success';
+                        alertDiv.style.padding = '12px';
+                        alertDiv.style.background = '#e8f5e9';
+                        alertDiv.style.color = '#2e7d32';
+                        alertDiv.style.marginBottom = '15px';
+                        alertDiv.style.borderRadius = '4px';
+                        
+                        const icon = document.createElement('i');
+                        icon.className = 'fas fa-check-circle';
+                        alertDiv.appendChild(icon);
+                        
+                        alertDiv.appendChild(document.createTextNode(' ' + successMsg));
+                        
+                        // Insert after page-title
+                        const pageTitle = document.querySelector('.page-title');
+                        pageTitle.parentNode.insertBefore(alertDiv, pageTitle.nextSibling);
+                        
+                        // Auto-hide after 5 seconds
+                        setTimeout(function() {
+                            alertDiv.style.opacity = '0';
+                            alertDiv.style.transition = 'opacity 1s';
+                            setTimeout(function() {
+                                alertDiv.remove();
+                                // Remove success parameter from URL without page reload
+                                const url = new URL(window.location);
+                                url.searchParams.delete('success');
+                                window.history.replaceState({}, '', url);
+                            }, 1000);
+                        }, 5000);
+                    }
+                });
             </script>
 
         </body>

@@ -6,6 +6,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <title>Trang quản trị</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="stylesheet" href="<c:url value='/css/admin-dashboard.css'/>" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   </head>
   <body>
     <div class="top-grid">
@@ -69,19 +70,20 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <div class="quixnav-scroll">
           <button id="navToggle" class="nav-toggle-btn" title="Toggle sidebar">☰</button>
           <ul class="metismenu" id="menu">
-  
-       
-            <li>
-              <a href="${pageContext.request.contextPath}/admin/users"><i class="icon icon-chat"></i><span class="nav-text">Users</span></a>
+            <li class="active">
+              <a href="${pageContext.request.contextPath}/admin/dashboard"><i class="icon icon-home"></i><span class="nav-text">Dashboard</span></a>
             </li>
             <li>
-              <a href="${pageContext.request.contextPath}/admin/products"><i class="icon icon-chat"></i><span class="nav-text">Products</span></a>
+              <a href="${pageContext.request.contextPath}/admin/users"><i class="fas fa-users"></i><span class="nav-text">Users</span></a>
             </li>
             <li>
-              <a href="${pageContext.request.contextPath}/admin/categories"><i class="icon icon-list"></i><span class="nav-text">Categories</span></a>
+              <a href="${pageContext.request.contextPath}/admin/products"><i class="fas fa-box"></i><span class="nav-text">Products</span></a>
             </li>
             <li>
-              <a href="${pageContext.request.contextPath}/admin/chat"><i class="icon icon-chat"></i><span class="nav-text">Chat</span></a>
+              <a href="${pageContext.request.contextPath}/admin/categories"><i class="fas fa-tag"></i><span class="nav-text">Categories</span></a>
+            </li>
+            <li>
+              <a href="${pageContext.request.contextPath}/admin/chat"><i class="fas fa-comments"></i><span class="nav-text">Chat</span></a>
             </li>
           </ul>
         </div>

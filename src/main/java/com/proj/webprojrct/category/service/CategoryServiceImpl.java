@@ -16,15 +16,19 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repo;
 
-    public CategoryServiceImpl(CategoryRepository repo) { this.repo = repo; }
+    public CategoryServiceImpl(CategoryRepository repo) {
+        this.repo = repo;
+    }
 
     @Override
     public CategoryDto create(CategoryDto dto) {
-        if (repo.findByName(dto.getName()).isPresent())
+        if (repo.findByName(dto.getName()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên danh mục đã tồn tại");
+        }
         Category c = Category.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
+                .parentId(dto.getParentId())
                 .build();
         return map(repo.save(c));
     }
@@ -35,13 +39,15 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục #" + id));
         c.setName(dto.getName());
         c.setDescription(dto.getDescription());
+        c.setParentId(dto.getParentId());
         return map(repo.save(c));
     }
 
     @Override
     public void delete(Long id) {
-        if (!repo.existsById(id))
+        if (!repo.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục #" + id);
+        }
         repo.deleteById(id);
     }
 
@@ -57,6 +63,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     private CategoryDto map(Category c) {
-        return new CategoryDto(c.getId(), c.getName(), c.getDescription());
+        return new CategoryDto(c.getId(), c.getName(), c.getDescription(), c.getParentId());
     }
 }

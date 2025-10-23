@@ -8,8 +8,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "categories")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Category {
 
     @Id
@@ -21,6 +24,9 @@ public class Category {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "parent_id")
+    private Long parentId;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

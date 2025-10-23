@@ -3,6 +3,7 @@ package com.proj.webprojrct.order.service;
 import com.proj.webprojrct.order.dto.request.OrderRequest;
 import com.proj.webprojrct.order.dto.response.OrderResponse;
 import com.proj.webprojrct.payment.entity.Payment;
+import com.proj.webprojrct.order.entity.Order;
 import java.util.List;
 
 public interface OrderService {
@@ -16,4 +17,6 @@ public interface OrderService {
     void cancelOrder(Long orderId);
 
     Payment updateOrderPayment(Long orderId);
+
+    Order getOrderByOrderId(Long orderId);
 }

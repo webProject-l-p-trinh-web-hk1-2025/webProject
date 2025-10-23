@@ -228,6 +228,11 @@ public class PaymentService {
             result.put("responseMessage", responseMessages.getOrDefault(responseCode, "Không xác định"));
             result.put("transactionStatus", transactionStatus);
             result.put("transactionMessage", statusMessages.getOrDefault(transactionStatus, "Không xác định"));
+
+            //xoa paymentUrlVnpay sau khi thanh toan thanh cong
+            long orderId = Long.parseLong(request.getParameter("vnp_TxnRef"));
+            PaymentUrlVnpay paymentUrl = paymentUrlVnpayRepository.findByOrderId(orderId);
+            paymentUrlVnpayRepository.delete(paymentUrl);
         } else {
             // Chữ ký không hợp lệ
             result.put("error", "Chữ ký không hợp lệ");
@@ -348,7 +353,6 @@ public class PaymentService {
         if ("02".equals(trantype)) {
             percent = 100;
         }
-
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng (Order) với ID: " + orderId));
         BigDecimal totalAmountBigDecimal = order.getTotalAmount();
         BigDecimal multiplier = new BigDecimal("100");
@@ -426,6 +430,7 @@ public class PaymentService {
         }
         in.close();
         System.out.println(response.toString());
+
         return response.toString();
     }
 
@@ -473,6 +478,26 @@ public class PaymentService {
         return paymentRepository.findByOrderId(orderId);
     }
 
+    public String getPaymentMethodByOrderId(long orderId) {
+        Payment payment = paymentRepository.findByOrderId(orderId);
+        if (payment != null) {
+            return payment.getMethod();
+        }
+        return null;
+    }
+
+    public String getPaymentStatusByOrderId(long orderId) {
+        Payment payment = paymentRepository.findByOrderId(orderId);
+        if (payment != null) {
+            return payment.getStatus();
+        }
+        return null;
+    }
+
+    public boolean existsByOrderId(Long orderId) {
+        return paymentRepository.existsByOrderId(orderId);
+    }
+
     public boolean getPaymentByOrderId(Long orderId) {
         // Kiểm tra có order không
         if (!paymentRepository.existsByOrderId(orderId)) {
@@ -496,4 +521,5 @@ public class PaymentService {
             return false;
         }
     }
+
 }

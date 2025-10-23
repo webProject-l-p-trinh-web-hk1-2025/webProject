@@ -112,28 +112,30 @@
             <script>
                 function cancelOrder(orderId) {
                     if (!confirm("Bạn có chắc muốn hủy đơn hàng này?")) return;
-
+                    debugger;
                     fetch('/api/orders/' + orderId + '/cancel', {
                         method: 'PUT',
                         credentials: 'include'
                     })
                         .then(response => {
-                            if (!response.ok) throw new Error('Không thể hủy đơn hàng');
+                            if (!response.ok) throw new Error("Không thể hủy đơn hàng");
                             return response.json();
                         })
                         .then(data => {
                             showMessage(data.message, 'success');
-                            // cập nhật trạng thái trên bảng
-                            document.getElementById('status-' + orderId).textContent = 'CANCELLED';
-                            // ẩn nút hủy
+                            // Cập nhật trạng thái hiển thị
+                            const statusEl = document.getElementById('status-' + orderId);
+                            if (statusEl) statusEl.textContent = 'CANCELLED';
+
                             const btn = document.querySelector('#order-row-' + orderId + ' .btn-cancel');
                             if (btn) btn.style.display = 'none';
                         })
                         .catch(error => {
                             console.error(error);
-                            showMessage('Lỗi khi hủy đơn hàng!', 'error');
+                            showMessage('Lỗi khi hủy đơn hàng hoặc hoàn tiền!', 'error');
                         });
                 }
+
 
                 function showMessage(message, type) {
                     const container = document.getElementById('messageContainer');

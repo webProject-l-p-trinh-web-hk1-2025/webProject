@@ -222,7 +222,6 @@
                                                     <strong>Chọn phương thức thanh toán:</strong>
                                                 </label>
                                                 <select id="payment-method">
-                                                    <option value="COD">Thanh toán khi nhận hàng (COD)</option>
                                                     <option value="VNPAY">Thanh toán qua VNPAY</option>
                                                 </select>
                                             </div>

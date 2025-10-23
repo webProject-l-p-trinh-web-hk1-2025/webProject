@@ -18,6 +18,7 @@ import com.proj.webprojrct.product.repository.ProductRepository;
 import com.proj.webprojrct.product.repository.ProductImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.proj.webprojrct.payment.vnpay.service.PaymentService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -59,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
         order.setUser(user);
         order.setStatus("PENDING");
         order.setTotalAmount(request.getTotalAmount());
-        order.setShippingAddress(user.getAddress());
+        order.setShippingAddress(request.getShippingAddress());
         order.setCreatedAt(LocalDateTime.now());
         order = orderRepository.save(order);
 
@@ -163,6 +164,11 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+        System.out.println("Order status: " + order.getStatus());
+        if (!order.getStatus().equals("PENDING")) {
+            throw new IllegalArgumentException("Only PENDING orders can be cancelled.");
+        }
+
         order.setStatus("CANCELLED");
         orderRepository.save(order);
     }
@@ -175,5 +181,11 @@ public class OrderServiceImpl implements OrderService {
         }
         return existingPayment;
 
+    }
+
+    @Override
+    public Order getOrderByOrderId(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
     }
 }

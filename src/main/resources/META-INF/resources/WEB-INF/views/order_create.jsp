@@ -291,6 +291,7 @@
 
                     // 9. Hàm xác nhận đơn hàng (giữ nguyên, không sửa)
                     function confirmAndCreateOrder() {
+                        debugger;
                         if (!pendingOrderData) {
                             alert('Lỗi: Dữ liệu đơn hàng không tồn tại.');
                             return;

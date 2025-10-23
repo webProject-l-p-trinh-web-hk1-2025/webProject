@@ -35,13 +35,13 @@ public class AdminProductController {
     //admin
     @GetMapping
     public String products(Model model) {
-        return "product_list";
+        return "admin/product_list";
     }
 
     // Trang form thêm mới
     @GetMapping("/new")
     public String form() {
-        return "product_form";
+        return "admin/product_form";
     }
 
     // Xử lý tạo sản phẩm mới
@@ -104,7 +104,7 @@ public class AdminProductController {
         }
 
         productRepository.save(p);
-        return "redirect:/product_list";
+        return "redirect:/admin/product_list";
     }
 
     // Xử lý xóa sản phẩm
@@ -143,7 +143,7 @@ public class AdminProductController {
                 || authentication instanceof AnonymousAuthenticationToken) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
         }
-        return "product_edit";
+        return "admin/product_edit";
     }
 
     //admin
@@ -157,7 +157,7 @@ public class AdminProductController {
         }
         ProductResponse p = productService.getById(id);
         model.addAttribute("product", p);
-        return "product_edit";
+        return "admin/product_edit";
     }
 
 }

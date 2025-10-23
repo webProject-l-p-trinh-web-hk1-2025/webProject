@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/chat-user.css" />
     <title>Chat Application</title>
   </head>
   <body>
@@ -43,7 +43,19 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <script src="/js/main.js"></script>
+    <script src="/js/chat-user.js"></script>
+
+    <script>
+      // Hiển thị khung chat khi trang đã tải xong
+      document.addEventListener("DOMContentLoaded", function () {
+        const chatPage = document.getElementById("chat-page");
+        if (chatPage && chatPage.classList.contains("hidden")) {
+          setTimeout(function () {
+            chatPage.classList.remove("hidden");
+          }, 100);
+        }
+      });
+    </script>
 
     <div id="mediaModal" class="hidden media-modal" onclick="closeMediaModal()">
       <div

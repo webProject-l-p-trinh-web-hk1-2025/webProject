@@ -53,9 +53,9 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!user.getVerifyPhone()) {
-            throw new RuntimeException("Chưa xác thực số điện thoại.");
-        }
+        // if (!user.getVerifyPhone()) {
+        //     throw new RuntimeException("Chưa xác thực số điện thoại.");
+        // }
         Order order = new Order();
         order.setUser(user);
         order.setStatus("PENDING");

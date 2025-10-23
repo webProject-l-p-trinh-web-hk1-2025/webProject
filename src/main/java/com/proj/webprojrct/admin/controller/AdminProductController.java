@@ -8,7 +8,7 @@ public class AdminProductController {
 
     @GetMapping("/admin/products")
     public String listProducts() {
-        return "product_list";
+        return "admin/product_list";
     }
 
 }

@@ -1,14 +1,17 @@
 package com.proj.webprojrct.admin.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.proj.webprojrct.user.dto.request.UserCreateRequest;
@@ -16,19 +19,51 @@ import com.proj.webprojrct.user.dto.request.UserAdminUpdateRequest;
 import com.proj.webprojrct.user.dto.response.UserAdminResponse;
 import com.proj.webprojrct.user.service.UserService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Controller
 public class AdminUserController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(AdminUserController.class);
 
     @Autowired
     private UserService userService;
 
     @GetMapping("/admin/users")
-    public String getAllAdminUsers(Model model, Authentication authentication) {
+    public String getAllAdminUsers(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "fullname", required = false) String fullname,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "role", required = false) String role,
+            @RequestParam(value = "active", required = false) Boolean active,
+            Model model, Authentication authentication) {
         try {
-            List<UserAdminResponse> users = userService.getAllUsers(authentication);
-            model.addAttribute("users", users);
+            logger.debug("Getting users with filters - page: {}, size: {}, phone: {}, fullname: {}, email: {}, role: {}, active: {}",
+                page, size, phone, fullname, email, role, active);
+                
+            // Tạo pageable với sắp xếp theo ID
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+            
+            // Gọi service với pageable và các filter
+            Page<UserAdminResponse> userPage = userService.getPagedUsers(
+                authentication, pageable, phone, fullname, email, role, active);
+            
+            // Thêm dữ liệu vào model
+            model.addAttribute("users", userPage);
+            
+            // Thêm các tham số filter vào model để giữ trạng thái
+            if (phone != null) model.addAttribute("filterPhone", phone);
+            if (fullname != null) model.addAttribute("filterFullname", fullname);
+            if (email != null) model.addAttribute("filterEmail", email);
+            if (role != null) model.addAttribute("filterRole", role);
+            if (active != null) model.addAttribute("filterActive", active.toString());
+            
             return "admin/users";
         } catch (RuntimeException e) {
+            logger.error("Error getting users", e);
             model.addAttribute("error", e.getMessage());
             return "admin/users";
         }
@@ -39,7 +74,7 @@ public class AdminUserController {
             Model model, Authentication authentication) {
         try {
             userService.handleCreateUser(authentication, userCreateRequest);
-            return "redirect:/admin/users";
+            return "redirect:/admin/users?success=Đã tạo người dùng thành công";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             // reload users to show the page
@@ -58,7 +93,7 @@ public class AdminUserController {
             Model model, Authentication authentication) {
         try {
             userService.handleUpdateUser(authentication, updateRequest, userId);
-            return "redirect:/admin/users";
+            return "redirect:/admin/users?success=Đã cập nhật người dùng thành công";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             return "admin/users";
@@ -70,7 +105,7 @@ public class AdminUserController {
             Model model, Authentication authentication) {
         try {
             userService.handleDeleteUser(authentication, userId);
-            return "redirect:/admin/users";
+            return "redirect:/admin/users?success=Đã xóa người dùng thành công";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             return "redirect:/admin/users";

@@ -4,12 +4,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.proj.webprojrct.common.config.security.CustomUserDetails;
@@ -23,6 +28,9 @@ import com.proj.webprojrct.user.dto.request.UserAdminUpdateRequest;
 import com.proj.webprojrct.user.dto.request.UserCreateRequest;
 import com.proj.webprojrct.user.dto.response.UserAdminResponse;
 import com.proj.webprojrct.user.entity.UserRole;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
  
 
 import lombok.*;
@@ -31,6 +39,8 @@ import lombok.*;
 @NoArgsConstructor
 @Service
 public class UserService {
+    //hàm thêm vào service phân trang
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private AvatarStorageService avatarStorageService;
@@ -54,6 +64,88 @@ public class UserService {
         List<User> users = userRepository.findAll();
         return userMapper.toDto(users);
     }
+    
+
+    /////////////////////////////////////// thêm vào service cho phân trang/////////////////////////////////////////////////////
+    public Page<UserAdminResponse> getPagedUsers(
+            Authentication authentication, 
+            Pageable pageable,
+            String phone,
+            String fullname,
+            String email,
+            String role,
+            Boolean active) {
+        
+        // Kiểm tra quyền truy cập
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new RuntimeException("Bạn chưa đăng nhập.");
+        }
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin) {
+            throw new RuntimeException("Bạn không đủ quyền truy cập.");
+        }
+        
+        logger.debug("Filtering users with criteria - phone: {}, fullname: {}, email: {}, role: {}, active: {}", 
+            phone, fullname, email, role, active);
+            
+        // Lấy tất cả users (trong thực tế nên tích hợp JPA Specification để query hiệu quả hơn)
+        List<User> allUsers = userRepository.findAll();
+        
+        logger.debug("Total users before filtering: {}", allUsers.size());
+        
+        // Lọc theo các tiêu chí
+        List<User> filteredUsers = allUsers.stream()
+            .filter(user -> {
+                boolean matches = true;
+                
+                if (StringUtils.hasText(phone)) {
+                    matches &= user.getPhone() != null && user.getPhone().toLowerCase().contains(phone.toLowerCase());
+                }
+                
+                if (StringUtils.hasText(fullname)) {
+                    matches &= user.getFullName() != null && user.getFullName().toLowerCase().contains(fullname.toLowerCase());
+                }
+                
+                if (StringUtils.hasText(email)) {
+                    matches &= user.getEmail() != null && user.getEmail().toLowerCase().contains(email.toLowerCase());
+                }
+                
+                if (StringUtils.hasText(role)) {
+                    matches &= user.getRole() != null && user.getRole().name().equalsIgnoreCase(role);
+                }
+                
+                if (active != null) {
+                    matches &= user.getIsActive().equals(active);
+                }
+                
+                return matches;
+            })
+            .collect(Collectors.toList());
+        
+        // Phân trang kết quả
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), filteredUsers.size());
+        
+        if (start > filteredUsers.size()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, filteredUsers.size());
+        }
+        
+        List<User> pageContent = filteredUsers.subList(start, end);
+        
+        // Chuyển đổi sang DTO
+        List<UserAdminResponse> dtoList = userMapper.toDto(pageContent);
+        
+        // Log thông tin phân trang
+        logger.debug("Pagination info - total: {}, page size: {}, current page: {}, content size: {}", 
+            filteredUsers.size(), pageable.getPageSize(), pageable.getPageNumber(), dtoList.size());
+            
+        // Trả về Page
+        return new PageImpl<>(dtoList, pageable, filteredUsers.size());
+    }
+
+        /////////////////////////////////////// thêm vào service cho phân trang/////////////////////////////////////////////////////
 
     public UserAdminResponse handleCreateUser(Authentication authentication, UserCreateRequest userCreateRequest) {
         if (authentication == null || !authentication.isAuthenticated()

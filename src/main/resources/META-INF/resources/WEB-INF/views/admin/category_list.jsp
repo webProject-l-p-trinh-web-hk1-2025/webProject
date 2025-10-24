@@ -11,6 +11,56 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table th,
+      table td {
+        padding: 12px 8px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+      table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+      }
+      .btn {
+        margin-right: 5px;
+        display: inline-block;
+        padding: 6px 12px;
+        text-decoration: none;
+        border-radius: 4px;
+        border: 1px solid transparent;
+      }
+      .btn-view {
+        background-color: #17a2b8;
+        color: white;
+      }
+      .btn-edit {
+        background-color: #ffc107;
+        color: #000;
+      }
+      .btn-delete {
+        background-color: #dc3545;
+        color: white;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .bg-info {
+        background-color: #17a2b8;
+        color: white;
+      }
+      .text-center {
+        text-align: center;
+      }
+    </style>
   </head>
   <body>
     <!-- app layout with collapsible sidebar -->
@@ -23,7 +73,7 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
           </button>
           <ul class="metismenu" id="menu">
             <li>
-              <a href="${pageContext.request.contextPath}/admin/dashboard"
+              <a href="${pageContext.request.contextPath}/admin"
                 ><i class="icon icon-home"></i
                 ><span class="nav-text">Dashboard</span></a
               >
@@ -47,10 +97,35 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
               >
             </li>
             <li>
-              <a href="${pageContext.request.contextPath}/admin/chat"
-                ><i class="fas fa-comments"></i
-                ><span class="nav-text">Chat</span></a
+              <a href="${pageContext.request.contextPath}/admin/document"
+                ><i class="fas fa-file-alt"></i
+                ><span class="nav-text">Documents</span></a
               >
+            </li>
+            <li>
+              <a
+                href="${pageContext.request.contextPath}/admin/chat"
+                style="position: relative"
+              >
+                <i class="fas fa-comments"></i>
+                <span class="nav-text">Chat</span>
+                <span
+                  id="chat-notification-badge"
+                  style="
+                    display: none;
+                    position: absolute;
+                    top: 8px;
+                    right: 12px;
+                    background: #e53935;
+                    color: white;
+                    border-radius: 50%;
+                    padding: 2px 6px;
+                    font-size: 10px;
+                    min-width: 18px;
+                    text-align: center;
+                  "
+                ></span>
+              </a>
             </li>
           </ul>
         </div>
@@ -61,12 +136,12 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
           <div class="page-title">
             <h2>Quản lý danh mục</h2>
             <div>
-              <a
+              <!-- <a
                 href="${pageContext.request.contextPath}/admin/products"
                 class="btn btn-outline"
               >
                 <i class="fas fa-box"></i> Sản phẩm
-              </a>
+              </a> -->
               <a
                 href="${pageContext.request.contextPath}/admin/categories/new"
                 class="btn btn-primary"
@@ -139,6 +214,7 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
         <script>
           const ctx = "<%=request.getContextPath()%>";
           const api = ctx + "/api/categories";
+          let allCategories = []; // Store all categories for filtering
 
           async function loadCategories() {
             const tbody = document.getElementById("tbody");
@@ -149,9 +225,10 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
               const res = await fetch(api);
               if (!res.ok) throw new Error("HTTP " + res.status);
               const list = await res.json();
+              allCategories = list; // Store for filtering
               if (Array.isArray(list) && list.length > 0) {
                 status.textContent = "";
-                render(list);
+                applyFiltersAndRender();
               } else {
                 status.textContent = "Không có danh mục.";
               }
@@ -159,6 +236,41 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
               console.error(e);
               status.textContent = "Lỗi khi tải danh mục.";
             }
+          }
+
+          function applyFiltersAndRender() {
+            let filtered = [...allCategories];
+
+            // Filter by name
+            const nameFilter = document
+              .getElementById("name")
+              .value.trim()
+              .toLowerCase();
+            if (nameFilter) {
+              filtered = filtered.filter((c) =>
+                (c.name || "").toLowerCase().includes(nameFilter)
+              );
+            }
+
+            // Sort
+            const sortValue = document.getElementById("sort").value;
+            const [sortField, sortOrder] = sortValue.split(",");
+
+            filtered.sort((a, b) => {
+              let valA = a[sortField];
+              let valB = b[sortField];
+
+              if (sortField === "name") {
+                valA = (valA || "").toLowerCase();
+                valB = (valB || "").toLowerCase();
+              }
+
+              if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+              if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+              return 0;
+            });
+
+            render(filtered);
           }
 
           function render(list) {
@@ -202,15 +314,22 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
                     '<td class="text-center">' +
                     '<a href="' +
                     ctx +
+                    "/admin/categories/" +
+                    cid +
+                    '" class="btn btn-view" title="Xem chi tiết">' +
+                    '<i class="fas fa-eye"></i>' +
+                    "</a>" +
+                    '<a href="' +
+                    ctx +
                     "/admin/categories/edit/" +
                     cid +
-                    '" class="btn btn-sm btn-outline-primary me-1" title="Sửa">' +
-                    '<i class="bi bi-pencil"></i>' +
+                    '" class="btn btn-edit" title="Sửa">' +
+                    '<i class="fas fa-edit"></i>' +
                     "</a>" +
-                    '<button class="btn btn-sm btn-outline-danger" onclick="deleteCategory(' +
+                    '<button class="btn btn-delete" onclick="deleteCategory(' +
                     cid +
                     ')" title="Xóa">' +
-                    '<i class="bi bi-trash"></i>' +
+                    '<i class="fas fa-trash"></i>' +
                     "</button>" +
                     "</td>";
                   tbody.appendChild(tr);
@@ -235,18 +354,60 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
           }
 
           loadCategories();
-        </script>
-        <!-- Script để toggle sidebar -->
-        <script>
+
+          // Add event listeners for filters
           document
-            .getElementById("navToggle")
-            .addEventListener("click", function () {
-              document.getElementById("sidebar").classList.toggle("minimized");
-              document
-                .querySelector(".main-content")
-                .classList.toggle("expanded");
+            .getElementById("name")
+            .addEventListener("input", applyFiltersAndRender);
+          document
+            .getElementById("sort")
+            .addEventListener("change", applyFiltersAndRender);
+          document
+            .getElementById("showAllBtn")
+            .addEventListener("click", () => {
+              document.getElementById("name").value = "";
+              document.getElementById("sort").value = "createdAt,desc";
+              applyFiltersAndRender();
             });
         </script>
+
+        <!-- Script để toggle sidebar -->
+        <script>
+          (function () {
+            const sidebar = document.getElementById("sidebar");
+            const toggle = document.getElementById("navToggle");
+            if (!sidebar || !toggle) return;
+
+            function isCollapsed() {
+              return localStorage.getItem("admin_sidebar_collapsed") === "1";
+            }
+
+            function apply() {
+              const collapsed = isCollapsed();
+              if (window.innerWidth <= 800) {
+                sidebar.classList.toggle("open", collapsed);
+                sidebar.classList.remove("collapsed");
+              } else {
+                sidebar.classList.toggle("collapsed", collapsed);
+                sidebar.classList.remove("open");
+              }
+            }
+
+            apply();
+            toggle.addEventListener("click", function () {
+              const current = isCollapsed();
+              localStorage.setItem(
+                "admin_sidebar_collapsed",
+                current ? "0" : "1"
+              );
+              apply();
+            });
+            window.addEventListener("resize", apply);
+          })();
+        </script>
+
+        <!-- Admin chat notification script -->
+        <script src="${pageContext.request.contextPath}/js/admin-chat-notifications.js"></script>
       </div>
     </div>
   </body>

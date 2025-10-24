@@ -71,7 +71,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
           <button id="navToggle" class="nav-toggle-btn" title="Toggle sidebar">☰</button>
           <ul class="metismenu" id="menu">
             <li class="active">
-              <a href="${pageContext.request.contextPath}/admin/dashboard"><i class="icon icon-home"></i><span class="nav-text">Dashboard</span></a>
+              <a href="${pageContext.request.contextPath}/admin"><i class="icon icon-home"></i><span class="nav-text">Dashboard</span></a>
             </li>
             <li>
               <a href="${pageContext.request.contextPath}/admin/users"><i class="fas fa-users"></i><span class="nav-text">Users</span></a>

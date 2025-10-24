@@ -24,7 +24,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
           </button>
           <ul class="metismenu" id="menu">
             <li>
-              <a href="${pageContext.request.contextPath}/admin/dashboard"
+              <a href="${pageContext.request.contextPath}/admin"
                 ><i class="icon icon-home"></i
                 ><span class="nav-text">Dashboard</span></a
               >
@@ -54,10 +54,29 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
               >
             </li>
             <li>
-              <a href="${pageContext.request.contextPath}/admin/chat"
-                ><i class="fas fa-comments"></i
-                ><span class="nav-text">Chat</span></a
+              <a
+                href="${pageContext.request.contextPath}/admin/chat"
+                style="position: relative"
               >
+                <i class="fas fa-comments"></i>
+                <span class="nav-text">Chat</span>
+                <span
+                  id="chat-notification-badge"
+                  style="
+                    display: none;
+                    position: absolute;
+                    top: 8px;
+                    right: 12px;
+                    background: #e53935;
+                    color: white;
+                    border-radius: 50%;
+                    padding: 2px 6px;
+                    font-size: 10px;
+                    min-width: 18px;
+                    text-align: center;
+                  "
+                ></span>
+              </a>
             </li>
           </ul>
         </div>
@@ -217,8 +236,55 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         }
 
         function applyFilters() {
-          // Here would be the filtering logic, typically with AJAX
-          console.log("Applying filters...");
+          const titleFilter = (titleInput?.value || "").toLowerCase().trim();
+          const sortValue = sortSelect?.value || "createdAt,desc";
+          const [sortField, sortOrder] = sortValue.split(",");
+
+          const table = document.querySelector("table tbody");
+          if (!table) return;
+
+          const rows = Array.from(table.querySelectorAll("tr"));
+
+          // Filter rows
+          rows.forEach((row) => {
+            if (!titleFilter) {
+              row.style.display = "";
+              return;
+            }
+
+            const titleCell = row.cells[1]; // Tiêu đề is column 2
+            const titleText = (titleCell?.textContent || "").toLowerCase();
+
+            if (titleText.includes(titleFilter)) {
+              row.style.display = "";
+            } else {
+              row.style.display = "none";
+            }
+          });
+
+          // Sort visible rows
+          const visibleRows = rows.filter(
+            (row) => row.style.display !== "none"
+          );
+          visibleRows.sort((a, b) => {
+            let valA, valB;
+
+            if (sortField === "title") {
+              valA = (a.cells[1]?.textContent || "").toLowerCase();
+              valB = (b.cells[1]?.textContent || "").toLowerCase();
+            } else if (sortField === "createdAt") {
+              // Assuming column 3 or similar has date - adjust as needed
+              valA = a.cells[0]?.textContent || "0"; // ID as proxy for creation order
+              valB = b.cells[0]?.textContent || "0";
+            }
+
+            if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+            if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+            return 0;
+          });
+
+          // Re-append sorted rows
+          visibleRows.forEach((row) => table.appendChild(row));
         }
 
         // Delete confirmation

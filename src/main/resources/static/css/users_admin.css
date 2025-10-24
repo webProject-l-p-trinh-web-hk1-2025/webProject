@@ -87,15 +87,31 @@ tbody tr:hover {
   background-color: #1565c0;
 }
 
-.btn-success,
-.btn-edit {
+.btn-success {
   background-color: #43a047;
   color: white;
 }
 
-.btn-success:hover,
-.btn-edit:hover {
+.btn-success:hover {
   background-color: #388e3c;
+}
+
+.btn-edit {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.btn-edit:hover {
+  background-color: #e0a800;
+}
+
+.btn-view {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.btn-view:hover {
+  background-color: #138496;
 }
 
 .btn-danger,

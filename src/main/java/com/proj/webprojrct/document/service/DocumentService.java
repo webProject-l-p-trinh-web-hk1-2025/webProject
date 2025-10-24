@@ -138,4 +138,23 @@ public class DocumentService {
         return documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document không tồn tại với id: " + id));
     }
+
+    public void deleteDocument(Long id) {
+        Document document = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document không tồn tại với id: " + id));
+        
+        // Xóa các file ảnh liên quan
+        if (document.getImages() != null && !document.getImages().isEmpty()) {
+            for (DocumentImage image : document.getImages()) {
+                try {
+                    deleteImage(image.getImageUrl());
+                } catch (Exception e) {
+                    System.err.println("Không thể xóa ảnh: " + image.getImageUrl());
+                }
+            }
+        }
+        
+        // Xóa document (cascade sẽ xóa images trong DB)
+        documentRepository.delete(document);
+    }
 }

@@ -61,7 +61,7 @@
                 <button id="navToggle" class="nav-toggle-btn" title="Toggle sidebar">☰</button>
                 <ul class="metismenu" id="menu">
                     <li>
-                        <a href="${pageContext.request.contextPath}/admin/dashboard"><i class="icon icon-home"></i><span class="nav-text">Dashboard</span></a>
+                        <a href="${pageContext.request.contextPath}/admin"><i class="icon icon-home"></i><span class="nav-text">Dashboard</span></a>
                     </li>
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/users"><i class="fas fa-users"></i><span class="nav-text">Users</span></a>
@@ -76,7 +76,11 @@
                         <a href="${pageContext.request.contextPath}/admin/document"><i class="fas fa-file-alt"></i><span class="nav-text">Documents</span></a>
                     </li>
                     <li>
-                        <a href="${pageContext.request.contextPath}/admin/chat"><i class="fas fa-comments"></i><span class="nav-text">Chat</span></a>
+                        <a href="${pageContext.request.contextPath}/admin/chat" style="position: relative;">
+                            <i class="fas fa-comments"></i>
+                            <span class="nav-text">Chat</span>
+                            <span id="chat-notification-badge" style="display:none; position:absolute; top:8px; right:12px; background:#e53935; color:white; border-radius:50%; padding:2px 6px; font-size:10px; min-width:18px; text-align:center;"></span>
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -121,9 +125,16 @@
                                     required />
                             </div>
                             <div class="form-group">
-                                <label>Product ID:</label>
-                                <input type="text" name="productId"
-                                    value="${document != null ? document.productId : ''}" required />
+                                <label>Product:</label>
+                                <select name="productId" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="">-- Chọn sản phẩm --</option>
+                                    <c:forEach items="${products}" var="product">
+                                        <option value="${product.id}" 
+                                            ${document != null && document.productId == product.id ? 'selected' : ''}>
+                                            ${product.name} (ID: ${product.id})
+                                        </option>
+                                    </c:forEach>
+                                </select>
                             </div>
 
                             <div class="form-group editor-toolbar">
@@ -275,6 +286,38 @@
                         if (editor.innerHTML.trim() === '') {
                             editor.innerHTML = '<p>&nbsp;</p>';
                         }
+                    </script>
+
+                    <script>
+                        // Sidebar toggle
+                        (function () {
+                            const sidebar = document.getElementById('sidebar');
+                            const toggle = document.getElementById('navToggle');
+                            if (!sidebar || !toggle) return;
+
+                            function isCollapsed() {
+                                return localStorage.getItem('admin_sidebar_collapsed') === '1';
+                            }
+
+                            function apply() {
+                                const collapsed = isCollapsed();
+                                if (window.innerWidth <= 800) {
+                                    sidebar.classList.toggle('open', collapsed);
+                                    sidebar.classList.remove('collapsed');
+                                } else {
+                                    sidebar.classList.toggle('collapsed', collapsed);
+                                    sidebar.classList.remove('open');
+                                }
+                            }
+
+                            apply();
+                            toggle.addEventListener('click', function () {
+                                const current = isCollapsed();
+                                localStorage.setItem('admin_sidebar_collapsed', current ? '0' : '1');
+                                apply();
+                            });
+                            window.addEventListener('resize', apply);
+                        })();
                     </script>
 
         </body>

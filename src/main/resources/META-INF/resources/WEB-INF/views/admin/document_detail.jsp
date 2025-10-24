@@ -25,7 +25,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
           </button>
           <ul class="metismenu" id="menu">
             <li>
-              <a href="${pageContext.request.contextPath}/admin/dashboard"
+              <a href="${pageContext.request.contextPath}/admin"
                 ><i class="icon icon-home"></i
                 ><span class="nav-text">Dashboard</span></a
               >
@@ -55,10 +55,29 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
               >
             </li>
             <li>
-              <a href="${pageContext.request.contextPath}/admin/chat"
-                ><i class="fas fa-comments"></i
-                ><span class="nav-text">Chat</span></a
+              <a
+                href="${pageContext.request.contextPath}/admin/chat"
+                style="position: relative"
               >
+                <i class="fas fa-comments"></i>
+                <span class="nav-text">Chat</span>
+                <span
+                  id="chat-notification-badge"
+                  style="
+                    display: none;
+                    position: absolute;
+                    top: 8px;
+                    right: 12px;
+                    background: #e53935;
+                    color: white;
+                    border-radius: 50%;
+                    padding: 2px 6px;
+                    font-size: 10px;
+                    min-width: 18px;
+                    text-align: center;
+                  "
+                ></span>
+              </a>
             </li>
           </ul>
         </div>

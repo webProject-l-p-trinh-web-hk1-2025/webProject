@@ -18,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.proj.webprojrct.document.entity.Document;
 import com.proj.webprojrct.document.dto.request.DocumentCreateRequest;
 import com.proj.webprojrct.document.service.DocumentService;
+import com.proj.webprojrct.product.dto.response.ProductResponse;
+import com.proj.webprojrct.product.service.ProductService;
 
 import java.util.Map;
 
@@ -27,6 +29,10 @@ public class AdminDocumentController {
 
     @Autowired
     private DocumentService documentService;
+    
+    @Autowired
+    private ProductService productService;
+    
       @GetMapping
     public String show(Model model) {
         List<Document> documents = documentService.getAllDocuments();
@@ -45,6 +51,11 @@ public class AdminDocumentController {
     public String showCreateForm(Model model) {
         model.addAttribute("document", null);
         model.addAttribute("formAction", "/admin/document/create");
+        
+        // Load danh sách products để chọn
+        List<ProductResponse> products = productService.getAll();
+        model.addAttribute("products", products);
+        
         return "admin/document_form";
     }
 
@@ -73,6 +84,11 @@ public class AdminDocumentController {
     public String showEditForm(@PathVariable Long id, Model model) {
         Document document = documentService.getDocument(id);
         model.addAttribute("document", document);
+        
+        // Load danh sách products để chọn
+        List<ProductResponse> products = productService.getAll();
+        model.addAttribute("products", products);
+        
         return "admin/document_form";
     }
 
@@ -96,5 +112,16 @@ public class AdminDocumentController {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", "Could not upload the image"));
         }
+    }
+    
+    @GetMapping("/delete/{id}")
+    public String deleteDocument(@PathVariable Long id, Model model) {
+        try {
+            documentService.deleteDocument(id);
+            model.addAttribute("success", "Xóa document thành công!");
+        } catch (Exception e) {
+            model.addAttribute("error", "Không thể xóa document: " + e.getMessage());
+        }
+        return "redirect:/admin/document";
     }
 }

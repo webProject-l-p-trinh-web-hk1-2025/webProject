@@ -36,8 +36,8 @@ public class SellerService {
     public List<OrderSellerResponse> getAllOrders(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
-        if (user.getRole() == null || user.getRole() != UserRole.SELLER) {
-            throw new IllegalArgumentException("User is not a seller");
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
         }
         List<Order> orders = orderRepository.findAll();
         List<OrderSellerResponse> orderResponses = new ArrayList<>();
@@ -94,8 +94,8 @@ public class SellerService {
     public List<OrderSellerResponse> getOrdersBySellerId(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
-        if (user.getRole() == null || user.getRole() != UserRole.SELLER) {
-            throw new IllegalArgumentException("User is not a seller");
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
         }
         List<OrderSellerResponse> orderResponses = new ArrayList<>();
         List<Order> orders = orderRepository.findAll();
@@ -158,8 +158,8 @@ public class SellerService {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
 
-        if (user.getRole() == null || user.getRole() != UserRole.SELLER) {
-            throw new IllegalArgumentException("User is not a seller");
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
         }
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
@@ -173,8 +173,8 @@ public class SellerService {
     public List<OrderSellerResponse> getAllOrderRefund(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
-        if (user.getRole() == null || user.getRole() != UserRole.SELLER) {
-            throw new IllegalArgumentException("User is not a seller");
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
         }
         List<String> allowedStatuses = Arrays.asList("ACCEPTED", "SHIPPED");
         List<Order> orders = orderRepository.findByStatusIn(allowedStatuses);
@@ -236,8 +236,8 @@ public class SellerService {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
 
-        if (user.getRole() == null || user.getRole() != UserRole.SELLER) {
-            throw new IllegalArgumentException("User is not a seller");
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
         }
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {

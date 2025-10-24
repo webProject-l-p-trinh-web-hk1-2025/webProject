@@ -2,13 +2,12 @@ package com.proj.webprojrct.reviewandrating.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import com.proj.webprojrct.reviewandrating.dto.request.ReviewRequest;
 import com.proj.webprojrct.reviewandrating.dto.response.ReviewResponse;
 import com.proj.webprojrct.reviewandrating.entity.Review;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 
 
@@ -29,21 +28,18 @@ public interface ReviewMapper {
     @Mapping(target = "userName", source = "user.fullName")
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "parentReviewId", source = "parentReview.reviewId")
-    @Mapping(target = "childReviews", source = "childReviews")
+    @Mapping(target = "childReviews", source = "childReviews", qualifiedByName = "mapChildReviews")
     public ReviewResponse toDto(Review review);
 
-    //chuyển từ set thành list để đảm bảo yêu cầu cho review response và để giữ thứ tự reply
-    //set chỉ đảm bảo không có 2 review id con trùng id chứ không đảm bảo thứ tự
-    default List<ReviewResponse> mapChildReviews(Set<Review> children) {
-        if (children == null) return null;
-        // sort by createdAt ascending to preserve chronological order
+    //chuyển từ list thành list để đảm bảo yêu cầu cho review response và để giữ thứ tự reply
+    //list đảm bảo thứ tự nhờ @OrderBy ở entity
+    @Named("mapChildReviews")
+    default List<ReviewResponse> mapChildReviews(List<Review> children) {
+        if (children == null || children.isEmpty()) return null;
+        // JPA đã sort bằng @OrderBy("createdAt ASC"), chỉ cần map
         return children.stream()
-                .sorted((a, b) -> {
-                    if (a.getCreatedAt() == null || b.getCreatedAt() == null) return 0;
-                    return a.getCreatedAt().compareTo(b.getCreatedAt());
-                })
                 .map(this::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 

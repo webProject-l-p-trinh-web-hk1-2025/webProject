@@ -6,7 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.proj.webprojrct.product.entity.Product;
 import com.proj.webprojrct.user.entity.User;
@@ -40,8 +41,15 @@ public class Review {
     @Column(columnDefinition = "TEXT") // chỉ cho phép bình luận dạng text
     private String comment;
 
-    @Column(name = "created_at", updatable = false, insertable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 
 
     // 1. Mối quan hệ với bình luận CHA (Parent Review)
@@ -53,5 +61,6 @@ public class Review {
     // 2. Mối quan hệ với các bình luận CON (Children Reviews)
     // Tham chiếu đến tập hợp các bình luận con
     @OneToMany(mappedBy = "parentReview", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Review> childReviews; // Sử dụng Set để tránh trùng lặp khi thêm review
+    @OrderBy("createdAt ASC") // Cũ nhất lên đầu (oldest first) - giống flow chat tự nhiên
+    private List<Review> childReviews = new ArrayList<>(); // Sử dụng List để giữ thứ tự
 }

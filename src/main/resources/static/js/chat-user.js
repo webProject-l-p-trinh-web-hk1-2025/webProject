@@ -206,6 +206,8 @@ function userItemClick(event) {
         if (typeof updateGlobalChatCount === "function") {
           updateGlobalChatCount();
         }
+        // Also trigger floating badge update immediately
+        sessionStorage.setItem("chatBadgeNeedsRefresh", "true");
       })
       .catch((error) => {
         console.error("Error marking messages as read:", error);

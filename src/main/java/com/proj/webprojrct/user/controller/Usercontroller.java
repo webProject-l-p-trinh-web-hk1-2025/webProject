@@ -185,9 +185,8 @@ public class Usercontroller {
         // Get user's orders (already sorted newest first in service)
         var orders = orderService.getOrdersByUserId(userId);
         model.addAttribute("orders", orders);
-        model.addAttribute("hideHeader", true); // Hide breadcrumb
         
-        return "order_list";
+        return "profile_history";
     }
 
     @GetMapping("/profile/update")

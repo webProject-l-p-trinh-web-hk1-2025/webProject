@@ -1,6 +1,17 @@
 .site-header {
   background: linear-gradient(180deg,#f7f7f8,#f0f0f0);
   border-bottom: 1px solid rgba(0,0,0,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+.site-header.scrolled {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  background: linear-gradient(180deg,#ffffff,#f7f7f7);
 }
 
 .site-header-inner {

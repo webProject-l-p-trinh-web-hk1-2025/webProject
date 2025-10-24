@@ -42,88 +42,124 @@
               <div class="section">
                 <div class="container">
                   <div class="row">
-                    <!-- Product main img -->
-                    <div class="col-md-5 col-md-push-2">
-                      <div id="product-main-img">
-                        <!-- Main images will be inserted here -->
-                      </div>
-                    </div>
-                    <!-- /Product main img -->
-
-                    <!-- Product thumb imgs -->
-                    <div class="col-md-2 col-md-pull-5">
-                      <div id="product-imgs">
-                        <!-- Thumbnails will be inserted here -->
-                      </div>
-                    </div>
-                    <!-- /Product thumb imgs -->
-
-                    <!-- Product details -->
-                    <div class="col-md-5">
-                      <div class="product-details">
-                        <h2 class="product-name" id="productName">Loading...</h2>
-                        <div>
-                          <div class="product-rating" id="productRating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-o"></i>
+                    <!-- Main Content (col-md-9) -->
+                    <div class="col-md-9">
+                      <div class="row">
+                        <!-- Product main img -->
+                        <div class="col-md-5 col-md-push-2">
+                          <div id="product-main-img">
+                            <!-- Main images will be inserted here -->
                           </div>
-                          <a class="review-link" href="#tab3">10 Review(s) | Add your review</a>
                         </div>
-                        <div>
-                          <h3 class="product-price" id="productPrice">$0.00</h3>
-                          <span class="product-available" id="productStock">In Stock</span>
-                        </div>
-                        <p id="productDescription">Loading product description...</p>
+                        <!-- /Product main img -->
 
-                        <div class="add-to-cart">
-                          <div class="qty-label">
-                            Qty
-                            <div class="input-number">
-                              <input type="number" id="quantity" value="1" min="1" />
-                              <span class="qty-up">+</span>
-                              <span class="qty-down">-</span>
+                        <!-- Product thumb imgs -->
+                        <div class="col-md-2 col-md-pull-5">
+                          <div id="product-imgs">
+                            <!-- Thumbnails will be inserted here -->
+                          </div>
+                        </div>
+                        <!-- /Product thumb imgs -->
+
+                        <!-- Product details -->
+                        <div class="col-md-5">
+                          <div class="product-details">
+                            <h2 class="product-name" id="productName">Loading...</h2>
+                            <div>
+                              <div class="product-rating" id="productRating">
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star-o"></i>
+                              </div>
+                              <a class="review-link" href="#tab3">10 Review(s) | Add your review</a>
                             </div>
+                            <div>
+                              <h3 class="product-price" id="productPrice">$0.00</h3>
+                              <span class="product-available" id="productStock">In Stock</span>
+                            </div>
+                            <p id="productDescription">Loading product description...</p>
+
+                            <!-- Product Variants Section -->
+                            <div class="product-variants" style="margin: 20px 0;">
+                              <!-- Storage Options -->
+                              <div class="variant-group" id="storageVariants" style="margin-bottom: 15px;">
+                                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">Phiên bản</h4>
+                                <div class="variant-options" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                  <!-- Storage buttons will be inserted here by JavaScript -->
+                                </div>
+                              </div>
+
+                              <!-- Color Options -->
+                              <div class="variant-group" id="colorVariants" style="margin-bottom: 15px;">
+                                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">Màu sắc</h4>
+                                <div class="variant-options" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                  <!-- Color buttons will be inserted here by JavaScript -->
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="add-to-cart">
+                              <div class="qty-label">
+                                Qty
+                                <div class="input-number">
+                                  <input type="number" id="quantity" value="1" min="1" />
+                                  <span class="qty-up">+</span>
+                                  <span class="qty-down">-</span>
+                                </div>
+                              </div>
+                              <button class="add-to-cart-btn" id="addToCartBtn">
+                                <i class="fa fa-shopping-cart"></i> add to cart
+                              </button>
+                            </div>
+
+                            <ul class="product-btns">
+                              <li>
+                                <a href="#" id="addToWishlistBtn"><i class="fa fa-heart-o"></i> add to wishlist</a>
+                              </li>
+                              <li>
+                                <a href="#"><i class="fa fa-exchange"></i> add to compare</a>
+                              </li>
+                            </ul>
+
+                            <ul class="product-links">
+                              <li>Category:</li>
+                              <li><a href="#" id="productCategory">Category</a></li>
+                            </ul>
+
+                            <ul class="product-links">
+                              <li>Share:</li>
+                              <li>
+                                <a href="#"><i class="fa fa-facebook"></i></a>
+                              </li>
+                              <li>
+                                <a href="#"><i class="fa fa-twitter"></i></a>
+                              </li>
+                              <li>
+                                <a href="#"><i class="fa fa-google-plus"></i></a>
+                              </li>
+                              <li>
+                                <a href="#"><i class="fa fa-envelope"></i></a>
+                              </li>
+                            </ul>
                           </div>
-                          <button class="add-to-cart-btn" id="addToCartBtn">
-                            <i class="fa fa-shopping-cart"></i> add to cart
-                          </button>
                         </div>
-
-                        <ul class="product-btns">
-                          <li>
-                            <a href="#" id="addToWishlistBtn"><i class="fa fa-heart-o"></i> add to wishlist</a>
-                          </li>
-                          <li>
-                            <a href="#"><i class="fa fa-exchange"></i> add to compare</a>
-                          </li>
-                        </ul>
-
-                        <ul class="product-links">
-                          <li>Category:</li>
-                          <li><a href="#" id="productCategory">Category</a></li>
-                        </ul>
-
-                        <ul class="product-links">
-                          <li>Share:</li>
-                          <li>
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                          </li>
-                          <li>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                          </li>
-                          <li>
-                            <a href="#"><i class="fa fa-google-plus"></i></a>
-                          </li>
-                          <li>
-                            <a href="#"><i class="fa fa-envelope"></i></a>
-                          </li>
-                        </ul>
+                        <!-- /Product details -->
                       </div>
                     </div>
-                    <!-- /Product details -->
+                    <!-- /Main Content -->
+
+                    <!-- Sidebar (col-md-3) - Version Products -->
+                    <div class="col-md-3">
+                      <div class="aside">
+                        <h3 class="aside-title">Sản phẩm tương tự</h3>
+                        <div id="versionProducts" class="product-widget">
+                          <!-- Version products will be inserted here -->
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /Sidebar -->
 
                     <!-- Product tab -->
                     <div class="col-md-12">
@@ -250,11 +286,14 @@
                   <div class="row">
                     <div class="col-md-12">
                       <div class="section-title text-center">
-                        <h3 class="title">Sản phẩm liên quan</h3>
+                        <h3 class="title">Sản phẩm cùng hãng</h3>
                       </div>
                     </div>
-                    <div id="relatedProducts" class="row">
-                      <!-- Related products will be inserted here -->
+                    <!-- Same brand products carousel -->
+                    <div class="col-md-12">
+                      <div id="sameProducts" class="product-slick-carousel">
+                        <!-- Same brand products will be inserted here -->
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -307,7 +346,38 @@
         nfcSupport: "<c:out value='${product.nfcSupport}'/>"
       };
 
+      // Version products from server (cùng dòng series)
+      const versionProductsData = [
+        <c:forEach items="${versionProducts}" var="vp" varStatus="status">
+        {
+          id: ${vp.id},
+          name: "<c:out value='${vp.name}'/>",
+          price: ${vp.price},
+          imageUrl: "<c:out value='${vp.imageUrl}'/>"
+        }<c:if test="${!status.last}">,</c:if>
+        </c:forEach>
+      ];
+
+      // Same brand products from server
+      const sameProductsData = [
+        <c:forEach items="${sameProducts}" var="sp" varStatus="status">
+        {
+          id: ${sp.id},
+          name: "<c:out value='${sp.name}'/>",
+          brand: "<c:out value='${sp.brand}'/>",
+          price: ${sp.price},
+          imageUrl: "<c:out value='${sp.imageUrl}'/>",
+          dealPercentage: ${sp.dealPercentage != null ? sp.dealPercentage : 0},
+          category: {
+            name: "<c:out value='${sp.category != null ? sp.category.name : "Chưa phân loại"}'/>"
+          }
+        }<c:if test="${!status.last}">,</c:if>
+        </c:forEach>
+      ];
+
       console.log('Product data from server:', productData);
+      console.log('Version products:', versionProductsData);
+      console.log('Same brand products:', sameProductsData);
 
       // Load product ngay lập tức
       displayProduct(productData);
@@ -315,9 +385,15 @@
       // Check if product is in wishlist
       checkWishlistStatus(productData.id);
 
-      // Load related products nếu có category
+      // Render version products (cùng dòng series) từ server data
+      renderVersionProducts(versionProductsData);
+
+      // Render same brand products từ server data
+      renderSameProducts(sameProductsData);
+
+      // Load and parse variants for storage and color options
       if (productData.category && productData.category.id) {
-        loadRelatedProducts(productData.category.id);
+        loadAndParseVariants(productData.category.id, productData.id, productData.storage, productData.name);
       }
       </c:if>
 
@@ -640,7 +716,7 @@
                     products.slice(0, 4).forEach(product => {
                       const categoryName = product.category ? product.category.name : 'Chưa phân loại';
                       const imgSrc = product.imageUrl ? ctx + product.imageUrl : ctx + '/images/no-image.png';
-                      const discountLabel = product.discount ? '<div class="product-label"><span class="sale">-' + product.discount + '%</span></div>' : '';
+                      const discountLabel = product.dealPercentage ? '<div class="product-label"><span class="sale">-' + product.dealPercentage + '%</span></div>' : '';
 
                       const productHtml = '<div class="col-md-3 col-xs-6">' +
                         '<div class="product">' +
@@ -679,6 +755,135 @@
                     }
                   } catch (error) {
                     console.error('Error loading related products:', error);
+                  }
+                }
+
+                // Render version products (cùng dòng series) từ dữ liệu server
+                function renderVersionProducts(products) {
+                  const container = document.getElementById('versionProducts');
+                  
+                  if (!products || products.length === 0) {
+                    container.innerHTML = '<p class="text-center" style="padding:20px;">Không có sản phẩm tương tự</p>';
+                    return;
+                  }
+
+                  container.innerHTML = '';
+                  products.slice(0, 5).forEach(product => {
+                    const imgSrc = product.imageUrl ? ctx + product.imageUrl : ctx + '/images/no-image.png';
+                    const productHtml = 
+                      '<div class="product-widget" style="margin-bottom: 15px;">' +
+                        '<div class="product-img" style="width: 60px; float: left; margin-right: 15px;">' +
+                          '<img src="' + imgSrc + '" alt="' + product.name + '" style="width:100%; border-radius:4px;">' +
+                        '</div>' +
+                        '<div class="product-body">' +
+                          '<h3 class="product-name" style="font-size: 14px; margin: 0 0 5px;"><a href="' + ctx + '/product/' + product.id + '">' + product.name + '</a></h3>' +
+                          '<h4 class="product-price" style="font-size: 16px; color: #d70018; font-weight: bold;">' + formatPrice(product.price) + '</h4>' +
+                        '</div>' +
+                        '<div style="clear:both;"></div>' +
+                      '</div>';
+                    container.innerHTML += productHtml;
+                  });
+                }
+
+                // Render same brand products cho phần dưới từ dữ liệu server
+                function renderSameProducts(products) {
+                  const container = document.getElementById('sameProducts');
+
+                  if (!products || products.length === 0) {
+                    container.innerHTML = '<div class="col-md-12"><p class="text-center">Không có sản phẩm cùng hãng</p></div>';
+                    return;
+                  }
+
+                  // Destroy existing slick if any
+                  if (typeof jQuery !== 'undefined' && jQuery(container).hasClass('slick-initialized')) {
+                    jQuery(container).slick('unslick');
+                  }
+
+                  container.innerHTML = '';
+                  
+                  // Render ALL products (không giới hạn 4)
+                  products.forEach(product => {
+                    const categoryName = product.category ? product.category.name : 'Chưa phân loại';
+                    const imgSrc = product.imageUrl ? ctx + product.imageUrl : ctx + '/images/no-image.png';
+                    const discountLabel = product.dealPercentage ? '<div class="product-label"><span class="sale">-' + product.dealPercentage + '%</span></div>' : '';
+
+                    const productHtml = '<div>' + // Slick carousel item wrapper
+                      '<div class="product">' +
+                      '<div class="product-img">' +
+                      '<img src="' + imgSrc + '" alt="' + product.name + '">' +
+                      discountLabel +
+                      '</div>' +
+                      '<div class="product-body">' +
+                      '<p class="product-category">' + categoryName + '</p>' +
+                      '<h3 class="product-name"><a href="' + ctx + '/product/' + product.id + '">' + product.name + '</a></h3>' +
+                      '<h4 class="product-price">' + formatPrice(product.price) + '</h4>' +
+                      '<div class="product-rating">' +
+                      '<i class="fa fa-star"></i>' +
+                      '<i class="fa fa-star"></i>' +
+                      '<i class="fa fa-star"></i>' +
+                      '<i class="fa fa-star"></i>' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '</div>' +
+                      '<div class="product-btns">' +
+                      '<button class="add-to-wishlist" data-product-id="' + product.id + '" onclick="toggleRelatedWishlist(' + product.id + ', this)"><i class="fa fa-heart-o"></i><span class="tooltipp">Yêu thích</span></button>' +
+                      '<button class="quick-view" onclick="window.location.href=\'' + ctx + '/product/' + product.id + '\'"><i class="fa fa-eye"></i><span class="tooltipp">Xem chi tiết</span></button>' +
+                      '</div>' +
+                      '</div>' +
+                      '<div class="add-to-cart">' +
+                      '<button class="add-to-cart-btn" onclick="addToCart(' + product.id + ', 1)"><i class="fa fa-shopping-cart"></i> Thêm vào giỏ</button>' +
+                      '</div>' +
+                      '</div>' +
+                      '</div>'; // Close slick item wrapper
+
+                    container.innerHTML += productHtml;
+                  });
+
+                  // Initialize Slick Carousel với autoplay
+                  setTimeout(() => {
+                    if (typeof jQuery !== 'undefined' && typeof jQuery.fn.slick !== 'undefined') {
+                      jQuery(container).slick({
+                        infinite: true,
+                        speed: 500,
+                        slidesToShow: 4,
+                        slidesToScroll: 1,
+                        autoplay: true,
+                        autoplaySpeed: 3000,
+                        pauseOnHover: true,
+                        pauseOnFocus: true,
+                        arrows: true,
+                        dots: false,
+                        responsive: [
+                          {
+                            breakpoint: 991,
+                            settings: {
+                              slidesToShow: 3,
+                              slidesToScroll: 1
+                            }
+                          },
+                          {
+                            breakpoint: 767,
+                            settings: {
+                              slidesToShow: 2,
+                              slidesToScroll: 1
+                            }
+                          },
+                          {
+                            breakpoint: 480,
+                            settings: {
+                              slidesToShow: 1,
+                              slidesToScroll: 1
+                            }
+                          }
+                        ]
+                      });
+                    } else {
+                      console.error('jQuery or Slick carousel not loaded');
+                    }
+                  }, 500); // Tăng timeout lên 500ms để đảm bảo jQuery đã load
+
+                  // Load wishlist status if user is logged in
+                  if (isUserLoggedIn) {
+                    loadRelatedWishlistStatus();
                   }
                 }
 
@@ -756,6 +961,313 @@
                       });
                     })
                     .catch(err => console.error('Error loading wishlist status:', err));
+                }
+
+                // ==================== VARIANT PARSING FUNCTIONS ====================
+                
+                /**
+                 * Parse product variants from versionProducts
+                 * Storage from product.storage field, Color parsed from product.name
+                 */
+                async function loadAndParseVariants(categoryId, currentProductId, currentProductStorage, currentProductName) {
+                  if (!categoryId) return;
+
+                  try {
+                    const response = await fetch(ctx + '/api/products?categoryId=' + categoryId);
+                    if (!response.ok) return;
+
+                    const products = await response.json();
+                    
+                    // Extract current product's model name
+                    const currentModel = extractModelName(currentProductName);
+                    console.log('Current product:', currentProductName, '→ Model:', currentModel);
+                    
+                    // Filter: only products with SAME MODEL (not just same category)
+                    const variants = products.filter(p => {
+                      if (p.id == currentProductId) return false; // Exclude current product
+                      const productModel = extractModelName(p.name);
+                      console.log('  Checking:', p.name, '→ Model:', productModel, '→ Match:', productModel === currentModel);
+                      return productModel === currentModel; // Only same model variants
+                    });
+
+                    console.log('Found variants:', variants.length);
+
+                    if (variants.length === 0) {
+                      // Hide variant sections if no variants
+                      document.getElementById('storageVariants').style.display = 'none';
+                      document.getElementById('colorVariants').style.display = 'none';
+                      return;
+                    }
+
+                    // Extract storages and colors
+                    const storageSet = new Set();
+                    const colorSet = new Set();
+                    const variantMap = new Map(); // Map to store product details by storage+color
+
+                    // Add current product first
+                    const currentColor = extractColor(currentProductName);
+                    if (currentProductStorage) storageSet.add(currentProductStorage);
+                    if (currentColor) colorSet.add(currentColor);
+                    variantMap.set(currentProductStorage + '|' + currentColor, { 
+                      id: currentProductId, 
+                      name: currentProductName,
+                      storage: currentProductStorage,
+                      isCurrent: true 
+                    });
+
+                    // Parse all variants (same model only)
+                    variants.forEach(product => {
+                      const storage = product.storage; // Use storage field directly
+                      const color = extractColor(product.name);
+                      
+                      if (storage) storageSet.add(storage);
+                      if (color) colorSet.add(color);
+                      
+                      variantMap.set(storage + '|' + color, { 
+                        id: product.id, 
+                        name: product.name,
+                        storage: storage,
+                        price: product.price,
+                        isCurrent: false 
+                      });
+                    });
+
+                    // Sort storages by capacity
+                    const storages = Array.from(storageSet).sort((a, b) => {
+                      const sizeA = parseInt(a);
+                      const sizeB = parseInt(b);
+                      return sizeA - sizeB;
+                    });
+
+                    const colors = Array.from(colorSet);
+
+                    // Render storage options
+                    renderStorageOptions(storages, currentProductStorage, variantMap, currentColor);
+                    
+                    // Render color options
+                    renderColorOptions(colors, currentColor, variantMap, currentProductStorage);
+
+                  } catch (error) {
+                    console.error('Error loading variants:', error);
+                  }
+                }
+
+                /**
+                 * Extract model name from product name
+                 * Returns the base model without storage/color (e.g., "iPhone 15 Pro Max")
+                 */
+                function extractModelName(productName) {
+                  // List of known models (longest first to match correctly)
+                  const models = [
+                    'iPhone 15 Pro Max', 'iPhone 15 Plus', 'iPhone 15 Pro', 'iPhone 15',
+                    'iPhone 17 Pro Max', 'iPhone 17',
+                    'iPhone 13',
+                    'Galaxy Z Flip6', 'Galaxy A35',
+                    'Redmi Note 13 5G',
+                    'OPPO Reno12 Pro',
+                    'Xiaomi 14 Ultra',
+                    'realme C67'
+                  ];
+                  
+                  // Find matching model
+                  for (const model of models) {
+                    if (productName.startsWith(model)) {
+                      return model;
+                    }
+                  }
+                  
+                  // Fallback: remove storage and color to extract model
+                  return productName.replace(/\d+\s*(GB|TB)/gi, '').trim().split(/\s+/).slice(0, 3).join(' ');
+                }
+
+                /**
+                 * Extract color from product name
+                 * For products without specific color info, return null
+                 */
+                function extractColor(productName) {
+                  // List of known models to remove (LONGEST FIRST!)
+                  const models = [
+                    'iPhone 15 Pro Max', 'iPhone 15 Plus', 'iPhone 15 Pro', 'iPhone 15',
+                    'iPhone 17 Pro Max', 'iPhone 17',
+                    'iPhone 13',
+                    'Galaxy Z Flip6', 'Galaxy A35',
+                    'Redmi Note 13 5G',
+                    'OPPO Reno12 Pro',
+                    'Xiaomi 14 Ultra',
+                    'realme C67'
+                  ];
+                  
+                  let remaining = productName;
+                  
+                  // Remove model name (match longest first)
+                  for (const model of models) {
+                    if (productName.startsWith(model)) {
+                      remaining = productName.substring(model.length).trim();
+                      break;
+                    }
+                  }
+                  
+                  // Remove storage part if exists (e.g., "128 GB", "256 GB", "512 GB", "1 TB")
+                  remaining = remaining.replace(/\d+\s*(GB|TB)/gi, '').trim();
+                  
+                  // What's left should be the color (if any)
+                  return remaining || null;
+                }
+
+                /**
+                 * Render storage option buttons
+                 */
+                function renderStorageOptions(storages, currentStorage, variantMap, currentColor) {
+                  const container = document.querySelector('#storageVariants .variant-options');
+                  if (!storages || storages.length === 0) {
+                    document.getElementById('storageVariants').style.display = 'none';
+                    return;
+                  }
+
+                  container.innerHTML = '';
+                  storages.forEach(storage => {
+                    const variant = variantMap.get(storage + '|' + currentColor);
+                    const isSelected = storage === currentStorage;
+                    const isAvailable = variant && !variant.isCurrent;
+
+                    const button = document.createElement('button');
+                    button.className = 'variant-btn' + (isSelected ? ' selected' : '');
+                    button.textContent = storage;
+                    button.style.cssText = `
+                      padding: 10px 20px;
+                      border: 2px solid \${isSelected ? '#d70018' : '#ddd'};
+                      border-radius: 6px;
+                      background: \${isSelected ? '#d70018' : 'white'};
+                      color: \${isSelected ? 'white' : '#333'};
+                      font-weight: \${isSelected ? 'bold' : 'normal'};
+                      cursor: \${isAvailable ? 'pointer' : 'default'};
+                      transition: all 0.3s;
+                      opacity: \${isAvailable ? '1' : '0.6'};
+                    `;
+
+                    if (isAvailable) {
+                      button.onclick = () => window.location.href = ctx + '/product/' + variant.id;
+                      button.onmouseover = () => {
+                        if (!isSelected) {
+                          button.style.borderColor = '#d70018';
+                          button.style.background = '#fff5f5';
+                        }
+                      };
+                      button.onmouseout = () => {
+                        if (!isSelected) {
+                          button.style.borderColor = '#ddd';
+                          button.style.background = 'white';
+                        }
+                      };
+                    }
+
+                    if (isSelected) {
+                      const checkmark = document.createElement('i');
+                      checkmark.className = 'fa fa-check';
+                      checkmark.style.marginLeft = '5px';
+                      button.appendChild(checkmark);
+                    }
+
+                    container.appendChild(button);
+                  });
+                }
+
+                /**
+                 * Render color option buttons
+                 */
+                function renderColorOptions(colors, currentColor, variantMap, currentStorage) {
+                  const container = document.querySelector('#colorVariants .variant-options');
+                  if (!colors || colors.length === 0) {
+                    document.getElementById('colorVariants').style.display = 'none';
+                    return;
+                  }
+
+                  container.innerHTML = '';
+                  colors.forEach(color => {
+                    const variant = variantMap.get(currentStorage + '|' + color);
+                    const isSelected = color === currentColor;
+                    const isAvailable = variant && !variant.isCurrent;
+
+                    const button = document.createElement('div');
+                    button.className = 'color-variant-btn' + (isSelected ? ' selected' : '');
+                    button.style.cssText = `
+                      padding: 12px 16px;
+                      border: 2px solid \${isSelected ? '#d70018' : '#ddd'};
+                      border-radius: 8px;
+                      background: white;
+                      cursor: \${isAvailable ? 'pointer' : 'default'};
+                      transition: all 0.3s;
+                      opacity: \${isAvailable ? '1' : '0.6'};
+                      position: relative;
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                    `;
+
+                    // Color preview circle (optional, based on color name)
+                    const colorCircle = document.createElement('div');
+                    colorCircle.style.cssText = `
+                      width: 24px;
+                      height: 24px;
+                      border-radius: 50%;
+                      background: \${getColorCode(color)};
+                      border: 1px solid #ddd;
+                    `;
+
+                    const colorText = document.createElement('span');
+                    colorText.textContent = color;
+                    colorText.style.cssText = `
+                      font-weight: \${isSelected ? 'bold' : 'normal'};
+                      color: \${isSelected ? '#d70018' : '#333'};
+                    `;
+
+                    button.appendChild(colorCircle);
+                    button.appendChild(colorText);
+
+                    if (isSelected) {
+                      const checkmark = document.createElement('i');
+                      checkmark.className = 'fa fa-check';
+                      checkmark.style.cssText = 'color: #d70018; margin-left: auto;';
+                      button.appendChild(checkmark);
+                    }
+
+                    if (isAvailable) {
+                      button.onclick = () => window.location.href = ctx + '/product/' + variant.id;
+                      button.onmouseover = () => {
+                        if (!isSelected) {
+                          button.style.borderColor = '#d70018';
+                          button.style.boxShadow = '0 2px 8px rgba(215, 0, 24, 0.2)';
+                        }
+                      };
+                      button.onmouseout = () => {
+                        if (!isSelected) {
+                          button.style.borderColor = '#ddd';
+                          button.style.boxShadow = 'none';
+                        }
+                      };
+                    }
+
+                    container.appendChild(button);
+                  });
+                }
+
+                /**
+                 * Get color code from color name (basic mapping)
+                 */
+                function getColorCode(colorName) {
+                  const colorMap = {
+                    'Titan Tự Nhiên': '#e8e8e8',
+                    'Titan Trắng': '#f5f5f5',
+                    'Titan Đen': '#2c2c2c',
+                    'Titan Sa Mạc': '#d4a574',
+                    'Xanh': '#4a90e2',
+                    'Đỏ': '#e74c3c',
+                    'Vàng': '#f1c40f',
+                    'Xám': '#95a5a6',
+                    'Bạc': '#c0c0c0',
+                    'Vàng Đồng': '#cd7f32'
+                  };
+                  return colorMap[colorName] || '#ddd';
                 }
 
                 // ==================== REVIEW AND RATING FUNCTIONS ====================

@@ -213,7 +213,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
           // Update the stat cards with actual data
           document.getElementById("total-users").textContent = data.users.toLocaleString();
           document.getElementById("total-products").textContent = data.products.toLocaleString();
-          document.getElementById("total-revenue").textContent = "$" + parseFloat(data.totalRevenue).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          document.getElementById("total-revenue").textContent = parseFloat(data.totalRevenue).toLocaleString('vi-VN') + "₫";
           document.getElementById("total-orders").textContent = data.orders.toLocaleString();
           
         } catch (e) {
@@ -331,7 +331,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
             options: { scales: { y: { beginAtZero: true } } },
           });
           const total = values.reduce((a, b) => a + b, 0);
-          document.getElementById("revTotal").innerText = total.toFixed(2);
+          document.getElementById("revTotal").innerText = total.toLocaleString('vi-VN') + "₫";
         } catch (e) {
           console.error(e);
         }

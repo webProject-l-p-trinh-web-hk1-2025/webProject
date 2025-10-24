@@ -1,116 +1,184 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-        <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-            <html>
+<title>Danh sách đơn hàng của Seller - CellPhoneStore</title>
 
-            <head>
-                <title>Danh sách đơn hàng của Seller</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        background: #f8f8f8;
-                        margin: 20px;
-                    }
+<style>
+    .seller-orders-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
 
-                    .container {
-                        max-width: 1200px;
-                        margin: auto;
-                        background: #fff;
-                        padding: 20px;
-                        border-radius: 8px;
-                    }
+    .seller-orders-container h1 {
+        color: #d70018;
+        margin-bottom: 20px;
+        font-size: 28px;
+        font-weight: bold;
+    }
 
-                    h1 {
-                        color: #d70018;
-                    }
+    .order-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #fafafa;
+    }
 
-                    .order-card {
-                        border: 1px solid #ddd;
-                        border-radius: 8px;
-                        margin-bottom: 20px;
-                        padding: 15px;
-                        background: #fafafa;
-                    }
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
 
-                    .order-header {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-bottom: 10px;
-                    }
+    .order-info div {
+        margin-bottom: 5px;
+        color: #333;
+    }
 
-                    .order-info div {
-                        margin-bottom: 5px;
-                    }
+    .order-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
 
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 10px;
-                    }
+    .order-table th,
+    .order-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
 
-                    th,
-                    td {
-                        border: 1px solid #ddd;
-                        padding: 8px;
-                        text-align: center;
-                    }
+    .order-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
 
-                    th {
-                        background-color: #f2f2f2;
-                    }
+    .product-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
 
-                    .product-img {
-                        width: 80px;
-                        height: 80px;
-                        object-fit: cover;
-                        border-radius: 4px;
-                    }
+    .btn-accept {
+        background: #28a745;
+        color: #fff;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+    }
 
-                    .btn {
-                        padding: 8px 15px;
-                        border-radius: 5px;
-                        text-decoration: none;
-                        font-weight: bold;
-                        cursor: pointer;
-                        border: none;
-                    }
+    .btn-accept:hover {
+        background: #218838;
+    }
 
-                    .btn-accept {
-                        background: #28a745;
-                        color: #fff;
-                    }
+    .btn-disabled {
+        background: #aaa;
+        color: #fff;
+        cursor: not-allowed;
+        padding: 8px 15px;
+        border-radius: 5px;
+    }
 
-                    .btn-disabled {
-                        background: #aaa;
-                        color: #fff;
-                        cursor: not-allowed;
-                    }
+    .btn-back {
+        background: #d70018;
+        color: #fff;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
 
-                    .btn-back {
-                        background: #d70018;
-                        color: #fff;
-                        text-decoration: none;
-                        padding: 10px 20px;
-                        border-radius: 5px;
-                        display: inline-block;
-                        margin-bottom: 20px;
-                    }
-                </style>
-            </head>
+    .btn-back:hover {
+        background: #b30014;
+        color: #fff;
+    }
 
-            <body>
-                <div class="container">
-                    <h1>Danh sách đơn hàng</h1>
-                    <a href="/home" class="btn-back">Quay về trang chính</a>
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .status-pending { background: #ffc107; color: #000; }
+    .status-confirmed { background: #17a2b8; color: #fff; }
+    .status-shipping { background: #007bff; color: #fff; }
+    .status-delivered { background: #28a745; color: #fff; }
+    .status-cancelled { background: #dc3545; color: #fff; }
+</style>
+
+<!-- BREADCRUMB -->
+<div id="breadcrumb" class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="breadcrumb-tree">
+                    <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
+                    <li class="active">Đơn hàng của tôi (Seller)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /BREADCRUMB -->
+
+<!-- SECTION -->
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="seller-orders-container">
+                    <h1>Đơn hàng của tôi (Seller)</h1>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        <i class="fa fa-shopping-bag"></i> Quản lý đơn hàng bạn đã bán. Bạn có thể chấp nhận đơn hàng PENDING.
+                    </p>
+                    <a href="${pageContext.request.contextPath}/" class="btn-back">
+                        <i class="fa fa-arrow-left"></i> Quay về trang chính
+                    </a>
+
+                    <!-- Filter Status -->
+                    <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                        <label style="font-weight: bold; margin-right: 10px;">
+                            <i class="fa fa-filter"></i> Lọc theo trạng thái:
+                        </label>
+                        <select id="statusFilter" onchange="filterByStatus()" 
+                                style="padding: 8px 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                            <option value="ALL" ${selectedStatus == 'ALL' ? 'selected' : ''}>Tất cả</option>
+                            <option value="PENDING" ${selectedStatus == 'PENDING' ? 'selected' : ''}>Chờ xác nhận</option>
+                            <option value="ACCEPTED" ${selectedStatus == 'ACCEPTED' ? 'selected' : ''}>Đã chấp nhận</option>
+                            <option value="CANCELLED" ${selectedStatus == 'CANCELLED' ? 'selected' : ''}>Đã hủy</option>
+                        </select>
+                    </div>
+
+                    <script>
+                        function filterByStatus() {
+                            const status = document.getElementById('statusFilter').value;
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('status', status);
+                            url.searchParams.set('page', '1'); // Reset to page 1 when filtering
+                            window.location.href = url.toString();
+                        }
+                    </script>
 
                     <c:forEach var="order" items="${orders}">
                         <div class="order-card">
                             <div class="order-header">
                                 <div>
                                     <strong>Order ID:</strong> ${order.orderId} &nbsp;|&nbsp;
-                                    <strong>Status:</strong> ${order.status} &nbsp;|&nbsp;
+                                    <strong>Status:</strong> 
+                                    <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
+                                    &nbsp;|&nbsp;
                                     <strong>Payment:</strong> ${order.paymentMethod} - ${order.paymentStatus}
                                     &nbsp;|&nbsp;
                                     <strong>Total:</strong>
@@ -118,9 +186,11 @@
                                 </div>
                                 <div>
                                     <c:if test="${order.status == 'PENDING'}">
-                                        <form action="/seller/accept-order/${order.orderId}" method="post"
+                                        <form action="${pageContext.request.contextPath}/seller/accept-order/${order.orderId}" method="post"
                                             style="display:inline;">
-                                            <button type="submit" class="btn btn-accept">Accept Order</button>
+                                            <button type="submit" class="btn-accept">
+                                                <i class="fa fa-check"></i> Accept Order
+                                            </button>
                                         </form>
                                     </c:if>
                                 </div>
@@ -131,8 +201,8 @@
                                 <div><strong>Created At:</strong> ${order.createdAt}</div>
                             </div>
 
-                            <h4>Sản phẩm trong đơn hàng</h4>
-                            <table>
+                            <h4 style="margin-top: 15px; color: #333;">Sản phẩm trong đơn hàng</h4>
+                            <table class="order-table">
                                 <thead>
                                     <tr>
                                         <th>Ảnh</th>
@@ -148,12 +218,14 @@
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${not empty item.productImageUrl}">
-                                                        <img class="product-img" src="${item.productImageUrl}"
-                                                            alt="${item.productName}" />
+                                                        <img class="product-img" 
+                                                             src="${pageContext.request.contextPath}${item.productImageUrl}"
+                                                             alt="${item.productName}" />
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <img class="product-img" src="/images/no-image.png"
-                                                            alt="No Image" />
+                                                        <img class="product-img" 
+                                                             src="${pageContext.request.contextPath}/images/no-image.png"
+                                                             alt="No Image" />
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>
@@ -175,9 +247,57 @@
                     </c:forEach>
 
                     <c:if test="${empty orders}">
-                        <p>Không có đơn hàng nào.</p>
+                        <div style="text-align: center; padding: 40px; color: #999;">
+                            <i class="fa fa-inbox" style="font-size: 48px; margin-bottom: 10px;"></i>
+                            <p style="font-size: 18px;">Không có đơn hàng nào.</p>
+                        </div>
+                    </c:if>
+
+                    <!-- Pagination -->
+                    <c:if test="${not empty orders && totalPages > 1}">
+                        <div style="text-align: center; margin-top: 30px;">
+                            <div class="store-pagination">
+                                <!-- Previous Button -->
+                                <c:if test="${currentPage > 1}">
+                                    <a href="${pageContext.request.contextPath}/seller/orders?page=${currentPage - 1}&size=${pageSize}" 
+                                       class="btn btn-default">
+                                        <i class="fa fa-angle-left"></i> Trước
+                                    </a>
+                                </c:if>
+                                
+                                <!-- Page Numbers -->
+                                <c:forEach begin="${currentPage - 2 < 1 ? 1 : currentPage - 2}" 
+                                           end="${currentPage + 2 > totalPages ? totalPages : currentPage + 2}" 
+                                           var="pageNum">
+                                    <c:choose>
+                                        <c:when test="${pageNum == currentPage}">
+                                            <span class="btn btn-primary">${pageNum}</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="${pageContext.request.contextPath}/seller/orders?page=${pageNum}&size=${pageSize}" 
+                                               class="btn btn-default">${pageNum}</a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+                                
+                                <!-- Next Button -->
+                                <c:if test="${currentPage < totalPages}">
+                                    <a href="${pageContext.request.contextPath}/seller/orders?page=${currentPage + 1}&size=${pageSize}" 
+                                       class="btn btn-default">
+                                        Sau <i class="fa fa-angle-right"></i>
+                                    </a>
+                                </c:if>
+                            </div>
+                            
+                            <!-- Page Info -->
+                            <div style="margin-top: 15px; color: #666;">
+                                Hiển thị ${startIndex} - ${endIndex} trong tổng số ${totalOrders} đơn hàng
+                            </div>
+                        </div>
                     </c:if>
                 </div>
-            </body>
-
-            </html>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /SECTION -->

@@ -84,6 +84,119 @@
                         z-index: 1;
                     }
 
+                    /* Modern Product Section Animations */
+                    .section-title {
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .section-title .title {
+                        animation: fadeInDown 0.8s ease-out;
+                    }
+
+                    .section-tab-nav {
+                        animation: fadeIn 1s ease-out 0.3s both;
+                    }
+
+                    .section-tab-nav li {
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        position: relative;
+                    }
+
+                    .section-tab-nav li a {
+                        transition: all 0.3s ease;
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .section-tab-nav li a::before {
+                        content: '';
+                        position: absolute;
+                        bottom: 0;
+                        left: 50%;
+                        width: 0;
+                        height: 2px;
+                        background: #D10024;
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        transform: translateX(-50%);
+                    }
+
+                    .section-tab-nav li.active a::before,
+                    .section-tab-nav li:hover a::before {
+                        width: 100%;
+                    }
+
+                    .section-tab-nav li.active a {
+                        color: #D10024;
+                        font-weight: 600;
+                    }
+
+                    /* Tab Pane Animations */
+                    .tab-pane {
+                        opacity: 0;
+                        transform: translateY(20px);
+                        transition: none;
+                        display: none;
+                    }
+
+                    .tab-pane.active {
+                        display: block;
+                        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                    }
+
+                    .tab-pane.fade-out {
+                        animation: fadeOutDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                    }
+
+                    /* Product Card Hover Effects */
+                    .product {
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        position: relative;
+                    }
+
+                    .product:hover {
+                        transform: translateY(-10px);
+                        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+                    }
+
+                    .product-img {
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .product-img img {
+                        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+
+                    .product:hover .product-img img {
+                        transform: scale(1.08);
+                    }
+
+                    /* Stagger Animation for Products */
+                    .tab-pane.active .product {
+                        opacity: 0;
+                        animation: staggerFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                    }
+
+                    .tab-pane.active .product:nth-child(1) { animation-delay: 0.1s; }
+                    .tab-pane.active .product:nth-child(2) { animation-delay: 0.15s; }
+                    .tab-pane.active .product:nth-child(3) { animation-delay: 0.2s; }
+                    .tab-pane.active .product:nth-child(4) { animation-delay: 0.25s; }
+                    .tab-pane.active .product:nth-child(5) { animation-delay: 0.3s; }
+                    .tab-pane.active .product:nth-child(6) { animation-delay: 0.35s; }
+
+                    /* Auto-rotate Progress Indicator */
+                    .section-tab-nav li.active::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -2px;
+                        left: 0;
+                        width: 0;
+                        height: 2px;
+                        background: linear-gradient(90deg, #D10024, #FF4757);
+                        animation: progressBar 5s linear forwards;
+                    }
+
                     /* Animations */
                     @keyframes pulse {
                         0%, 100% {
@@ -115,6 +228,57 @@
                         to {
                             opacity: 1;
                             transform: translateY(0);
+                        }
+                    }
+
+                    @keyframes fadeInDown {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    @keyframes fadeIn {
+                        from {
+                            opacity: 0;
+                        }
+                        to {
+                            opacity: 1;
+                        }
+                    }
+
+                    @keyframes fadeOutDown {
+                        from {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                        to {
+                            opacity: 0;
+                            transform: translateY(-20px);
+                        }
+                    }
+
+                    @keyframes staggerFadeIn {
+                        from {
+                            opacity: 0;
+                            transform: translateY(30px) scale(0.95);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0) scale(1);
+                        }
+                    }
+
+                    @keyframes progressBar {
+                        from {
+                            width: 0;
+                        }
+                        to {
+                            width: 100%;
                         }
                     }
 
@@ -714,7 +878,88 @@
                     // Start countdown when page loads
                     window.addEventListener('DOMContentLoaded', function() {
                         updateHomeCountdown();
+                        initProductTabsAutoRotate();
                     });
+
+                    // Auto-rotate product tabs with smooth animation
+                    function initProductTabsAutoRotate() {
+                        const tabNavItems = document.querySelectorAll('.section-tab-nav li');
+                        const tabPanes = document.querySelectorAll('.tab-pane');
+                        
+                        if (tabNavItems.length === 0 || tabPanes.length === 0) return;
+                        
+                        let currentIndex = 0;
+                        let autoRotateInterval;
+                        let isUserInteracting = false;
+                        
+                        // Function to switch to a specific tab
+                        function switchToTab(index) {
+                            if (index === currentIndex) return;
+                            
+                            // Remove active class and add fade-out animation to current tab
+                            tabPanes.forEach(pane => {
+                                if (pane.classList.contains('active')) {
+                                    pane.classList.add('fade-out');
+                                    setTimeout(() => {
+                                        pane.classList.remove('active', 'fade-out');
+                                    }, 400);
+                                }
+                            });
+                            
+                            // Update nav items
+                            tabNavItems.forEach(item => item.classList.remove('active'));
+                            tabNavItems[index].classList.add('active');
+                            
+                            // Show new tab with animation
+                            setTimeout(() => {
+                                tabPanes[index].classList.add('active');
+                            }, 400);
+                            
+                            currentIndex = index;
+                        }
+                        
+                        // Auto-rotate every 5 seconds
+                        function startAutoRotate() {
+                            autoRotateInterval = setInterval(() => {
+                                if (!isUserInteracting) {
+                                    const nextIndex = (currentIndex + 1) % tabNavItems.length;
+                                    switchToTab(nextIndex);
+                                }
+                            }, 5000); // 5 seconds per tab
+                        }
+                        
+                        // Stop auto-rotate temporarily when user interacts
+                        function pauseAutoRotate() {
+                            isUserInteracting = true;
+                            setTimeout(() => {
+                                isUserInteracting = false;
+                            }, 10000); // Resume after 10 seconds of no interaction
+                        }
+                        
+                        // Add click handlers to tabs
+                        tabNavItems.forEach((item, index) => {
+                            item.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                pauseAutoRotate();
+                                switchToTab(index);
+                            });
+                        });
+                        
+                        // Start auto-rotation
+                        startAutoRotate();
+                        
+                        // Pause on hover
+                        const productsSection = document.querySelector('.products-tabs');
+                        if (productsSection) {
+                            productsSection.addEventListener('mouseenter', () => {
+                                isUserInteracting = true;
+                            });
+                            
+                            productsSection.addEventListener('mouseleave', () => {
+                                isUserInteracting = false;
+                            });
+                        }
+                    }
                 </script>
             </body>
 

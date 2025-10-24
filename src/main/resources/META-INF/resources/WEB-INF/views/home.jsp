@@ -9,6 +9,210 @@
                 <meta http-equiv="X-UA-Compatible" content="IE=edge">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                 <title>CellPhoneStore - Trang chủ</title>
+                
+                <style>
+                    /* Flash Sale Countdown Styling */
+                    .hot-deal-countdown {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        gap: 20px;
+                        margin: 30px 0;
+                        padding: 0;
+                    }
+
+                    .hot-deal-countdown li {
+                        list-style: none;
+                        display: flex;
+                        align-items: center;
+                    }
+
+                    .hot-deal-countdown li > div {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border-radius: 15px;
+                        padding: 25px 20px;
+                        width: 100px;
+                        height: 100px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+                        position: relative;
+                        overflow: hidden;
+                        animation: pulse 2s ease-in-out infinite;
+                    }
+
+                    .hot-deal-countdown li > div::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        left: -50%;
+                        width: 200%;
+                        height: 200%;
+                        background: linear-gradient(
+                            45deg,
+                            transparent,
+                            rgba(255, 255, 255, 0.1),
+                            transparent
+                        );
+                        transform: rotate(45deg);
+                        animation: shine 3s infinite;
+                    }
+
+                    .hot-deal-countdown h3 {
+                        font-size: 42px;
+                        font-weight: 700;
+                        color: #fff;
+                        margin: 0;
+                        line-height: 1;
+                        text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                        font-family: 'Arial Black', sans-serif;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .hot-deal-countdown span {
+                        display: block;
+                        color: rgba(255, 255, 255, 0.9);
+                        font-size: 12px;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        margin-top: 5px;
+                        font-weight: 600;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    /* Animations */
+                    @keyframes pulse {
+                        0%, 100% {
+                            transform: scale(1);
+                            box-shadow: 0 10px 30px rgba(255, 68, 68, 0.4);
+                        }
+                        50% {
+                            transform: scale(1.05);
+                            box-shadow: 0 15px 40px rgba(255, 68, 68, 0.6);
+                        }
+                    }
+
+                    @keyframes shine {
+                        0% {
+                            left: -50%;
+                            top: -50%;
+                        }
+                        100% {
+                            left: 150%;
+                            top: 150%;
+                        }
+                    }
+
+                    @keyframes fadeInUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(30px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    /* Flash Sale Section */
+                    .hot-deal {
+                        text-align: center;
+                        padding: 60px 30px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border-radius: 20px;
+                        position: relative;
+                        overflow: hidden;
+                        animation: fadeInUp 1s ease-out;
+                    }
+
+                    .hot-deal::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        right: -50%;
+                        width: 200%;
+                        height: 200%;
+                        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                        animation: rotate 20s linear infinite;
+                    }
+
+                    @keyframes rotate {
+                        0% {
+                            transform: rotate(0deg);
+                        }
+                        100% {
+                            transform: rotate(360deg);
+                        }
+                    }
+
+        .hot-deal h2 {
+            color: #ffffff;
+            font-size: 42px;
+            font-weight: 900;
+            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+            margin: 30px 0 20px 0;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 1s ease-out 0.2s both;
+            letter-spacing: 2px;
+        }                    .hot-deal p {
+                        color: #ffffff;
+                        font-size: 24px;
+                        font-weight: 700;
+                        margin: 20px 0 30px;
+                        position: relative;
+                        z-index: 1;
+                        animation: fadeInUp 1s ease-out 0.4s both;
+                    }
+
+                    .hot-deal .primary-btn {
+                        position: relative;
+                        z-index: 1;
+                        background: #fff;
+                        color: #667eea;
+                        padding: 18px 45px;
+                        font-size: 18px;
+                        font-weight: 700;
+                        border-radius: 50px;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                        animation: fadeInUp 1s ease-out 0.6s both;
+                    }
+
+                    .hot-deal .primary-btn:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+                        background: #f8f9fa;
+                    }
+
+                    /* Responsive */
+                    @media (max-width: 768px) {
+                        .hot-deal-countdown {
+                            gap: 10px;
+                        }
+
+                        .hot-deal-countdown li > div {
+                            padding: 15px;
+                            min-width: 70px;
+                        }
+
+                        .hot-deal-countdown h3 {
+                            font-size: 32px;
+                        }
+
+                        .hot-deal h2 {
+                            font-size: 28px;
+                        }
+
+                        .hot-deal p {
+                            font-size: 18px;
+                        }
+                    }
+                </style>
             </head>
 
             <body>
@@ -194,32 +398,32 @@
                                     <ul class="hot-deal-countdown">
                                         <li>
                                             <div>
-                                                <h3>02</h3>
-                                                <span>Ngày</span>
+                                                <h3 id="home-days">00</h3>
+                                
                                             </div>
                                         </li>
                                         <li>
                                             <div>
-                                                <h3>10</h3>
-                                                <span>Giờ</span>
+                                                <h3 id="home-hours">00</h3>
+                                                
                                             </div>
                                         </li>
                                         <li>
                                             <div>
-                                                <h3>34</h3>
-                                                <span>Phút</span>
+                                                <h3 id="home-minutes">00</h3>
+                                                
                                             </div>
                                         </li>
                                         <li>
                                             <div>
-                                                <h3>60</h3>
-                                                <span>Giây</span>
+                                                <h3 id="home-seconds">00</h3>
+                                                
                                             </div>
                                         </li>
                                     </ul>
                                     <h2 class="text-uppercase">Flash Sale hôm nay</h2>
                                     <p>Giảm giá lên đến 50%</p>
-                                    <a class="primary-btn cta-btn" href="${pageContext.request.contextPath}/shop">Mua
+                                    <a class="primary-btn cta-btn" href="${pageContext.request.contextPath}/deals">Mua
                                         ngay</a>
                                 </div>
                             </div>
@@ -460,6 +664,57 @@
                             loadFavoriteStates();
                         });
                     }
+
+                    // Synchronized 24-hour countdown for home page (same as deals page)
+                    function updateHomeCountdown() {
+                        // Get or create countdown start time (shared with deals page)
+                        let startTime = localStorage.getItem('flashSaleStartTime');
+                        if (!startTime) {
+                            startTime = new Date().getTime();
+                            localStorage.setItem('flashSaleStartTime', startTime);
+                        } else {
+                            startTime = parseInt(startTime);
+                        }
+
+                        // Calculate 24-hour countdown
+                        const duration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+                        const endTime = startTime + duration;
+
+                        const timer = setInterval(function() {
+                            const currentTime = new Date().getTime();
+                            const timeLeft = endTime - currentTime;
+
+                            if (timeLeft <= 0) {
+                                // Reset countdown when it reaches 0
+                                const newStartTime = new Date().getTime();
+                                localStorage.setItem('flashSaleStartTime', newStartTime);
+                                clearInterval(timer);
+                                updateHomeCountdown(); // Restart countdown
+                                return;
+                            }
+
+                            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                            // Update countdown display
+                            const daysEl = document.getElementById("home-days");
+                            const hoursEl = document.getElementById("home-hours");
+                            const minutesEl = document.getElementById("home-minutes");
+                            const secondsEl = document.getElementById("home-seconds");
+
+                            if (daysEl) daysEl.textContent = days.toString().padStart(2, '0');
+                            if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
+                            if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
+                            if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+                        }, 1000);
+                    }
+
+                    // Start countdown when page loads
+                    window.addEventListener('DOMContentLoaded', function() {
+                        updateHomeCountdown();
+                    });
                 </script>
             </body>
 

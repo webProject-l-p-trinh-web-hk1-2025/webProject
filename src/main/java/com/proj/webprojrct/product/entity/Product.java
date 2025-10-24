@@ -37,6 +37,13 @@ public class Product {
 
     private String imageUrl;
 
+    @Column(name = "on_deal")
+    @Builder.Default
+    private Boolean onDeal = false;
+
+    @Column(name = "deal_percentage")
+    private Integer dealPercentage;
+
     // --- Specs ---
     private String screenSize;
     private String displayTech;

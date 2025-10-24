@@ -142,6 +142,38 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                       ></select>
                     </div>
                   </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Áp dụng khuyến mãi (Deal)</label>
+                      <div class="form-check">
+                        <input
+                          type="checkbox"
+                          name="onDeal"
+                          id="onDealCheckbox"
+                          class="form-check-input"
+                          ${product.onDeal ? 'checked' : ''}
+                        />
+                        <label class="form-check-label" for="onDealCheckbox">
+                          Sản phẩm đang giảm giá
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Phần trăm giảm giá (%)</label>
+                      <input
+                        type="number"
+                        name="dealPercentage"
+                        class="form-control"
+                        min="0"
+                        max="100"
+                        value="${product.dealPercentage != null ? product.dealPercentage : 0}"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div class="card mt-4">
@@ -376,6 +408,8 @@ uri="http://java.sun.com/jsp/jstl/core" %>
             price: parseFloat(form.price.value),
             stock: parseInt(form.stock.value),
             categoryId: parseInt(form.categoryId.value),
+            onDeal: form.onDeal?.checked || false,
+            dealPercentage: form.onDeal?.checked ? (parseInt(form.dealPercentage?.value) || 0) : null,
           };
           data.screenSize = form.screenSize?.value || null;
           data.displayTech = form.displayTech?.value || null;

@@ -20,4 +20,5 @@ public interface ProductService {
     void deleteImage(Long imageId) throws IOException;
     List<String> getAllBrands();
     List<String> suggestNames(String q, int limit);
+    ProductResponse setDealStatus(Long id, Boolean onDeal, Integer dealPercentage);
 }

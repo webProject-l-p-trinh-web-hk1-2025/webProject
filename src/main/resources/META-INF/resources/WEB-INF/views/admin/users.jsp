@@ -33,7 +33,11 @@
                                 <a href="${pageContext.request.contextPath}/admin/categories"><i class="fas fa-tag"></i><span class="nav-text">Categories</span></a>
                             </li>
                             <li>
-                                <a href="${pageContext.request.contextPath}/admin/chat"><i class="fas fa-comments"></i><span class="nav-text">Chat</span></a>
+                                <a href="${pageContext.request.contextPath}/admin/chat" style="position: relative;">
+                                    <i class="fas fa-comments"></i>
+                                    <span class="nav-text">Chat</span>
+                                    <span id="chat-notification-badge" style="display:none; position:absolute; top:8px; right:12px; background:#e53935; color:white; border-radius:50%; padding:2px 6px; font-size:10px; min-width:18px; text-align:center;"></span>
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -350,6 +354,11 @@
                     </div>
                 </div>
             </div>
+
+            <!-- WebSocket libraries for chat notifications -->
+            <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+            <script src="<c:url value='/js/admin-chat-notifications.js'/>"></script>
 
             <script>
                 function filterTable() {

@@ -13,9 +13,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.proj.webprojrct.common.config.security.CustomUserDetails;
-import com.proj.webprojrct.ReviewandRating.dto.request.ReviewRequest;
-import com.proj.webprojrct.ReviewandRating.dto.response.ReviewResponse;
-import com.proj.webprojrct.ReviewandRating.service.ReviewService;
+import com.proj.webprojrct.reviewandrating.dto.request.ReviewRequest;
+import com.proj.webprojrct.reviewandrating.dto.response.ReviewResponse;
+import com.proj.webprojrct.reviewandrating.service.ReviewService;
 
 import jakarta.validation.Valid;
 

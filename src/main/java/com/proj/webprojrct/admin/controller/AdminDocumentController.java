@@ -36,14 +36,18 @@ public class AdminDocumentController {
       @GetMapping
     public String show(Model model) {
         List<Document> documents = documentService.getAllDocuments();
+        List<ProductResponse> products = productService.getAll();
         model.addAttribute("documents", documents);
+        model.addAttribute("products", products);
         return "admin/document_list";
     }
 
     @GetMapping({"/all", "/list"})
     public String showAllDocuments(Model model) {
         List<Document> documents = documentService.getAllDocuments();
+        List<ProductResponse> products = productService.getAll();
         model.addAttribute("documents", documents);
+        model.addAttribute("products", products);
         return "admin/document_list";
     }
 
@@ -123,5 +127,20 @@ public class AdminDocumentController {
             model.addAttribute("error", "Không thể xóa document: " + e.getMessage());
         }
         return "redirect:/admin/document";
+    }
+    
+    // API endpoint to get document by productId (for product detail page)
+    @GetMapping("/api/product/{productId}")
+    @ResponseBody
+    public ResponseEntity<?> getDocumentByProductId(@PathVariable Long productId) {
+        try {
+            Document document = documentService.getDocumentByProductId(productId);
+            if (document == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(document);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
     }
 }

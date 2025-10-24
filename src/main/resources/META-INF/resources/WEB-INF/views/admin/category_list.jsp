@@ -46,17 +46,6 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
         background-color: #dc3545;
         color: white;
       }
-      .badge {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 600;
-      }
-      .bg-info {
-        background-color: #17a2b8;
-        color: white;
-      }
       .text-center {
         text-align: center;
       }
@@ -200,6 +189,7 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
                   <tr>
                     <th style="width: 60px">#</th>
                     <th>Tên danh mục</th>
+                    <th>Danh mục cha</th>
                     <th>Mô tả</th>
                     <th style="width: 100px">Số SP</th>
                     <th style="width: 160px">Thao tác</th>
@@ -296,6 +286,17 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
                   const cdesc = c.description != null ? c.description : "";
                   const count = counts[cid] || 0;
 
+                  // Find parent category name
+                  let parentName = "-";
+                  if (c.parentId) {
+                    const parent = allCategories.find(
+                      (cat) => cat.id === c.parentId
+                    );
+                    if (parent) {
+                      parentName = parent.name;
+                    }
+                  }
+
                   tr.innerHTML =
                     '<td class="text-center">' +
                     (idx + 1) +
@@ -304,12 +305,13 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
                     cname +
                     "</strong></td>" +
                     '<td class="text-muted">' +
+                    parentName +
+                    "</td>" +
+                    '<td class="text-muted">' +
                     cdesc +
                     "</td>" +
                     '<td class="text-center">' +
-                    '<span class="badge bg-info">' +
                     count +
-                    "</span>" +
                     "</td>" +
                     '<td class="text-center">' +
                     '<a href="' +

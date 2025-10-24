@@ -1,13 +1,12 @@
-package com.proj.webprojrct.ReviewandRating.repository;
+package com.proj.webprojrct.reviewandrating.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.proj.webprojrct.ReviewandRating.entity.Review;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-
+import com.proj.webprojrct.reviewandrating.entity.Review;
 
 import java.util.List;
 

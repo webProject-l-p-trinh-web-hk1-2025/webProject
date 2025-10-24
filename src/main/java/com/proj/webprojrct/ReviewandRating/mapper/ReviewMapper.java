@@ -1,12 +1,13 @@
-package com.proj.webprojrct.ReviewandRating.mapper;
+package com.proj.webprojrct.reviewandrating.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import com.proj.webprojrct.ReviewandRating.dto.request.ReviewRequest;
-import com.proj.webprojrct.ReviewandRating.dto.response.ReviewResponse;
-import com.proj.webprojrct.ReviewandRating.entity.Review;
+import com.proj.webprojrct.reviewandrating.dto.request.ReviewRequest;
+import com.proj.webprojrct.reviewandrating.dto.response.ReviewResponse;
+import com.proj.webprojrct.reviewandrating.entity.Review;
+
 import java.util.List;
 
 

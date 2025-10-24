@@ -1,4 +1,4 @@
-package com.proj.webprojrct.ReviewandRating.entity;
+package com.proj.webprojrct.reviewandrating.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

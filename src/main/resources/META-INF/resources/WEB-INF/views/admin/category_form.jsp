@@ -145,6 +145,27 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
                   ></textarea>
                 </div>
 
+                <div style="margin-bottom: 15px">
+                  <label
+                    for="parentId"
+                    style="display: block; margin-bottom: 5px; font-weight: 500"
+                    >Danh mục cha (không bắt buộc)</label
+                  >
+                  <select
+                    id="parentId"
+                    name="parentId"
+                    style="
+                      width: 100%;
+                      padding: 8px 12px;
+                      border: 1px solid #ced4da;
+                      border-radius: 4px;
+                      font-size: 14px;
+                    "
+                  >
+                    <option value="">-- Không có (Danh mục gốc) --</option>
+                  </select>
+                </div>
+
                 <div style="margin-top: 20px; display: flex; gap: 10px">
                   <button
                     type="button"
@@ -180,6 +201,27 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
       const form = document.getElementById("categoryForm");
       const status = document.getElementById("status");
 
+      // Load all categories for parent dropdown
+      function loadCategories() {
+        fetch(api)
+          .then((r) => (r.ok ? r.json() : []))
+          .then((categories) => {
+            const parentSelect = document.getElementById("parentId");
+            categories.forEach((cat) => {
+              const option = document.createElement("option");
+              option.value = cat.id;
+              option.textContent = cat.name;
+              parentSelect.appendChild(option);
+            });
+          })
+          .catch((e) => {
+            console.error("Error loading categories:", e);
+          });
+      }
+
+      // Load categories on page load
+      loadCategories();
+
       // If URL contains /edit/{id} we will fetch existing
       const path = location.pathname;
       const editMatch = path.match(/\/admin\/categories\/edit\/(\d+)/);
@@ -200,6 +242,9 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
             document.getElementById("id").value = c.id || "";
             document.getElementById("name").value = c.name || "";
             document.getElementById("description").value = c.description || "";
+            if (c.parentId) {
+              document.getElementById("parentId").value = c.parentId;
+            }
           })
           .catch((e) => {
             console.error(e);
@@ -213,14 +258,22 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
         ev.preventDefault();
 
         const id = document.getElementById("id").value;
+        const parentIdValue = document.getElementById("parentId").value;
         const payload = {
           name: document.getElementById("name").value.trim(),
           description: document.getElementById("description").value.trim(),
+          parentId: parentIdValue ? parseInt(parentIdValue) : null,
         };
 
         // Validate
         if (payload.name.length < 2) {
           showError("Tên danh mục phải có ít nhất 2 ký tự");
+          return;
+        }
+
+        // Prevent setting self as parent
+        if (id && payload.parentId && parseInt(id) === payload.parentId) {
+          showError("Không thể chọn chính danh mục này làm danh mục cha");
           return;
         }
 

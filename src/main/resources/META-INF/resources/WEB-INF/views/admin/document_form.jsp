@@ -49,6 +49,74 @@
                     border-radius: 4px;
                     object-fit: cover;
                 }
+
+                /* Resizable wrapper for images and tables */
+                .img-wrapper,
+                .table-wrapper {
+                    display: block;
+                    position: relative;
+                    max-width: 100%;
+                    margin: 5px auto;
+                }
+
+                .img-wrapper img,
+                .table-wrapper table {
+                    display: block;
+                    width: 100%;
+                    max-width: 100%;
+                }
+                
+                /* Support for text-align from justifyCenter/justifyLeft/justifyRight */
+                #editor [style*="text-align: center"] .img-wrapper,
+                #editor [style*="text-align: center"] .table-wrapper {
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                
+                #editor [style*="text-align: left"] .img-wrapper,
+                #editor [style*="text-align: left"] .table-wrapper {
+                    margin-left: 0;
+                    margin-right: auto;
+                }
+                
+                #editor [style*="text-align: right"] .img-wrapper,
+                #editor [style*="text-align: right"] .table-wrapper {
+                    margin-left: auto;
+                    margin-right: 0;
+                }
+
+                .img-wrapper:hover,
+                .table-wrapper:hover,
+                .img-wrapper.resizing,
+                .table-wrapper.resizing {
+                    outline: 2px dashed #1976d2;
+                }
+
+                .resize-handle {
+                    position: absolute;
+                    bottom: 0;
+                    right: 0;
+                    width: 16px;
+                    height: 16px;
+                    background: #1976d2;
+                    border: 2px solid white;
+                    border-radius: 50%;
+                    cursor: nwse-resize;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 10px;
+                }
+
+                .img-wrapper:hover .resize-handle,
+                .table-wrapper:hover .resize-handle,
+                .img-wrapper.resizing .resize-handle,
+                .table-wrapper.resizing .resize-handle {
+                    opacity: 1;
+                }
     </style>
 </head>
 
@@ -146,8 +214,14 @@
                                 <button type="button" onclick="formatDoc('insertOrderedList')">OL</button>
                                 <button type="button" onclick="insertLink()">Link</button>
                                 <button type="button" onclick="triggerImageUpload()">Image</button>
-
                                 <button type="button" onclick="insertTable()">Table</button>
+                                
+                                <span style="margin: 0 5px;">|</span>
+                                
+                                <button type="button" onclick="alignContent('left')" title="Căn trái">⬅</button>
+                                <button type="button" onclick="alignContent('center')" title="Căn giữa">↔</button>
+                                <button type="button" onclick="alignContent('right')" title="Căn phải">➡</button>
+                                <button type="button" onclick="formatDoc('justifyFull')" title="Căn đều">⬌</button>
 
                                 <label for="editorColorPicker">Color:</label>
                                 <input type="color" id="editorColorPicker" onchange="formatDoc('foreColor', this.value)"
@@ -160,23 +234,10 @@
                                 </c:if>
                             </div>
 
-                            <%-- (Input ẩn và phần upload ảnh gallery giữ nguyên) --%>
-                                <input type="file" id="editorImageInput" accept="image/*" style="display: none;"
-                                    onchange="uploadImage(this)">
-                                <div class="form-group">
-                                    <label>Upload Images (Gallery):</label>
-                                    <input type="file" name="images" multiple accept="image/*" />
-                                    <c:if test="${document != null && not empty document.images}">
-                                        <div class="img-preview">
-                                            <c:forEach var="img" items="${document.images}">
-                                                <img src="${pageContext.request.contextPath}${img.imageUrl}"
-                                                    alt="Image" />
-                                            </c:forEach>
-                                        </div>
-                                    </c:if>
-                                </div>
+                            <input type="file" id="editorImageInput" accept="image/*" style="display: none;"
+                                onchange="uploadImage(this)">
 
-                                <input type="hidden" name="description" id="description">
+                            <input type="hidden" name="description" id="description">
 
                                 <div class="form-group">
                                     <button type="submit" class="btn btn-save">${document != null ? 'Cập nhật' :
@@ -191,6 +252,58 @@
                         function formatDoc(command, value = null) {
                             document.execCommand(command, false, value);
                             document.getElementById('editor').focus();
+                        }
+
+                        // Hàm căn lề cho cả text, ảnh và bảng
+                        function alignContent(align) {
+                            const selection = window.getSelection();
+                            
+                            // Check if we're inside an img-wrapper or table-wrapper
+                            if (selection.rangeCount > 0) {
+                                let node = selection.getRangeAt(0).commonAncestorContainer;
+                                if (node.nodeType === 3) node = node.parentElement;
+                                
+                                // Find wrapper
+                                let wrapper = null;
+                                let current = node;
+                                while (current && current !== editor) {
+                                    if (current.classList && 
+                                        (current.classList.contains('img-wrapper') || 
+                                         current.classList.contains('table-wrapper'))) {
+                                        wrapper = current;
+                                        break;
+                                    }
+                                    current = current.parentElement;
+                                }
+                                
+                                if (wrapper) {
+                                    // Apply margin alignment to wrapper
+                                    if (align === 'center') {
+                                        wrapper.style.marginLeft = 'auto';
+                                        wrapper.style.marginRight = 'auto';
+                                        wrapper.style.display = 'block';
+                                    } else if (align === 'left') {
+                                        wrapper.style.marginLeft = '0';
+                                        wrapper.style.marginRight = 'auto';
+                                        wrapper.style.display = 'block';
+                                    } else if (align === 'right') {
+                                        wrapper.style.marginLeft = 'auto';
+                                        wrapper.style.marginRight = '0';
+                                        wrapper.style.display = 'block';
+                                    }
+                                } else {
+                                    // Apply text alignment for regular text
+                                    if (align === 'left') {
+                                        formatDoc('justifyLeft');
+                                    } else if (align === 'center') {
+                                        formatDoc('justifyCenter');
+                                    } else if (align === 'right') {
+                                        formatDoc('justifyRight');
+                                    }
+                                }
+                            }
+                            
+                            editor.focus();
                         }
 
                         // Hàm chèn link (giữ nguyên)
@@ -235,6 +348,14 @@
                             // Chèn HTML vào editor
                             document.execCommand('insertHTML', false, tableHtml);
                             document.getElementById('editor').focus();
+                            
+                            // Make the new table resizable
+                            setTimeout(() => {
+                                const tables = editor.querySelectorAll('table:not(.resizable)');
+                                if (tables.length > 0) {
+                                    makeResizable(tables[tables.length - 1]);
+                                }
+                            }, 100);
                         }
 
                         // --- (Các hàm upload ảnh giữ nguyên) ---
@@ -286,6 +407,150 @@
                         if (editor.innerHTML.trim() === '') {
                             editor.innerHTML = '<p>&nbsp;</p>';
                         }
+
+                        // --- DRAG TO RESIZE IMAGES & TABLES ---
+                        let isResizing = false;
+                        let currentWrapper = null;
+                        let startX = 0;
+                        let startWidth = 0;
+
+                        // Wrap element with resizable container
+                        function makeResizable(element) {
+                            // Check if already wrapped
+                            if (element.parentElement && 
+                                (element.parentElement.classList.contains('img-wrapper') || 
+                                 element.parentElement.classList.contains('table-wrapper'))) {
+                                return;
+                            }
+                            
+                            // Create wrapper
+                            const wrapper = document.createElement('div');
+                            wrapper.className = element.tagName === 'IMG' ? 'img-wrapper' : 'table-wrapper';
+                            
+                            // Set initial width from element if it has inline style
+                            if (element.style.width) {
+                                wrapper.style.width = element.style.width;
+                                element.style.width = '100%';
+                            }
+                            
+                            // Wrap the element
+                            element.parentNode.insertBefore(wrapper, element);
+                            wrapper.appendChild(element);
+                            
+                            // Create resize handle
+                            const handle = document.createElement('div');
+                            handle.className = 'resize-handle';
+                            handle.innerHTML = '⇲';
+                            wrapper.appendChild(handle);
+                            
+                            // Handle mouse down on resize handle
+                            handle.addEventListener('mousedown', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                startResize(wrapper, e);
+                            });
+                        }
+
+                        function startResize(wrapper, e) {
+                            isResizing = true;
+                            currentWrapper = wrapper;
+                            startX = e.clientX;
+                            startWidth = wrapper.offsetWidth;
+                            
+                            wrapper.classList.add('resizing');
+                            document.body.style.cursor = 'nwse-resize';
+                            
+                            document.addEventListener('mousemove', doResize);
+                            document.addEventListener('mouseup', stopResize);
+                        }
+
+                        function doResize(e) {
+                            if (!isResizing || !currentWrapper) return;
+                            
+                            const deltaX = e.clientX - startX;
+                            let newWidth = startWidth + deltaX;
+                            
+                            // Min 50px, max 100% of editor width
+                            const minWidth = 50;
+                            const maxWidth = editor.offsetWidth - 20;
+                            newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
+                            
+                            currentWrapper.style.width = newWidth + 'px';
+                        }
+
+                        function stopResize() {
+                            if (isResizing) {
+                                isResizing = false;
+                                if (currentWrapper) {
+                                    currentWrapper.classList.remove('resizing');
+                                }
+                                document.body.style.cursor = '';
+                                currentWrapper = null;
+                                
+                                document.removeEventListener('mousemove', doResize);
+                                document.removeEventListener('mouseup', stopResize);
+                            }
+                        }
+
+                        // Make existing images and tables resizable on load
+                        setTimeout(() => {
+                            // Wrap images that aren't already wrapped
+                            editor.querySelectorAll('img').forEach(img => {
+                                if (!img.parentElement.classList.contains('img-wrapper')) {
+                                    makeResizable(img);
+                                }
+                            });
+                            
+                            // Wrap tables that aren't already wrapped
+                            editor.querySelectorAll('table').forEach(table => {
+                                if (!table.parentElement.classList.contains('table-wrapper')) {
+                                    makeResizable(table);
+                                }
+                            });
+                        }, 300);
+
+                        // Make newly inserted images resizable
+                        const originalExecCommand = document.execCommand;
+                        document.execCommand = function(command, showUI, value) {
+                            const result = originalExecCommand.call(this, command, showUI, value);
+                            
+                            if (command === 'insertImage') {
+                                setTimeout(() => {
+                                    editor.querySelectorAll('img').forEach(img => {
+                                        if (!img.parentElement.classList.contains('img-wrapper')) {
+                                            makeResizable(img);
+                                        }
+                                    });
+                                }, 100);
+                            }
+                            
+                            return result;
+                        };
+
+                        // Delete with keyboard
+                        document.addEventListener('keydown', function(e) {
+                            if (e.key === 'Delete' || e.key === 'Backspace') {
+                                const selection = window.getSelection();
+                                if (selection && selection.rangeCount > 0) {
+                                    const range = selection.getRangeAt(0);
+                                    let node = range.commonAncestorContainer;
+                                    
+                                    // Find wrapper if we're inside one
+                                    while (node && node !== editor) {
+                                        if (node.classList && 
+                                            (node.classList.contains('img-wrapper') || 
+                                             node.classList.contains('table-wrapper'))) {
+                                            if (confirm('Xóa ' + (node.classList.contains('img-wrapper') ? 'ảnh' : 'bảng') + ' này?')) {
+                                                node.remove();
+                                            }
+                                            e.preventDefault();
+                                            return;
+                                        }
+                                        node = node.parentNode;
+                                    }
+                                }
+                            }
+                        });
                     </script>
 
                     <script>

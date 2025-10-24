@@ -138,6 +138,11 @@ public class DocumentService {
         return documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document không tồn tại với id: " + id));
     }
+    
+    public Document getDocumentByProductId(Long productId) {
+        List<Document> documents = documentRepository.findByProductId(productId);
+        return documents.isEmpty() ? null : documents.get(0);
+    }
 
     public void deleteDocument(Long id) {
         Document document = documentRepository.findById(id)

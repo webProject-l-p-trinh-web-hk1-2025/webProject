@@ -172,13 +172,9 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                     <div class="form-group">
                       <label>Áp dụng khuyến mãi (Deal)</label>
                       <div class="form-check">
-                        <input
-                          type="checkbox"
-                          name="onDeal"
-                          id="onDealCheckbox"
-                          class="form-check-input"
-                          ${product.onDeal ? 'checked' : ''}
-                        />
+                        <input type="checkbox" name="onDeal" id="onDealCheckbox"
+                        class="form-check-input" ${product.onDeal ? 'checked' :
+                        ''} />
                         <label class="form-check-label" for="onDealCheckbox">
                           Sản phẩm đang giảm giá
                         </label>
@@ -382,7 +378,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                       <i class="fas fa-save"></i> Lưu thay đổi
                     </button>
                     <a
-                      href="${pageContext.request.contextPath}/product_detail?id=${product.id}"
+                      href="${pageContext.request.contextPath}/admin/products/edit/${product.id}"
                       class="btn btn-outline-secondary"
                       ><i class="fas fa-times"></i> Hủy</a
                     >
@@ -434,7 +430,9 @@ uri="http://java.sun.com/jsp/jstl/core" %>
             stock: parseInt(form.stock.value),
             categoryId: parseInt(form.categoryId.value),
             onDeal: form.onDeal?.checked || false,
-            dealPercentage: form.onDeal?.checked ? (parseInt(form.dealPercentage?.value) || 0) : null,
+            dealPercentage: form.onDeal?.checked
+              ? parseInt(form.dealPercentage?.value) || 0
+              : null,
           };
           data.screenSize = form.screenSize?.value || null;
           data.displayTech = form.displayTech?.value || null;
@@ -477,7 +475,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                 });
               }
               alert("Cập nhật thành công!");
-              location.href = ctx + "/product_detail?id=" + id;
+              location.href = ctx + "/admin/products/edit/" + id;
               return;
             }
 

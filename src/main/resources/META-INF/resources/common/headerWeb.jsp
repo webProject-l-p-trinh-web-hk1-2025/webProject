@@ -140,6 +140,18 @@ isAuthenticated); %>
         <!-- ACCOUNT -->
         <div class="col-md-3 clearfix">
           <div class="header-ctn">
+            <!-- Chat Support -->
+            <c:if test="${isUserAuthenticated}">
+              <div class="chat-support-btn">
+                <a href="${pageContext.request.contextPath}/user/chat">
+                  <i class="fa fa-comments"></i>
+                  <span>Chat</span>
+                  <div class="qty" id="chat-qty">0</div>
+                </a>
+              </div>
+            </c:if>
+            <!-- /Chat Support -->
+
             <!-- Wishlist -->
             <div>
               <a href="${pageContext.request.contextPath}/wishlist">
@@ -289,11 +301,91 @@ isAuthenticated); %>
               });
           }
 
+          // Function to update chat unread count (global function)
+          function updateGlobalChatCount() {
+  <%
+              org.springframework.security.core.Authentication chatAuth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+      boolean isChatAuthenticated = chatAuth != null && chatAuth.isAuthenticated() && !(chatAuth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
+  %>
+  var isLoggedIn = <%= isChatAuthenticated %>;
+
+            if (!isLoggedIn) {
+              console.log('[Chat Badge] User not logged in');
+              return;
+            }
+
+            console.log('[Chat Badge] Fetching unread count...');
+            fetch('${pageContext.request.contextPath}/api/chat/unread-count', {
+              method: 'GET',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+              .then(function (response) {
+                if (response.ok) {
+                  return response.json();
+                }
+                return null;
+              })
+              .then(function (data) {
+                console.log('[Chat Badge] Unread count:', data);
+                if (data && data.unreadCount !== undefined) {
+                  var qtyElement = document.getElementById('chat-qty');
+                  if (qtyElement) {
+                    qtyElement.textContent = data.unreadCount;
+                    console.log('[Chat Badge] Updated to:', data.unreadCount);
+                  } else {
+                    console.warn('[Chat Badge] Element #chat-qty not found');
+                  }
+                }
+              })
+              .catch(function (error) {
+                console.error('[Chat Badge] Error updating chat count:', error);
+              });
+          }
+
           // Update counts on page load
           window.addEventListener('DOMContentLoaded', function () {
             updateGlobalCartCount();
             updateGlobalWishlistCount();
+
+            // Check if badge needs refresh (set by chat page)
+            if (sessionStorage.getItem('chatBadgeNeedsRefresh') === 'true') {
+              console.log('[Chat Badge] Forced refresh requested');
+              sessionStorage.removeItem('chatBadgeNeedsRefresh');
+              // Small delay to ensure DB is updated
+              setTimeout(function() {
+                updateGlobalChatCount();
+              }, 200);
+            } else {
+              updateGlobalChatCount();
+            }
+
             initSearchAutocomplete();
+          });
+
+          // Update chat badge when page becomes visible (user switches back to tab)
+          document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+              console.log('[Chat Badge] Page visible, refreshing badge...');
+              updateGlobalChatCount();
+            }
+          });
+
+          // Update chat badge when page is shown (including from back/forward cache)
+          window.addEventListener('pageshow', function(event) {
+            // event.persisted is true if page is loaded from cache
+            if (event.persisted) {
+              console.log('[Chat Badge] Page shown from cache, refreshing badge...');
+              updateGlobalChatCount();
+            }
+          });
+
+          // Update chat badge when user navigates back to this page
+          window.addEventListener('focus', function() {
+            console.log('[Chat Badge] Window focused, refreshing badge...');
+            updateGlobalChatCount();
           });
 
           // ========== SEARCH AUTOCOMPLETE ==========
@@ -491,5 +583,54 @@ isAuthenticated); %>
   /* Adjust search suggestions z-index when header is sticky */
   #searchSuggestions {
     z-index: 10000 !important;
+  }
+
+  /* Chat Support button styling */
+  .header-ctn .chat-support-btn {
+    display: inline-block;
+    margin-left: 15px;
+  }
+
+  .header-ctn .chat-support-btn:first-child {
+    margin-left: 0;
+  }
+
+  .header-ctn .chat-support-btn > a {
+    display: block;
+    position: relative;
+    width: 90px;
+    text-align: center;
+    color: #fff;
+    text-decoration: none;
+    transition: opacity 0.3s;
+  }
+
+  .header-ctn .chat-support-btn > a:hover {
+    opacity: 0.8;
+  }
+
+  .header-ctn .chat-support-btn > a > i {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .header-ctn .chat-support-btn > a > span {
+    font-size: 12px;
+    display: block;
+  }
+
+  .header-ctn .chat-support-btn > a > .qty {
+    position: absolute;
+    right: 15px;
+    top: -10px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 10px;
+    color: #fff;
+    background-color: #d10024;
   }
 </style>

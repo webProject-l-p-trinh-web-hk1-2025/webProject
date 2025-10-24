@@ -1,773 +1,175 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-  <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-    <%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
-      <%@ page import="org.springframework.security.core.Authentication" %>
-        <%@ page import="org.springframework.security.authentication.AnonymousAuthenticationToken" %>
-          <% Authentication auth=SecurityContextHolder.getContext().getAuthentication(); boolean isAuthenticated=auth
-            !=null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken);
-            request.setAttribute("isUserAuthenticated", isAuthenticated); %>
-            <!DOCTYPE html>
-            <html>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Chi tiết sản phẩm</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    .product-image { max-width: 250px; max-height: 250px; border-radius: 8px; border: 1px solid #ccc; object-fit: contain; }
+    .spec-label { color: #6c757d; font-weight: 500; }
+    .price-tag { font-size: 1.5rem; font-weight: 600; color: #dc3545; }
+  </style>
+</head>
+<body class="bg-light">
+<div class="container py-4" style="max-width:900px;">
+  <div id="alertBox" class="alert alert-danger d-none"></div>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/product_list">Sản phẩm</a></li>
+      <li class="breadcrumb-item active">Chi tiết</li>
+    </ol>
+  </nav>
 
-            <head>
-              <meta charset="UTF-8">
-              <title>Chi tiết sản phẩm -
-                <c:out value="${product.name}" default="Sản phẩm" />
-              </title>
-            </head>
+  <div id="productCard" class="card d-none">
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-md-4 text-center">
+          <img id="image" class="product-image" src="">
+          <div id="thumbs" class="d-flex flex-wrap justify-content-center gap-2 mt-2"></div>
+        </div>
+        <div class="col-md-8">
+          <h3 id="name"></h3>
+          <div class="mb-2"><span class="badge bg-primary" id="brand"></span> <span class="badge bg-info" id="category"></span></div>
+          <div id="price" class="price-tag mb-3"></div>
+          <div><strong>Tồn kho:</strong> <span id="stock"></span></div>
+          <div><strong>Ngày tạo:</strong> <span id="createdAt"></span></div>
+          <a id="editBtn" class="btn btn-outline-primary mt-3" href="#"><i class="bi bi-pencil-square me-1"></i>Sửa</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            <body>
-              <!-- BREADCRUMB -->
-              <div id="breadcrumb" class="section">
-                <div class="container">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <ul class="breadcrumb-tree">
-                        <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                        <li><a href="${pageContext.request.contextPath}/shop">Sản phẩm</a></li>
-                        <li class="active" id="breadcrumbName">Chi tiết sản phẩm</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- /BREADCRUMB -->
+  <div id="specsCard" class="card mt-3 d-none">
+    <div class="card-header"><h5 class="mb-0">Thông số kỹ thuật</h5></div>
+    <div class="card-body">
+      <dl class="row mb-0" id="specList"></dl>
+    </div>
+  </div>
+</div>
 
-              <!-- SECTION -->
-              <div class="section">
-                <div class="container">
-                  <div class="row">
-                    <!-- Product main img -->
-                    <div class="col-md-5 col-md-push-2">
-                      <div id="product-main-img">
-                        <!-- Main images will be inserted here -->
-                      </div>
-                    </div>
-                    <!-- /Product main img -->
+<script>
+const ctx = "${pageContext.request.contextPath}";
+const id = new URLSearchParams(window.location.search).get("id");
+const api = ctx + '/api/products/' + id;
 
-                    <!-- Product thumb imgs -->
-                    <div class="col-md-2 col-md-pull-5">
-                      <div id="product-imgs">
-                        <!-- Thumbnails will be inserted here -->
-                      </div>
-                    </div>
-                    <!-- /Product thumb imgs -->
+(async function load() {
+  try {
+    const res = await fetch(api);
+    if (!res.ok) throw new Error("Không tìm thấy sản phẩm");
+    const p = await res.json();
+    document.getElementById("productCard").classList.remove("d-none");
+    fill(p);
+  } catch (e) {
+    showError(e.message);
+  }
+})();
 
-                    <!-- Product details -->
-                    <div class="col-md-5">
-                      <div class="product-details">
-                        <h2 class="product-name" id="productName">Loading...</h2>
-                        <div>
-                          <div class="product-rating" id="productRating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-o"></i>
-                          </div>
-                          <a class="review-link" href="#tab3">10 Review(s) | Add your review</a>
-                        </div>
-                        <div>
-                          <h3 class="product-price" id="productPrice">$0.00</h3>
-                          <span class="product-available" id="productStock">In Stock</span>
-                        </div>
-                        <p id="productDescription">Loading product description...</p>
-
-                        <div class="add-to-cart">
-                          <div class="qty-label">
-                            Qty
-                            <div class="input-number">
-                              <input type="number" id="quantity" value="1" min="1">
-                              <span class="qty-up">+</span>
-                              <span class="qty-down">-</span>
-                            </div>
-                          </div>
-                          <button class="add-to-cart-btn" id="addToCartBtn"><i class="fa fa-shopping-cart"></i> add to
-                            cart</button>
-                        </div>
-
-                        <ul class="product-btns">
-                          <li><a href="#" id="addToWishlistBtn"><i class="fa fa-heart-o"></i> add to wishlist</a></li>
-                          <li><a href="#"><i class="fa fa-exchange"></i> add to compare</a></li>
-                        </ul>
-
-                        <ul class="product-links">
-                          <li>Category:</li>
-                          <li><a href="#" id="productCategory">Category</a></li>
-                        </ul>
-
-                        <ul class="product-links">
-                          <li>Share:</li>
-                          <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                          <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                          <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
-                          <li><a href="#"><i class="fa fa-envelope"></i></a></li>
-                        </ul>
-                      </div>
-                    </div>
-                    <!-- /Product details -->
-
-                    <!-- Product tab -->
-                    <div class="col-md-12">
-                      <div id="product-tab">
-                        <!-- product tab nav -->
-                        <ul class="tab-nav">
-                          <li class="active"><a data-toggle="tab" href="#tab1">Mô tả</a></li>
-                          <li><a data-toggle="tab" href="#tab2">Thông số kỹ thuật</a></li>
-                          <li><a data-toggle="tab" href="#tab3">Đánh giá (0)</a></li>
-                        </ul>
-                        <!-- /product tab nav -->
-
-                        <!-- product tab content -->
-                        <div class="tab-content">
-                          <!-- tab1 -->
-                          <div id="tab1" class="tab-pane fade in active">
-                            <div class="row">
-                              <div class="col-md-12">
-                                <p id="tabDescription">Đang tải thông tin sản phẩm...</p>
-                              </div>
-                            </div>
-                          </div>
-                          <!-- /tab1 -->
-
-                          <!-- tab2 -->
-                          <div id="tab2" class="tab-pane fade in">
-                            <div class="row">
-                              <div class="col-md-12">
-                                <div id="specsContent">
-                                  <p>Đang tải thông số kỹ thuật...</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <!-- /tab2 -->
-
-                          <!-- tab3 -->
-                          <div id="tab3" class="tab-pane fade in">
-                            <div class="row">
-                              <!-- Rating -->
-                              <div class="col-md-3">
-                                <div id="rating">
-                                  <div class="rating-avg">
-                                    <span>4.5</span>
-                                    <div class="rating-stars">
-                                      <i class="fa fa-star"></i>
-                                      <i class="fa fa-star"></i>
-                                      <i class="fa fa-star"></i>
-                                      <i class="fa fa-star"></i>
-                                      <i class="fa fa-star-o"></i>
-                                    </div>
-                                  </div>
-                                  <ul class="rating">
-                                    <li>
-                                      <div class="rating-stars">
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                      </div>
-                                      <div class="rating-progress">
-                                        <div style="width: 80%;"></div>
-                                      </div>
-                                      <span class="sum">3</span>
-                                    </li>
-                                    <li>
-                                      <div class="rating-stars">
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star-o"></i>
-                                      </div>
-                                      <div class="rating-progress">
-                                        <div style="width: 60%;"></div>
-                                      </div>
-                                      <span class="sum">2</span>
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-                              <!-- /Rating -->
-
-                              <!-- Reviews -->
-                              <div class="col-md-6">
-                                <div id="reviews">
-                                  <ul class="reviews">
-                                    <li>
-                                      <div class="review-heading">
-                                        <h5 class="name">John</h5>
-                                        <p class="date">27 DEC 2018, 8:0 PM</p>
-                                        <div class="review-rating">
-                                          <i class="fa fa-star"></i>
-                                          <i class="fa fa-star"></i>
-                                          <i class="fa fa-star"></i>
-                                          <i class="fa fa-star"></i>
-                                          <i class="fa fa-star-o empty"></i>
-                                        </div>
-                                      </div>
-                                      <div class="review-body">
-                                        <p>Sản phẩm rất tốt, chất lượng xuất sắc!</p>
-                                      </div>
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-                              <!-- /Reviews -->
-
-                              <!-- Review Form -->
-                              <div class="col-md-3">
-                                <div id="review-form">
-                                  <form class="review-form">
-                                    <input class="input" type="text" placeholder="Tên của bạn">
-                                    <input class="input" type="email" placeholder="Email">
-                                    <textarea class="input" placeholder="Đánh giá của bạn"></textarea>
-                                    <div class="input-rating">
-                                      <span>Xếp hạng: </span>
-                                      <div class="stars">
-                                        <input id="star5" name="rating" value="5" type="radio"><label
-                                          for="star5"></label>
-                                        <input id="star4" name="rating" value="4" type="radio"><label
-                                          for="star4"></label>
-                                        <input id="star3" name="rating" value="3" type="radio"><label
-                                          for="star3"></label>
-                                        <input id="star2" name="rating" value="2" type="radio"><label
-                                          for="star2"></label>
-                                        <input id="star1" name="rating" value="1" type="radio"><label
-                                          for="star1"></label>
-                                      </div>
-                                    </div>
-                                    <button class="primary-btn">Gửi</button>
-                                  </form>
-                                </div>
-                              </div>
-                              <!-- /Review Form -->
-                            </div>
-                          </div>
-                          <!-- /tab3 -->
-                        </div>
-                        <!-- /product tab content -->
-                      </div>
-                    </div>
-                    <!-- /product tab -->
-                  </div>
-                </div>
-              </div>
-              <!-- /SECTION -->
-
-              <!-- Section -->
-              <div class="section">
-                <div class="container">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="section-title text-center">
-                        <h3 class="title">Sản phẩm liên quan</h3>
-                      </div>
-                    </div>
-                    <div id="relatedProducts" class="row">
-                      <!-- Related products will be inserted here -->
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- /Section -->
-
-              <script>
-                const ctx = "${pageContext.request.contextPath}";
-                const isUserLoggedIn = ${ isUserAuthenticated };
-
-// Sử dụng data từ server thay vì fetch API
-<c:if test="${not empty product}">
-var productData = {
-  id: <c:out value="${product.id}"/>,
-  name: "<c:out value='${product.name}'/>",
-  price: <c:out value="${product.price}" default="0"/>,
-  stock: <c:out value="${product.stock}" default="0"/>,
-  brand: "<c:out value='${product.brand}'/>",
-  imageUrl: "<c:out value='${product.imageUrl}'/>",
-  imageUrls: [
-    <c:forEach items="${product.imageUrls}" var="imgUrl" varStatus="status">
-      "<c:out value='${imgUrl}'/>"<c:if test="${!status.last}">,</c:if>
-    </c:forEach>
-  ],
-  <c:choose>
-  <c:when test="${not empty product.category}">
-  category: {
-    id: <c:out value="${product.category.id}"/>,
-    name: "<c:out value='${product.category.name}'/>"
-  },
-  </c:when>
-  <c:otherwise>
-  category: null,
-  </c:otherwise>
-  </c:choose>
-  screenSize: "<c:out value='${product.screenSize}'/>",
-  displayTech: "<c:out value='${product.displayTech}'/>",
-  resolution: "<c:out value='${product.resolution}'/>",
-  displayFeatures: "<c:out value='${product.displayFeatures}'/>",
-  rearCamera: "<c:out value='${product.rearCamera}'/>",
-  frontCamera: "<c:out value='${product.frontCamera}'/>",
-  chipset: "<c:out value='${product.chipset}'/>",
-  cpuSpecs: "<c:out value='${product.cpuSpecs}'/>",
-  ram: "<c:out value='${product.ram}'/>",
-  storage: "<c:out value='${product.storage}'/>",
-  battery: "<c:out value='${product.battery}'/>",
-  simType: "<c:out value='${product.simType}'/>",
-  os: "<c:out value='${product.os}'/>",
-  nfcSupport: "<c:out value='${product.nfcSupport}'/>"
-};
-
-console.log('Product data from server:', productData);
-
-// Load product ngay lập tức
-displayProduct(productData);
-
-// Check if product is in wishlist
-checkWishlistStatus(productData.id);
-
-// Load related products nếu có category
-if (productData.category && productData.category.id) {
-  loadRelatedProducts(productData.category.id);
+function showError(msg) {
+  const a = document.getElementById("alertBox");
+  a.textContent = msg;
+  a.classList.remove("d-none");
 }
-</c:if>
 
-<c:if test="${empty product}">
-alert("Không tìm thấy sản phẩm");
-window.location.href = ctx + '/shop';
-</c:if>
+function fill(p) {
+  document.getElementById("name").textContent = p.name;
+  document.getElementById("brand").textContent = p.brand;
+  document.getElementById("category").textContent = p.category?.name || "Chưa phân loại";
+  document.getElementById("price").textContent = p.price?.toLocaleString('vi-VN') + " ₫";
+  document.getElementById("stock").textContent = p.stock;
+  document.getElementById("createdAt").textContent = new Date(p.createdAt).toLocaleDateString('vi-VN');
+  document.getElementById("image").src = p.imageUrl ? ctx + p.imageUrl : ctx + "/images/no-image.png";
 
-                function displayProduct(p) {
-                  // Update breadcrumb
-                  document.getElementById('breadcrumbName').textContent = p.name;
+  // if there are multiple images, render thumbnails and allow switching
+  const thumbs = document.getElementById('thumbs');
+  const imgs = p.imageUrls && p.imageUrls.length ? p.imageUrls : (p.imageUrl ? [p.imageUrl] : []);
+  if (imgs.length > 0) {
+    thumbs.innerHTML = '';
+    imgs.forEach((u, i) => {
+      // u may be a string url or an object {id, url}
+      const idVal = typeof u === 'string' ? null : u.id;
+      const url = typeof u === 'string' ? u : u.url;
+      const wrap = document.createElement('div');
+      wrap.style.position = 'relative';
+      const imgEl = document.createElement('img');
+      imgEl.src = url.startsWith('/') ? ctx + url : url;
+      imgEl.className = 'product-image';
+      imgEl.style.maxWidth = '60px';
+      imgEl.style.maxHeight = '60px';
+      imgEl.style.cursor = 'pointer';
+      imgEl.addEventListener('click', () => { document.getElementById('image').src = imgEl.src; });
 
-                  // Update product details
-                  document.getElementById('productName').textContent = p.name;
-                  document.getElementById('productPrice').textContent = formatPrice(p.price);
-                  document.getElementById('productStock').textContent = p.stock > 0 ? 'Còn hàng' : 'Hết hàng';
+      // delete button
+      if (idVal) {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-danger';
+        btn.style.position = 'absolute';
+        btn.style.top = '-6px';
+        btn.style.right = '-6px';
+        btn.innerHTML = '<i class="bi bi-x"></i>';
+        btn.title = 'Xóa ảnh';
+        btn.addEventListener('click', async (ev) => {
+          ev.stopPropagation();
+          if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+          const dres = await fetch(ctx + '/api/products/images/' + idVal, { method: 'DELETE' });
+          if (dres.ok) {
+            // refresh product
+            const newP = await (await fetch(api)).json();
+            fill(newP);
+          } else {
+            alert('Xóa ảnh thất bại');
+          }
+        });
+        wrap.appendChild(btn);
+      }
 
-                  // Tạo description từ specs
-                  var desc = 'Điện thoại ' + p.name;
-                  if (p.brand) desc += ' thương hiệu ' + p.brand;
-                  if (p.screenSize) desc += ', màn hình ' + p.screenSize;
-                  if (p.ram && p.storage) desc += ', ' + p.ram + ' / ' + p.storage;
-                  if (p.chipset) desc += ', chip ' + p.chipset;
-                  desc += '. Sản phẩm chính hãng, bảo hành toàn quốc.';
+      wrap.appendChild(imgEl);
+      thumbs.appendChild(wrap);
+    });
+  }
 
-                  document.getElementById('productDescription').textContent = desc;
-                  document.getElementById('tabDescription').textContent = desc;
+  const editBtn = document.getElementById("editBtn");
+  editBtn.href = ctx + '/admin/products/edit/' + p.id;
 
-                  // Update category
-                  if (p.category) {
-                    document.getElementById('productCategory').textContent = p.category.name;
-                  }
+  // specs
+  const specListEl = document.getElementById("specList");
+  const rows = [];
 
-                  // Get all images
-                  const imgs = p.imageUrls && p.imageUrls.length ? p.imageUrls : (p.imageUrl ? [p.imageUrl] : []);
+  // top-level technical fields on the product
+  if (p.screenSize) rows.push({ key: 'Screen size', value: p.screenSize });
+  if (p.displayTech) rows.push({ key: 'Display tech', value: p.displayTech });
+  if (p.resolution) rows.push({ key: 'Resolution', value: p.resolution });
+  if (p.displayFeatures) rows.push({ key: 'Display features', value: p.displayFeatures });
+  if (p.rearCamera) rows.push({ key: 'Rear camera', value: p.rearCamera });
+  if (p.frontCamera) rows.push({ key: 'Front camera', value: p.frontCamera });
+  if (p.chipset) rows.push({ key: 'Chipset', value: p.chipset });
+  if (p.cpuSpecs) rows.push({ key: 'CPU specs', value: p.cpuSpecs });
+  if (p.ram) rows.push({ key: 'RAM', value: p.ram });
+  if (p.storage) rows.push({ key: 'Storage', value: p.storage });
+  if (p.battery) rows.push({ key: 'Battery', value: p.battery });
+  if (p.simType) rows.push({ key: 'SIM type', value: p.simType });
+  if (p.os) rows.push({ key: 'OS', value: p.os });
+  if (p.nfcSupport) rows.push({ key: 'NFC support', value: p.nfcSupport });
 
-                  // Update main images slider
-                  const mainImgContainer = document.getElementById('product-main-img');
-                  mainImgContainer.innerHTML = '';
+  // custom specs (key/value)
+  const customSpecs = p.specs || [];
+  customSpecs.forEach(s => {
+    if (s && s.key) rows.push({ key: s.key, value: s.value });
+  });
 
-                  if (imgs.length > 0) {
-                    imgs.forEach((u) => {
-                      const url = typeof u === 'string' ? u : u.url;
-                      const mainDiv = document.createElement('div');
-                      mainDiv.className = 'product-preview';
-                      const mainImg = document.createElement('img');
-                      mainImg.src = url.startsWith('/') ? ctx + url : url;
-                      mainImg.alt = p.name;
-                      mainDiv.appendChild(mainImg);
-                      mainImgContainer.appendChild(mainDiv);
-                    });
-                  }
-
-                  // Update thumbnails
-                  const thumbsContainer = document.getElementById('product-imgs');
-                  thumbsContainer.innerHTML = '';
-
-                  if (imgs.length > 0) {
-                    imgs.forEach((u, index) => {
-                      const url = typeof u === 'string' ? u : u.url;
-                      const thumbDiv = document.createElement('div');
-                      thumbDiv.className = 'product-preview';
-                      const thumbImg = document.createElement('img');
-                      thumbImg.src = url.startsWith('/') ? ctx + url : url;
-                      thumbImg.alt = p.name;
-                      thumbImg.style.cursor = 'pointer';
-                      thumbImg.dataset.index = index;
-                      thumbDiv.appendChild(thumbImg);
-                      thumbsContainer.appendChild(thumbDiv);
-                    });
-                  }
-
-                  // Update specs in tab2
-                  displaySpecs(p);
-
-                  // Initialize slick carousel for product images
-                  setTimeout(() => {
-                    if (typeof $.fn.slick !== 'undefined') {
-                      // Destroy existing slick instances if any
-                      if ($('#product-main-img').hasClass('slick-initialized')) {
-                        $('#product-main-img').slick('unslick');
-                      }
-                      if ($('#product-imgs').hasClass('slick-initialized')) {
-                        $('#product-imgs').slick('unslick');
-                      }
-
-                      $('#product-main-img').slick({
-                        infinite: true,
-                        speed: 300,
-                        slidesToShow: 1,
-                        arrows: false,
-                        fade: true,
-                        asNavFor: '#product-imgs'
-                      });
-
-                      $('#product-imgs').slick({
-                        slidesToShow: 3,
-                        slidesToScroll: 1,
-                        arrows: true,
-                        vertical: true,
-                        verticalSwiping: true,
-                        focusOnSelect: true,
-                        asNavFor: '#product-main-img',
-                        responsive: [{
-                          breakpoint: 991,
-                          settings: {
-                            vertical: false,
-                            slidesToShow: 4
-                          }
-                        }]
-                      });
-                    }
-                  }, 100);
-
-                  // Setup add to cart button
-                  document.getElementById('addToCartBtn').addEventListener('click', () => {
-                    const quantity = parseInt(document.getElementById('quantity').value) || 1;
-                    addToCart(p.id, quantity);
-                  });
-
-                  // Setup add to wishlist button
-                  document.getElementById('addToWishlistBtn').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    addToWishlist(p.id);
-                  });
-
-                  // Setup quantity controls
-                  document.querySelector('.qty-up').addEventListener('click', () => {
-                    const input = document.getElementById('quantity');
-                    input.value = parseInt(input.value) + 1;
-                  });
-
-                  document.querySelector('.qty-down').addEventListener('click', () => {
-                    const input = document.getElementById('quantity');
-                    if (parseInt(input.value) > 1) {
-                      input.value = parseInt(input.value) - 1;
-                    }
-                  });
-                }
-
-                function displaySpecs(p) {
-                  const specsContainer = document.getElementById('specsContent');
-                  const specs = [];
-
-                  // Collect all specs
-                  if (p.brand) specs.push({ key: 'Thương hiệu', value: p.brand });
-                  if (p.screenSize) specs.push({ key: 'Kích thước màn hình', value: p.screenSize });
-                  if (p.displayTech) specs.push({ key: 'Công nghệ màn hình', value: p.displayTech });
-                  if (p.resolution) specs.push({ key: 'Độ phân giải', value: p.resolution });
-                  if (p.displayFeatures) specs.push({ key: 'Tính năng màn hình', value: p.displayFeatures });
-                  if (p.rearCamera) specs.push({ key: 'Camera sau', value: p.rearCamera });
-                  if (p.frontCamera) specs.push({ key: 'Camera trước', value: p.frontCamera });
-                  if (p.chipset) specs.push({ key: 'Chipset', value: p.chipset });
-                  if (p.cpuSpecs) specs.push({ key: 'CPU', value: p.cpuSpecs });
-                  if (p.ram) specs.push({ key: 'RAM', value: p.ram });
-                  if (p.storage) specs.push({ key: 'Bộ nhớ trong', value: p.storage });
-                  if (p.battery) specs.push({ key: 'Pin', value: p.battery });
-                  if (p.simType) specs.push({ key: 'Loại SIM', value: p.simType });
-                  if (p.os) specs.push({ key: 'Hệ điều hành', value: p.os });
-                  if (p.nfcSupport) specs.push({ key: 'Hỗ trợ NFC', value: p.nfcSupport });
-
-                  // Add custom specs
-                  if (p.specs && Array.isArray(p.specs)) {
-                    p.specs.forEach(s => {
-                      if (s && s.key) specs.push({ key: s.key, value: s.value });
-                    });
-                  }
-
-                  if (specs.length > 0) {
-                    let html = '<table class="table table-striped">';
-                    specs.forEach(spec => {
-                      html += '<tr>';
-                      html += '<td style="width: 40%; font-weight: 500;">' + spec.key + '</td>';
-                      html += '<td>' + (spec.value || '') + '</td>';
-                      html += '</tr>';
-                    });
-                    html += '</table>';
-                    specsContainer.innerHTML = html;
-                  } else {
-                    specsContainer.innerHTML = '<p>Chưa có thông số kỹ thuật.</p>';
-                  }
-                }
-
-                function formatPrice(price) {
-                  if (!price) return '0 ₫';
-                  return price.toLocaleString('vi-VN') + ' ₫';
-                }
-
-                async function addToCart(productId, quantity) {
-                  // Check if user is logged in
-                  if (!isUserLoggedIn) {
-                    window.location.href = ctx + '/login';
-                    return;
-                  }
-
-                  try {
-                    const response = await fetch(ctx + '/api/cart/add', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json'
-                      },
-                      credentials: 'include',
-                      body: JSON.stringify({ productId: productId, quantity: quantity })
-                    });
-
-                    if (response.ok) {
-                      // Update cart count in header
-                      if (typeof updateGlobalCartCount === 'function') {
-                        updateGlobalCartCount();
-                      }
-                    } else if (response.status === 401 || response.status === 403) {
-                      window.location.href = ctx + '/login';
-                    } else {
-                      alert('Có lỗi xảy ra. Vui lòng thử lại.');
-                    }
-                  } catch (error) {
-                    console.error('Error adding to cart:', error);
-                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
-                  }
-                }
-
-                async function addToWishlist(productId) {
-                  try {
-                    var btn = document.getElementById('addToWishlistBtn');
-                    var icon = btn.querySelector('i');
-                    var isInWishlist = icon.classList.contains('fa-heart');
-
-                    var url = isInWishlist
-                      ? ctx + '/api/favorite/remove/' + productId
-                      : ctx + '/api/favorite/add';
-                    var method = isInWishlist ? 'DELETE' : 'POST';
-                    var body = isInWishlist ? null : JSON.stringify({ productId: productId });
-
-                    const response = await fetch(url, {
-                      method: method,
-                      headers: {
-                        'Content-Type': 'application/json'
-                      },
-                      credentials: 'include',
-                      body: body
-                    });
-
-                    if (response.ok) {
-                      if (isInWishlist) {
-                        // Remove from wishlist
-                        icon.classList.remove('fa-heart');
-                        icon.classList.add('fa-heart-o');
-                        btn.style.color = '';
-                      } else {
-                        // Add to wishlist
-                        icon.classList.remove('fa-heart-o');
-                        icon.classList.add('fa-heart');
-                        btn.style.color = '#d70018';
-                      }
-                      // Update wishlist count in header
-                      if (typeof updateGlobalWishlistCount === 'function') {
-                        updateGlobalWishlistCount();
-                      }
-                    } else if (response.status === 401 || response.status === 403) {
-                      window.location.href = ctx + '/login';
-                    } else {
-                      alert('Có lỗi xảy ra. Vui lòng thử lại.');
-                    }
-                  } catch (error) {
-                    console.error('Error toggling wishlist:', error);
-                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
-                  }
-                }
-
-                function checkWishlistStatus(productId) {
-                  // Check if this product is in wishlist
-                  fetch(ctx + '/api/favorite', {
-                    credentials: 'include'
-                  })
-                    .then(res => res.ok ? res.json() : [])
-                    .then(favorites => {
-                      const isInWishlist = favorites.some(fav => fav.productId == productId);
-                      if (isInWishlist) {
-                        var btn = document.getElementById('addToWishlistBtn');
-                        if (btn) {
-                          var icon = btn.querySelector('i');
-                          icon.classList.remove('fa-heart-o');
-                          icon.classList.add('fa-heart');
-                          btn.style.color = '#d70018';
-                        }
-                      }
-                    })
-                    .catch(err => console.error('Error checking wishlist status:', err));
-                }
-
-                async function loadRelatedProducts(categoryId) {
-                  if (!categoryId) {
-                    console.log('No categoryId provided for related products');
-                    return;
-                  }
-
-                  try {
-                    console.log('Loading related products for category:', categoryId);
-                    const response = await fetch(ctx + '/api/products?categoryId=' + categoryId + '&limit=4');
-
-                    console.log('Response status:', response.status);
-
-                    if (!response.ok) {
-                      console.error('Failed to fetch related products:', response.status, response.statusText);
-                      return;
-                    }
-
-                    const products = await response.json();
-                    console.log('Related products loaded:', products);
-
-                    const container = document.getElementById('relatedProducts');
-
-                    if (!products || products.length === 0) {
-                      console.log('No related products found');
-                      container.innerHTML = '<div class="col-md-12"><p class="text-center">Không có sản phẩm liên quan</p></div>';
-                      return;
-                    }
-
-                    container.innerHTML = '';
-                    products.slice(0, 4).forEach(product => {
-                      const categoryName = product.category ? product.category.name : 'Chưa phân loại';
-                      const imgSrc = product.imageUrl ? ctx + product.imageUrl : ctx + '/images/no-image.png';
-                      const discountLabel = product.discount ? '<div class="product-label"><span class="sale">-' + product.discount + '%</span></div>' : '';
-
-                      const productHtml = '<div class="col-md-3 col-xs-6">' +
-                        '<div class="product">' +
-                        '<div class="product-img">' +
-                        '<img src="' + imgSrc + '" alt="' + product.name + '">' +
-                        discountLabel +
-                        '</div>' +
-                        '<div class="product-body">' +
-                        '<p class="product-category">' + categoryName + '</p>' +
-                        '<h3 class="product-name"><a href="' + ctx + '/product/' + product.id + '">' + product.name + '</a></h3>' +
-                        '<h4 class="product-price">' + formatPrice(product.price) + '</h4>' +
-                        '<div class="product-rating">' +
-                        '<i class="fa fa-star"></i>' +
-                        '<i class="fa fa-star"></i>' +
-                        '<i class="fa fa-star"></i>' +
-                        '<i class="fa fa-star"></i>' +
-                        '<i class="fa fa-star-o"></i>' +
-                        '</div>' +
-                        '<div class="product-btns">' +
-                        '<button class="add-to-wishlist" data-product-id="' + product.id + '" onclick="toggleRelatedWishlist(' + product.id + ', this)"><i class="fa fa-heart-o"></i><span class="tooltipp">Yêu thích</span></button>' +
-                        '<button class="quick-view" onclick="window.location.href=\'' + ctx + '/product/' + product.id + '\'"><i class="fa fa-eye"></i><span class="tooltipp">Xem chi tiết</span></button>' +
-                        '</div>' +
-                        '</div>' +
-                        '<div class="add-to-cart">' +
-                        '<button class="add-to-cart-btn" onclick="addToCart(' + product.id + ', 1)"><i class="fa fa-shopping-cart"></i> Thêm vào giỏ</button>' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>';
-
-                      container.innerHTML += productHtml;
-                    });
-
-                    // Load wishlist status for related products only if user is logged in
-                    if (isUserLoggedIn) {
-                      loadRelatedWishlistStatus();
-                    }
-                  } catch (error) {
-                    console.error('Error loading related products:', error);
-                  }
-                }
-
-                // Toggle wishlist for related products
-                async function toggleRelatedWishlist(productId, button) {
-                  // Check if user is logged in
-                  if (!isUserLoggedIn) {
-                    window.location.href = ctx + '/login';
-                    return;
-                  }
-
-                  try {
-                    var icon = button.querySelector('i');
-                    var isInWishlist = icon.classList.contains('fa-heart');
-
-                    var url = isInWishlist
-                      ? ctx + '/api/favorite/remove/' + productId
-                      : ctx + '/api/favorite/add';
-                    var method = isInWishlist ? 'DELETE' : 'POST';
-                    var body = isInWishlist ? null : JSON.stringify({ productId: productId });
-
-                    const response = await fetch(url, {
-                      method: method,
-                      headers: {
-                        'Content-Type': 'application/json'
-                      },
-                      credentials: 'include',
-                      body: body
-                    });
-
-                    if (response.ok) {
-                      if (isInWishlist) {
-                        // Remove from wishlist
-                        icon.classList.remove('fa-heart');
-                        icon.classList.add('fa-heart-o');
-                        button.style.color = '';
-                      } else {
-                        // Add to wishlist
-                        icon.classList.remove('fa-heart-o');
-                        icon.classList.add('fa-heart');
-                        button.style.color = '#d70018';
-                      }
-                      // Update wishlist count in header
-                      if (typeof updateGlobalWishlistCount === 'function') {
-                        updateGlobalWishlistCount();
-                      }
-                    } else if (response.status === 401 || response.status === 403) {
-                      window.location.href = ctx + '/login';
-                    } else {
-                      alert('Có lỗi xảy ra. Vui lòng thử lại.');
-                    }
-                  } catch (error) {
-                    console.error('Error toggling wishlist:', error);
-                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
-                  }
-                }
-
-                // Load wishlist status for related products
-                function loadRelatedWishlistStatus() {
-                  fetch(ctx + '/api/favorite', {
-                    credentials: 'include'
-                  })
-                    .then(res => res.ok ? res.json() : [])
-                    .then(favorites => {
-                      favorites.forEach(favorite => {
-                        var buttons = document.querySelectorAll('.add-to-wishlist[data-product-id="' + favorite.productId + '"]');
-                        buttons.forEach(button => {
-                          var icon = button.querySelector('i');
-                          if (icon) {
-                            icon.classList.remove('fa-heart-o');
-                            icon.classList.add('fa-heart');
-                            button.style.color = '#d70018';
-                          }
-                        });
-                      });
-                    })
-                    .catch(err => console.error('Error loading wishlist status:', err));
-                }
-              </script>
-            </body>
-
-            </html>
+  if (rows.length > 0) {
+    document.getElementById("specsCard").classList.remove("d-none");
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      html += '<dt class="col-sm-4 spec-label">' + (r.key || '') + '</dt>';
+      html += '<dd class="col-sm-8">' + (r.value || '') + '</dd>';
+    }
+    specListEl.innerHTML = html;
+  }
+}
+</script>
+</body>
+</html>

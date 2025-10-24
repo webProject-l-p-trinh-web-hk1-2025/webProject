@@ -1,4 +1,4 @@
-package com.proj.webprojrct.reviewandrating.dto.response;
+package com.proj.webprojrct.ReviewandRating.dto.response;
 
 import lombok.*;
 

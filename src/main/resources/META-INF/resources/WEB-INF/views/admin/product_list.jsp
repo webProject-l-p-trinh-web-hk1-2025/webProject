@@ -123,6 +123,7 @@
                       <th>Giá</th>
                       <th>Tồn</th>
                       <th>Ngày tạo</th>
+                      <th style="width:120px;">Khuyến mãi</th>
                       <th style="width:250px;">Thao tác</th>
                     </tr>
                   </thead>
@@ -130,6 +131,44 @@
                 </table>
               </div>
             </div>
+
+        <!-- Deal Percentage Modal -->
+        <div id="dealModal" class="deal-modal" style="display: none;">
+          <div class="deal-modal-content">
+            <div class="deal-modal-header">
+              <h3>🎯 Thiết lập khuyến mãi</h3>
+              <button class="deal-modal-close" onclick="closeDealModal()">&times;</button>
+            </div>
+            <div class="deal-modal-body">
+              <p style="margin-bottom: 20px; color: #666;">Nhập phần trăm giảm giá cho sản phẩm này:</p>
+              <div class="percentage-input-group">
+                <input type="number" id="dealPercentageInput" min="0" max="100" value="10" class="percentage-input" 
+                       oninput="document.getElementById('dealPercentageSlider').value = this.value" />
+                <span class="percentage-symbol">%</span>
+              </div>
+              <div class="percentage-presets">
+                <button onclick="setPercentage(10)" class="preset-btn">10%</button>
+                <button onclick="setPercentage(20)" class="preset-btn">20%</button>
+                <button onclick="setPercentage(30)" class="preset-btn">30%</button>
+                <button onclick="setPercentage(50)" class="preset-btn">50%</button>
+              </div>
+              <div class="percentage-slider">
+                <input type="range" id="dealPercentageSlider" min="0" max="100" value="10" 
+                       oninput="document.getElementById('dealPercentageInput').value = this.value" 
+                       class="slider-input" />
+                <div class="slider-labels">
+                  <span>0%</span>
+                  <span>50%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+            </div>
+            <div class="deal-modal-footer">
+              <button onclick="closeDealModal()" class="btn-cancel">Hủy</button>
+              <button onclick="confirmDeal()" class="btn-confirm">✓ Xác nhận</button>
+            </div>
+          </div>
+        </div>
 
         <div id="status" class="text-muted text-center py-2"></div>
         <nav aria-label="Page navigation">
@@ -143,6 +182,7 @@
       <script>
         const ctx = '${ctx}';
         const api = ctx + "/api/products";
+        const adminApi = ctx + "/admin/products"; // Admin endpoint
 
         let currentPage = 0;
         const pageSize = 5; // 5 products per page
@@ -270,11 +310,17 @@
               '<td class="text-end">' + price + '</td>' +
               '<td class="text-center">' + stock + '</td>' +
               '<td class="text-center">' + createdAt + '</td>' +
+              '<td class="text-center">' +
+              (p.onDeal ? '<span class="badge bg-success">Áp dụng -' + (p.dealPercentage || 0) + '%</span>' : '<span class="text-muted">Không</span>') +
+              '</td>' +
               '<td>' +
-              '<div class="d-flex justify-content-between">' +
+              '<div class="d-flex justify-content-between gap-1">' +
               '<a href="' + ctx + '/product_detail?id=' + p.id + '" class="btn btn-sm btn-outline-secondary">Xem</a>' +
               '<a href="' + ctx + '/admin/products/edit/' + p.id + '" class="btn btn-sm btn-outline-primary">Sửa</a>' +
               '<button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(' + p.id + ')">Xóa</button>' +
+              '<label style="margin:0; display:flex; align-items:center; gap:4px; white-space:nowrap;">' +
+              '<input type="checkbox" onchange="toggleDeal(' + p.id + ', this.checked)"' + (p.onDeal ? ' checked' : '') + '> Deal' +
+              '</label>' +
               '</div>' +
               '</td>' +
               '</tr>'
@@ -328,6 +374,72 @@
             search(currentPage);
           } else {
             alert("Lỗi xóa sản phẩm.");
+          }
+        }
+
+        // Deal modal management
+        let currentDealProductId = null;
+        let currentDealCheckbox = null;
+
+        async function toggleDeal(id, checked) {
+          if (checked) {
+            // Show modal for percentage input
+            currentDealProductId = id;
+            currentDealCheckbox = event.target;
+            document.getElementById('dealPercentageInput').value = 10;
+            document.getElementById('dealPercentageSlider').value = 10;
+            document.getElementById('dealModal').style.display = 'flex';
+          } else {
+            // Turn off deal directly
+            await saveDealStatus(id, false, 0);
+          }
+        }
+
+        function setPercentage(value) {
+          document.getElementById('dealPercentageInput').value = value;
+          document.getElementById('dealPercentageSlider').value = value;
+        }
+
+        function closeDealModal() {
+          document.getElementById('dealModal').style.display = 'none';
+          // Uncheck the checkbox if user cancelled
+          if (currentDealCheckbox) {
+            currentDealCheckbox.checked = false;
+          }
+          currentDealProductId = null;
+          currentDealCheckbox = null;
+        }
+
+        async function confirmDeal() {
+          const dealPercentage = parseInt(document.getElementById('dealPercentageInput').value) || 0;
+          document.getElementById('dealModal').style.display = 'none';
+          
+          if (currentDealProductId) {
+            await saveDealStatus(currentDealProductId, true, dealPercentage);
+          }
+          currentDealProductId = null;
+          currentDealCheckbox = null;
+        }
+
+        async function saveDealStatus(id, onDeal, dealPercentage) {
+          try {
+            // Use admin endpoint instead of API endpoint
+            const res = await fetch(adminApi + '/' + id + '/deal-toggle', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ onDeal: onDeal, dealPercentage: dealPercentage })
+            });
+            if (!res.ok) {
+              const txt = await res.text().catch(() => '');
+              throw new Error('HTTP ' + res.status + ' - ' + txt);
+            }
+            // refresh current page to reflect changes
+            search(currentPage);
+          } catch (e) {
+            console.error('Lỗi cập nhật deal:', e);
+            alert('Lỗi cập nhật trạng thái Deal: ' + (e.message || e.toString()));
+            // reload list to restore checkbox state
+            search(currentPage);
           }
         }
 
@@ -494,6 +606,275 @@
           document.querySelector('.main-content').classList.toggle('expanded');
         });
       </script>
+
+      <style>
+        /* Deal Modal Styles */
+        .deal-modal {
+          display: none;
+          position: fixed;
+          z-index: 10000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          align-items: center;
+          justify-content: center;
+          animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .deal-modal-content {
+          background: white;
+          border-radius: 16px;
+          width: 90%;
+          max-width: 500px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          animation: slideUp 0.3s ease;
+          overflow: hidden;
+        }
+
+        @keyframes slideUp {
+          from {
+            transform: translateY(50px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .deal-modal-header {
+          background: linear-gradient(135deg, #d70018 0%, #ff6b6b 100%);
+          color: white;
+          padding: 20px 25px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .deal-modal-header h3 {
+          margin: 0;
+          font-size: 22px;
+          font-weight: 600;
+        }
+
+        .deal-modal-close {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 32px;
+          cursor: pointer;
+          line-height: 1;
+          padding: 0;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: background 0.2s;
+        }
+
+        .deal-modal-close:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        .deal-modal-body {
+          padding: 30px 25px;
+        }
+
+        .percentage-input-group {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 25px;
+          gap: 10px;
+        }
+
+        .percentage-input {
+          width: 120px;
+          font-size: 48px;
+          font-weight: bold;
+          text-align: center;
+          border: 3px solid #d70018;
+          border-radius: 12px;
+          padding: 15px;
+          color: #d70018;
+          outline: none;
+          transition: all 0.3s;
+        }
+
+        .percentage-input:focus {
+          border-color: #ff6b6b;
+          box-shadow: 0 0 0 4px rgba(215, 0, 24, 0.1);
+        }
+
+        .percentage-symbol {
+          font-size: 36px;
+          font-weight: bold;
+          color: #d70018;
+        }
+
+        .percentage-presets {
+          display: flex;
+          gap: 10px;
+          justify-content: center;
+          margin-bottom: 25px;
+          flex-wrap: wrap;
+        }
+
+        .preset-btn {
+          padding: 10px 20px;
+          border: 2px solid #e0e0e0;
+          background: white;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          color: #666;
+        }
+
+        .preset-btn:hover {
+          border-color: #d70018;
+          color: #d70018;
+          background: #fff5f5;
+          transform: translateY(-2px);
+        }
+
+        .preset-btn:active {
+          transform: translateY(0);
+        }
+
+        .percentage-slider {
+          margin-top: 20px;
+        }
+
+        .slider-input {
+          width: 100%;
+          height: 8px;
+          border-radius: 4px;
+          outline: none;
+          -webkit-appearance: none;
+          appearance: none;
+          background: linear-gradient(to right, #d70018 0%, #ff6b6b 100%);
+          cursor: pointer;
+        }
+
+        .slider-input::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: white;
+          border: 3px solid #d70018;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          transition: transform 0.2s;
+        }
+
+        .slider-input::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+        }
+
+        .slider-input::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: white;
+          border: 3px solid #d70018;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider-labels {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 8px;
+          font-size: 12px;
+          color: #999;
+        }
+
+        .deal-modal-footer {
+          padding: 20px 25px;
+          background: #f8f9fa;
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+        }
+
+        .btn-cancel, .btn-confirm {
+          padding: 12px 30px;
+          border: none;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-cancel {
+          background: #e0e0e0;
+          color: #666;
+        }
+
+        .btn-cancel:hover {
+          background: #d0d0d0;
+        }
+
+        .btn-confirm {
+          background: linear-gradient(135deg, #d70018 0%, #ff6b6b 100%);
+          color: white;
+          box-shadow: 0 4px 12px rgba(215, 0, 24, 0.3);
+        }
+
+        .btn-confirm:hover {
+          box-shadow: 0 6px 16px rgba(215, 0, 24, 0.4);
+          transform: translateY(-2px);
+        }
+
+        .btn-confirm:active {
+          transform: translateY(0);
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 576px) {
+          .deal-modal-content {
+            width: 95%;
+            margin: 10px;
+          }
+
+          .percentage-input {
+            width: 100px;
+            font-size: 36px;
+            padding: 10px;
+          }
+
+          .percentage-symbol {
+            font-size: 28px;
+          }
+
+          .preset-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+          }
+
+          .deal-modal-footer {
+            flex-direction: column;
+          }
+
+          .btn-cancel, .btn-confirm {
+            width: 100%;
+          }
+        }
+      </style>
     </body>
 
     </html>

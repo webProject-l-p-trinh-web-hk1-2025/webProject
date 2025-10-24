@@ -205,6 +205,23 @@ public class ProductPageController {
         return "product_detail";
     }
     
+    @GetMapping("/deals")
+    public String deals(Model model) {
+        try {
+            // Get all products with onDeal=true
+            List<ProductResponse> allProducts = productService.getAll();
+            List<ProductResponse> dealProducts = allProducts.stream()
+                .filter(p -> p.getOnDeal() != null && p.getOnDeal())
+                .collect(java.util.stream.Collectors.toList());
+            
+            model.addAttribute("products", dealProducts);
+            model.addAttribute("categories", categoryService.getAll());
+        } catch (Exception e) {
+            model.addAttribute("error", "Không thể tải dữ liệu khuyến mãi: " + e.getMessage());
+        }
+        return "deals";
+    }
+    
     // Helper method for fuzzy matching
     private boolean isFuzzyMatch(String productName, String searchTerm) {
         if (searchTerm.length() < 3) return false;

@@ -226,4 +226,22 @@ public class ProductServiceImpl implements ProductService {
         // Fallback: delete image record directly
         if (imageRepo.existsById(imageId)) imageRepo.deleteById(imageId);
     }
+
+    @Override
+    public ProductResponse setDealStatus(Long id, Boolean onDeal, Integer dealPercentage) {
+        Product p = repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm #" + id));
+        p.setOnDeal(onDeal != null && onDeal);
+        if (onDeal != null && onDeal) {
+            // Validate percentage
+            if (dealPercentage != null && dealPercentage >= 0 && dealPercentage <= 100) {
+                p.setDealPercentage(dealPercentage);
+            } else {
+                p.setDealPercentage(0); // Default to 0% if invalid
+            }
+        } else {
+            p.setDealPercentage(null); // Clear percentage when deal is turned off
+        }
+        return mapper.toResponse(repo.save(p));
+    }
 }

@@ -37,4 +37,6 @@ public class ProductResponse {
     private String simType;
     private String os;
     private String nfcSupport;
+    private Boolean onDeal;
+    private Integer dealPercentage;
 }

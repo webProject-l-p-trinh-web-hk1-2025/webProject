@@ -160,4 +160,34 @@ public class AdminProductController {
         return "admin/product_edit";
     }
 
+    // Deal admin
+    @ResponseBody
+    @PostMapping("/{id}/deal-toggle")
+    public ProductResponse toggleDeal(@PathVariable Long id, @RequestBody java.util.Map<String, Object> body) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        }
+        
+        Boolean onDeal = false;
+        Integer dealPercentage = null;
+        
+        if (body != null && body.containsKey("onDeal")) {
+            Object v = body.get("onDeal");
+            onDeal = Boolean.valueOf(String.valueOf(v));
+        }
+        if (body != null && body.containsKey("dealPercentage")) {
+            Object v = body.get("dealPercentage");
+            try {
+                dealPercentage = Integer.valueOf(String.valueOf(v));
+            } catch (NumberFormatException e) {
+                dealPercentage = 0;
+            }
+        }
+        
+        return productService.setDealStatus(id, onDeal, dealPercentage);
+    }
+
 }

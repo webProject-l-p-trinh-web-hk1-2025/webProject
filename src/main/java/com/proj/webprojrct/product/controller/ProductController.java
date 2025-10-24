@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /////////////////////////////////Dành cho USER////////////////////////////////////////////
 @RestController
@@ -249,6 +250,42 @@ public class ProductController {
         }
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+    deal
+     */
+    @PostMapping(value = "/{id}/deal-toggle", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ProductResponse setDeal(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        }
+        
+        boolean isAdmin = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        
+        if (!isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Chỉ admin mới có quyền cập nhật deal!");
+        }
+        
+        Boolean onDeal = false;
+        Integer dealPercentage = null;
+        if (body != null && body.containsKey("onDeal")) {
+            Object v = body.get("onDeal");
+            onDeal = Boolean.valueOf(String.valueOf(v));
+        }
+        if (body != null && body.containsKey("dealPercentage")) {
+            Object v = body.get("dealPercentage");
+            try {
+                dealPercentage = Integer.valueOf(String.valueOf(v));
+            } catch (NumberFormatException e) {
+                dealPercentage = 0;
+            }
+        }
+        return service.setDealStatus(id, onDeal, dealPercentage);
     }
 
     /* Upload ảnh riêng */

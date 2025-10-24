@@ -1,4 +1,4 @@
-package com.proj.webprojrct.reviewandrating.controller;
+package com.proj.webprojrct.ReviewandRating.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -17,9 +17,9 @@ import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
 
 import com.proj.webprojrct.common.config.security.CustomUserDetails;
-import com.proj.webprojrct.reviewandrating.dto.request.ReviewRequest;
+import com.proj.webprojrct.ReviewandRating.dto.request.ReviewRequest;
 
-import com.proj.webprojrct.reviewandrating.service.ReviewService;
+import com.proj.webprojrct.ReviewandRating.service.ReviewService;
 
 @Controller
 //@RequestMapping("/user")

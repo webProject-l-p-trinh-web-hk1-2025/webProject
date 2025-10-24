@@ -92,4 +92,17 @@ public class ReviewService {
         
         return stats;
     }
+
+    /**
+     * Delete a review (admin only - authorization checked in controller)
+     * @param reviewId the review ID to delete
+     */
+    @Transactional
+    public void deleteReview(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đánh giá với ID: " + reviewId));
+        
+        // Delete will cascade to child reviews due to CascadeType.ALL
+        reviewRepository.delete(review);
+    }
 }

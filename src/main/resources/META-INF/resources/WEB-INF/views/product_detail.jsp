@@ -306,6 +306,7 @@ isAuthenticated); %>
     <script>
                       const ctx = "${pageContext.request.contextPath}";
                       const isUserLoggedIn = ${ isUserAuthenticated };
+                      const isAdmin = <c:out value="${pageContext.request.isUserInRole('ADMIN')}" default="false"/>;
 
       // Sử dụng data từ server thay vì fetch API
       <c:if test="${not empty product}">
@@ -967,6 +968,13 @@ isAuthenticated); %>
                           html += '<i class="fa fa-reply"></i> Trả lời';
                           html += '</button>';
 
+                          // Delete button (chỉ hiện cho admin)
+                          if (isAdmin) {
+                            html += '<button class="btn btn-sm btn-link" onclick="deleteReview(' + review.reviewId + ')" style="padding: 5px 10px; font-size: 12px; color: #dc3545;">';
+                            html += '<i class="fa fa-trash"></i> Xóa';
+                            html += '</button>';
+                          }
+
                           // Display child reviews (replies) with collapse/expand functionality
                           if (review.childReviews && review.childReviews.length > 0) {
                             // Button to toggle child reviews visibility
@@ -991,6 +999,13 @@ isAuthenticated); %>
                               html += '<button class="btn btn-sm btn-link" onclick="showReplyForm(' + review.reviewId + ')" style="padding: 2px 8px; font-size: 11px; color: #d10024;">';
                               html += '<i class="fa fa-reply"></i> Trả lời';
                               html += '</button>';
+
+                              // Delete button for child review (chỉ hiện cho admin)
+                              if (isAdmin) {
+                                html += '<button class="btn btn-sm btn-link" onclick="deleteReview(' + child.reviewId + ')" style="padding: 2px 8px; font-size: 11px; color: #dc3545;">';
+                                html += '<i class="fa fa-trash"></i> Xóa';
+                                html += '</button>';
+                              }
 
                               html += '</div>';
                             });
@@ -1119,7 +1134,6 @@ isAuthenticated); %>
                               });
 
                               if (response.ok) {
-                                alert('Cảm ơn bạn đã đánh giá sản phẩm!');
                                 // Reset form
                                 reviewForm.reset();
                                 // Reload reviews and statistics
@@ -1256,7 +1270,6 @@ isAuthenticated); %>
                           });
 
                           if (response.ok) {
-                            alert('Phản hồi của bạn đã được gửi!');
                             // Hide and clear form
                             hideReplyForm(parentReviewId);
                             // Reload reviews (keep same page and keep expanded states)
@@ -1270,6 +1283,38 @@ isAuthenticated); %>
                           }
                         } catch (error) {
                           console.error('Error submitting reply:', error);
+                          alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                        }
+                      }
+
+                      // Delete review (admin only)
+                      async function deleteReview(reviewId) {
+                        if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này? Thao tác này không thể hoàn tác.')) {
+                          return;
+                        }
+
+                        try {
+                          const response = await fetch(ctx + '/admin/api/reviews/' + reviewId, {
+                            method: 'DELETE',
+                            credentials: 'include'
+                          });
+
+                          if (response.ok) {
+                            // Reload reviews and statistics
+                            loadRatingStatistics(productData.id);
+                            loadReviews(productData.id, currentReviewPage, true);
+                          } else if (response.status === 401) {
+                            alert('Vui lòng đăng nhập để thực hiện thao tác này');
+                            window.location.href = ctx + '/login';
+                          } else if (response.status === 403) {
+                            const error = await response.json();
+                            alert(error.error || 'Bạn không có quyền xóa đánh giá');
+                          } else {
+                            const error = await response.json();
+                            alert(error.error || 'Không thể xóa đánh giá. Vui lòng thử lại.');
+                          }
+                        } catch (error) {
+                          console.error('Error deleting review:', error);
                           alert('Có lỗi xảy ra. Vui lòng thử lại.');
                         }
                       }

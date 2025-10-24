@@ -9,6 +9,14 @@ body {
   height: 100vh;
   flex-direction: column;
 }
+/* Đảm bảo tất cả ảnh đều resize vừa khung, không làm thay đổi bố cục */
+img {
+  width: 100%;
+  max-width: 300px; /* hoặc giá trị phù hợp cho trang của bạn */
+  height: 200px; /* hoặc giá trị phù hợp cho trang của bạn */
+  object-fit: cover;
+  display: block;
+}
 
 .chat-container {
   display: flex;

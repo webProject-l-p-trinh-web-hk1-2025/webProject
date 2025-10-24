@@ -872,6 +872,9 @@ textarea.input {
 
 .product .product-img>img {
   width: 100%;
+  height: 250px;
+  object-fit: contain;
+  background: #f0f0f0;
 }
 
 .product .product-img .product-label {

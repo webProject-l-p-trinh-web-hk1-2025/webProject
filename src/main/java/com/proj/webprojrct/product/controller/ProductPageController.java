@@ -202,8 +202,41 @@ public class ProductPageController {
     public String productDetail(@PathVariable Long id, Model model) {
         ProductResponse product = productService.getById(id);
         model.addAttribute("product", product);
+
+        // Sản phẩm liên quan: cùng category
+        List<ProductResponse> relatedProducts = new java.util.ArrayList<>();
+        if (product.getCategory() != null) {
+            relatedProducts = productService.getByCategoryId(product.getCategory().getId());
+            // Loại bỏ chính sản phẩm đang xem
+            relatedProducts.removeIf(p -> p.getId().equals(product.getId()));
+        }
+        model.addAttribute("relatedProducts", relatedProducts);
+
+        // Sản phẩm cùng dòng (cùng parentId của category, ví dụ iPhone)
+        List<ProductResponse> versionProducts = new java.util.ArrayList<>();
+        if (product.getCategory() != null && product.getCategory().getParentId() != null) {
+            // Tìm tất cả category con có cùng parentId
+            Long parentId = product.getCategory().getParentId();
+            List<com.proj.webprojrct.category.dto.CategoryDto> allCategories = categoryService.getAll();
+            java.util.List<Long> childCategoryIds = new java.util.ArrayList<>();
+            for (var cat : allCategories) {
+                if (parentId.equals(cat.getParentId())) {
+                    childCategoryIds.add(cat.getId());
+                }
+            }
+            // Lấy tất cả sản phẩm thuộc các category này
+            for (Long catId : childCategoryIds) {
+                List<ProductResponse> products = productService.getByCategoryId(catId);
+                versionProducts.addAll(products);
+            }
+            // Loại bỏ chính sản phẩm đang xem
+            versionProducts.removeIf(p -> p.getId().equals(product.getId()));
+        }
+        model.addAttribute("versionProducts", versionProducts);
+
         return "product_detail";
     }
+
     
     @GetMapping("/deals")
     public String deals(Model model) {

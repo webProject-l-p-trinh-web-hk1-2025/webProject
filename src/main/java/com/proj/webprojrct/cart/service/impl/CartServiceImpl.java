@@ -61,6 +61,9 @@ public class CartServiceImpl implements CartService {
                 resp.setProductName(product.getName());
                 resp.setProductPrice(product.getPrice().doubleValue());
                 resp.setProductImageUrl(product.getImageUrl());
+                resp.setProductStock(product.getStock()); // Thêm stock
+                resp.setProductOnDeal(product.getOnDeal()); // Thêm onDeal
+                resp.setProductDealPercentage(product.getDealPercentage()); // Thêm dealPercentage
             }
             
             return resp;

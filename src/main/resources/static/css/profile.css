@@ -63,9 +63,12 @@ body.profile-page {
 
 /* Horizontal favorites list used in profile */
 .favorites-horizontal{display:flex;flex-direction:row;gap:12px;flex-wrap:wrap;align-items:flex-start}
-.favorites-horizontal .fav-row{flex-direction:column;align-items:center;gap:6px;width:120px}
-.favorites-horizontal .fav-thumb{width:100px;height:80px}
-.favorites-horizontal .fav-name{text-align:center;font-size:13px;margin-top:4px}
+.favorites-horizontal .fav-row{flex-direction:column;align-items:center;gap:6px;width:120px;cursor:pointer;transition:transform 0.3s ease, box-shadow 0.3s ease}
+.favorites-horizontal .fav-row:hover{transform:translateY(-8px);box-shadow:0 8px 20px rgba(225,29,72,0.15)}
+.favorites-horizontal .fav-row:hover .fav-name{color:#e11d48}
+.favorites-horizontal .fav-thumb{width:100px;height:80px;transition:border-color 0.3s ease}
+.favorites-horizontal .fav-row:hover .fav-thumb{border-color:#e11d48}
+.favorites-horizontal .fav-name{text-align:center;font-size:13px;margin-top:4px;transition:color 0.3s ease}
 /* Responsive tweaks */
 @media (max-width:900px){
   .profile-top{flex-direction:column;align-items:flex-start}

@@ -17,4 +17,7 @@ public class CartItemResponse {
     private String productName;
     private Double productPrice;
     private String productImageUrl;
+    private Integer productStock; // Thêm field stock
+    private Boolean productOnDeal; // Thêm field onDeal
+    private Integer productDealPercentage; // Thêm field dealPercentage
 }

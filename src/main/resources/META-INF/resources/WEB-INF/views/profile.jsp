@@ -185,11 +185,11 @@
                                 <div class="border rounded p-3 mb-3">
                                     <div class="d-flex justify-content-between">
                                         <div>
-                                            <p class="mb-1"><b>Mã đơn:</b> ${o.code}</p>
-                                            <p class="mb-1"><b>Ngày đặt:</b> ${o.date}</p>
+                                            <p class="mb-1"><b>Mã đơn:</b> #${o.orderId}</p>
+                                            <p class="mb-1"><b>Ngày đặt:</b> ${o.createdAt}</p>
                                             <p class="mb-1"><b>Tổng tiền:</b>
                                                 <span class="text-danger fw-bold">
-                                                    <fmt:formatNumber value="${o.total}" type="currency" currencySymbol="₫"/>
+                                                    <fmt:formatNumber value="${o.totalAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
                                                 </span>
                                             </p>
                                         </div>
@@ -396,13 +396,19 @@ async function loadProfileFavorites(containerId) {
             // support multiple possible field names returned by backend
             const imageUrl = f.productImageUrl || f.imageUrl || f.image || '';
             const name = f.productName || f.name || f.title || '';
+            const productId = f.productId || f.id || '';
             let imgTag = '<div class="fav-thumb empty"></div>';
             if (imageUrl && imageUrl.trim() !== '') {
                 const url = imageUrl.trim();
                 const final = url.startsWith('/') ? (ctx + url) : (/^https?:\/\//i.test(url) ? url : (ctx + '/' + url));
                 imgTag = '<img src="' + final + '" class="fav-thumb" />';
             }
-            return '<div class="fav-row">' + imgTag + '<div class="fav-meta"><div class="fav-name">' + (name ? escapeHtml(name) : '-') + '</div></div></div>';
+            // Wrap in link to product detail
+            const productLink = ctx + '/product/' + productId;
+            return '<a href="' + productLink + '" class="fav-row" style="text-decoration: none; color: inherit; display: block; transition: all 0.3s ease;">' + 
+                   imgTag + 
+                   '<div class="fav-meta"><div class="fav-name">' + (name ? escapeHtml(name) : '-') + '</div></div>' + 
+                   '</a>';
         }).join('');
         listEl.innerHTML = html;
 

@@ -325,9 +325,31 @@
                                                                             href="${pageContext.request.contextPath}/product/${product.id}">${product.name}</a>
                                                                     </h3>
                                                                     <h4 class="product-price">
-                                                                        <fmt:formatNumber value="${product.price}"
-                                                                            type="currency" currencySymbol="₫"
-                                                                            maxFractionDigits="0" />
+                                                                        <c:choose>
+                                                                            <c:when test="${product.onDeal == true && product.dealPercentage != null && product.dealPercentage > 0}">
+                                                                                <c:set var="discountedPrice" value="${product.price * (100 - product.dealPercentage) / 100}"/>
+                                                                                <c:set var="savedAmount" value="${product.price - discountedPrice}"/>
+                                                                                <span style="color: #d70018; font-size: 18px; font-weight: bold;">
+                                                                                    <fmt:formatNumber value="${discountedPrice}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                                                </span>
+                                                                                <br>
+                                                                                <del style="color: #999; font-size: 14px;">
+                                                                                    <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                                                </del>
+                                                                                <span style="color: #ff4444; font-size: 12px; margin-left: 5px; font-weight: bold; background: #ffe8e8; padding: 1px 5px; border-radius: 3px;">
+                                                                                    -${product.dealPercentage}%
+                                                                                </span>
+                                                                                <br>
+                                                                                <span style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
+                                                                                    Tiết kiệm <fmt:formatNumber value="${savedAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                                                </span>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <fmt:formatNumber value="${product.price}"
+                                                                                    type="currency" currencySymbol="₫"
+                                                                                    maxFractionDigits="0" />
+                                                                            </c:otherwise>
+                                                                        </c:choose>
                                                                     </h4>
                                                                     <div class="product-rating">
                                                                         <i class="fa fa-star"></i>
@@ -479,8 +501,30 @@
                                                     href="${pageContext.request.contextPath}/product/${product.id}">${product.name}</a>
                                             </h3>
                                             <h4 class="product-price">
-                                                <fmt:formatNumber value="${product.price}" type="currency"
-                                                    currencySymbol="₫" maxFractionDigits="0" />
+                                                <c:choose>
+                                                    <c:when test="${product.onDeal == true && product.dealPercentage != null && product.dealPercentage > 0}">
+                                                        <c:set var="discountedPrice" value="${product.price * (100 - product.dealPercentage) / 100}"/>
+                                                        <c:set var="savedAmount" value="${product.price - discountedPrice}"/>
+                                                        <span style="color: #d70018; font-size: 18px; font-weight: bold;">
+                                                            <fmt:formatNumber value="${discountedPrice}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                        </span>
+                                                        <br>
+                                                        <del style="color: #999; font-size: 14px;">
+                                                            <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                        </del>
+                                                        <span style="color: #ff4444; font-size: 12px; margin-left: 5px; font-weight: bold; background: #ffe8e8; padding: 1px 5px; border-radius: 3px;">
+                                                            -${product.dealPercentage}%
+                                                        </span>
+                                                        <br>
+                                                        <span style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
+                                                            Tiết kiệm <fmt:formatNumber value="${savedAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                        </span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <fmt:formatNumber value="${product.price}" type="currency"
+                                                            currencySymbol="₫" maxFractionDigits="0" />
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </h4>
                                             <div class="product-rating">
                                                 <i class="fa fa-star"></i>

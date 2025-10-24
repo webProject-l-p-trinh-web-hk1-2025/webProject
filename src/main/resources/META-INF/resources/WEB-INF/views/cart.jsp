@@ -226,7 +226,9 @@
                                 price: item.productPrice,
                                 quantity: item.quantity,
                                 imageUrl: item.productImageUrl,
-                                stock: 999,
+                                stock: item.productStock || 0, // Lấy stock từ API
+                                onDeal: item.productOnDeal || false, // Lấy onDeal
+                                dealPercentage: item.productDealPercentage || 0, // Lấy dealPercentage
                                 selected: false
                             };
                         });
@@ -281,9 +283,22 @@
                                     '<h4 style="margin-top: 0; margin-bottom: 10px;">' +
                                         '<a href="${pageContext.request.contextPath}/product/' + item.productId + '" style="color: #333;">' + item.name + '</a>' +
                                     '</h4>' +
-                                    '<p style="font-size: 18px; color: #D10024; font-weight: bold; margin-bottom: 15px;">' +
-                                        formatPrice(item.price) +
-                                    '</p>' +
+                                    (function() {
+                                        if (item.onDeal && item.dealPercentage > 0) {
+                                            var discountedPrice = item.price * (100 - item.dealPercentage) / 100;
+                                            var savedAmount = item.price - discountedPrice;
+                                            return '<div style="margin-bottom: 15px;">' +
+                                                '<span style="font-size: 18px; color: #D10024; font-weight: bold;">' + formatPrice(discountedPrice) + '</span> ' +
+                                                '<span style="font-size: 14px; color: #999; text-decoration: line-through;">' + formatPrice(item.price) + '</span> ' +
+                                                '<span style="display: inline-block; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: 5px;">-' + item.dealPercentage + '%</span> ' +
+                                                '<span style="display: inline-block; background: linear-gradient(135deg, #26d97f 0%, #1abc9c 100%); color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: 5px;">Tiết kiệm ' + formatPrice(savedAmount) + '</span>' +
+                                                '</div>';
+                                        } else {
+                                            return '<p style="font-size: 18px; color: #D10024; font-weight: bold; margin-bottom: 15px;">' +
+                                                formatPrice(item.price) +
+                                                '</p>';
+                                        }
+                                    })() +
                                     '<div class="quantity-controls">' +
                                         '<button class="quantity-btn" onclick="updateQuantity(' + item.id + ', -1)">−</button>' +
                                         '<input type="number" class="quantity-input" value="' + item.quantity + '" ' +
@@ -291,7 +306,7 @@
                                             'onchange="setQuantity(' + item.id + ', this.value)">' +
                                         '<button class="quantity-btn" onclick="updateQuantity(' + item.id + ', 1)">+</button>' +
                                     '</div>' +
-                                    '<p style="margin-top: 10px; color: #666;">Thành tiền: <strong>' + formatPrice(item.price * item.quantity) + '</strong></p>' +
+                                    '<p style="margin-top: 10px; color: #666;">Thành tiền: <strong>' + formatPrice((item.onDeal && item.dealPercentage > 0 ? item.price * (100 - item.dealPercentage) / 100 : item.price) * item.quantity) + '</strong></p>' +
                                 '</div>' +
                                 '<div class="col-md-3 col-xs-12" style="text-align: right; display: flex; flex-direction: column; justify-content: center;">' +
                                     '<button class="primary-btn" style="background: #dc3545; margin-bottom: 0;" onclick="removeItem(' + item.id + ')">' +
@@ -353,9 +368,12 @@
                     return sum + item.quantity;
                 }, 0);
 
-                // Tổng tiền = tổng (price * quantity) của item được chọn
+                // Tổng tiền = tổng (price * quantity) của item được chọn, sử dụng giá khuyến mãi nếu có
                 var subtotal = selectedItems.reduce(function (sum, item) {
-                    return sum + (item.price * item.quantity);
+                    var itemPrice = item.onDeal && item.dealPercentage > 0 
+                        ? item.price * (100 - item.dealPercentage) / 100 
+                        : item.price;
+                    return sum + (itemPrice * item.quantity);
                 }, 0);
 
                 document.getElementById('totalItems').textContent = totalItems;
@@ -387,7 +405,7 @@
                 var newQty = item.quantity + delta;
                 if (newQty < 1 || newQty > item.stock) {
                     if (newQty > item.stock) {
-                        showMessage('So luong khong duoc vuot qua ' + item.stock, 'error');
+                        showMessage('Sản phẩm "' + item.name + '" chỉ còn ' + item.stock + ' trong kho!', 'error');
                     }
                     return;
                 }
@@ -404,7 +422,7 @@
                     newQty = 1;
                 } else if (newQty > item.stock) {
                     newQty = item.stock;
-                    showMessage('So luong khong duoc vuot qua ' + item.stock, 'error');
+                    showMessage('Sản phẩm "' + item.name + '" chỉ còn ' + item.stock + ' trong kho!', 'error');
                 }
 
                 document.getElementById('qty-' + itemId).value = newQty;
@@ -529,19 +547,38 @@
                     return;
                 }
 
-                // Tạo payload
+                // Kiểm tra stock cho từng sản phẩm đã chọn
+                for (var i = 0; i < selectedItems.length; i++) {
+                    var item = selectedItems[i];
+                    if (item.quantity > item.stock) {
+                        showMessage('Sản phẩm "' + item.name + '" chỉ còn ' + item.stock + ' sản phẩm trong kho. Vui lòng giảm số lượng!', 'error');
+                        return;
+                    }
+                }
+
+                // Tạo payload với giá deal
                 var orderRequest = {
                     totalAmount: selectedItems.reduce(function (sum, item) {
-                        return sum + (item.price * item.quantity);
+                        var itemPrice = item.onDeal && item.dealPercentage > 0 
+                            ? item.price * (100 - item.dealPercentage) / 100 
+                            : item.price;
+                        return sum + (itemPrice * item.quantity);
                     }, 0),
                     shippingAddress: "",
                     orderItems: selectedItems.map(function (item) {
-                        // Đảm bảo "item" trong giỏ hàng của bạn CÓ "productName"
+                        // Tính giá deal nếu có
+                        var finalPrice = item.onDeal && item.dealPercentage > 0 
+                            ? item.price * (100 - item.dealPercentage) / 100 
+                            : item.price;
+                        
                         return {
                             productId: item.productId,
-                            productName: item.name, // <-- THÊM DÒNG NÀY VÀO
+                            productName: item.name,
                             quantity: item.quantity,
-                            price: item.price
+                            price: finalPrice, // Sử dụng giá sau khi giảm
+                            originalPrice: item.price, // Giữ lại giá gốc để hiển thị
+                            onDeal: item.onDeal || false,
+                            dealPercentage: item.dealPercentage || 0
                         };
                     })
                 };

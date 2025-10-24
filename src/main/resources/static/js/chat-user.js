@@ -192,6 +192,25 @@ function userItemClick(event) {
     nbrMsg.classList.add("hidden");
     nbrMsg.textContent = "0";
   }
+
+  // Mark messages from this sender as read
+  if (selectedUserId) {
+    fetch(`/api/chat/mark-read/${encodeURIComponent(selectedUserId)}`, {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Messages marked as read:", data);
+        // Update global chat badge in header after marking as read
+        if (typeof updateGlobalChatCount === "function") {
+          updateGlobalChatCount();
+        }
+      })
+      .catch((error) => {
+        console.error("Error marking messages as read:", error);
+      });
+  }
 }
 
 async function loadAdminConversations() {
@@ -498,6 +517,23 @@ async function onMessageReceived(payload) {
       }
     }
 
+    // Mark messages as read immediately since user is viewing this conversation
+    fetch(`/api/chat/mark-read/${encodeURIComponent(senderId)}`, {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Messages auto-marked as read:", data);
+        // Update badge to reflect that message was read
+        if (typeof updateGlobalChatCount === "function") {
+          updateGlobalChatCount();
+        }
+      })
+      .catch((error) => {
+        console.error("Error auto-marking messages as read:", error);
+      });
+
     return;
   }
 
@@ -508,6 +544,11 @@ async function onMessageReceived(payload) {
       nbrMsg.textContent = count + 1;
       nbrMsg.classList.remove("hidden");
     }
+  }
+
+  // Update global chat badge in header (if function exists)
+  if (typeof updateGlobalChatCount === "function") {
+    updateGlobalChatCount();
   }
 }
 

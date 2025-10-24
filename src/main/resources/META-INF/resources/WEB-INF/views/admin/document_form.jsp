@@ -1,51 +1,17 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-        <html>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
 
-        <head>
-            <title>${document != null ? "Chỉnh sửa Document" : "Tạo Document mới"}</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                }
-
-                .form-group {
-                    margin-bottom: 15px;
-                }
-
-                label {
-                    display: block;
-                    font-weight: bold;
-                    margin-bottom: 5px;
-                }
-
-                input[type="text"],
-                select {
-                    width: 100%;
-                    padding: 8px;
-                    box-sizing: border-box;
-                }
-
-                #editor {
-                    border: 1px solid #ccc;
-                    min-height: 300px;
-                    padding: 10px;
-                }
-
-                .editor-toolbar button {
-                    margin-right: 5px;
-                    margin-bottom: 5px;
-                    padding: 5px 8px;
-                }
-
-                /* -- CSS MỚI -- */
-                .editor-toolbar label {
-                    display: inline-block;
-                    font-weight: normal;
-                    margin: 0 5px 0 10px;
-                    vertical-align: middle;
-                }
-
+<head>
+    <title>${document != null ? "Chỉnh sửa tài liệu" : "Tạo tài liệu mới"}</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="<c:url value='/css/admin-dashboard.css'/>" />
+    <link rel="stylesheet" href="<c:url value='/css/documents_admin.css'/>" />
+    <link rel="stylesheet" href="<c:url value='/css/document_form.css'/>" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    
+    <style>
                 .editor-toolbar input[type="color"] {
                     width: 40px;
                     height: 28px;
@@ -83,31 +49,72 @@
                     border-radius: 4px;
                     object-fit: cover;
                 }
-            </style>
-        </head>
+    </style>
+</head>
 
-        <body>
+<body>
+    <!-- app layout with collapsible sidebar -->
+    <div class="app-layout">
+        <!-- Metismenu-style sidebar -->
+        <div class="quixnav sidebar" id="sidebar">
+            <div class="quixnav-scroll">
+                <button id="navToggle" class="nav-toggle-btn" title="Toggle sidebar">☰</button>
+                <ul class="metismenu" id="menu">
+                    <li>
+                        <a href="${pageContext.request.contextPath}/admin"><i class="icon icon-home"></i><span class="nav-text">Dashboard</span></a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/admin/users"><i class="fas fa-users"></i><span class="nav-text">Users</span></a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/admin/products"><i class="fas fa-box"></i><span class="nav-text">Products</span></a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/admin/categories"><i class="fas fa-tag"></i><span class="nav-text">Categories</span></a>
+                    </li>
+                    <li class="active">
+                        <a href="${pageContext.request.contextPath}/admin/document"><i class="fas fa-file-alt"></i><span class="nav-text">Documents</span></a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/admin/chat" style="position: relative;">
+                            <i class="fas fa-comments"></i>
+                            <span class="nav-text">Chat</span>
+                            <span id="chat-notification-badge" style="display:none; position:absolute; top:8px; right:12px; background:#e53935; color:white; border-radius:50%; padding:2px 6px; font-size:10px; min-width:18px; text-align:center;"></span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
 
-            <h2>${document != null ? "Chỉnh sửa Document" : "Tạo Document mới"}</h2>
+        <div class="main-content">
+            <div class="container">
+                <div class="page-title">
+                    <h2>${document != null ? "Chỉnh sửa tài liệu" : "Tạo tài liệu mới"}</h2>
+                    <a href="${pageContext.request.contextPath}/admin/document" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
 
-            <%-- (Các thông báo error/success giữ nguyên) --%>
                 <c:if test="${not empty error}">
-                    <p style="color:red">${error}</p>
+                    <div class="alert alert-danger">
+                        ${error}
+                    </div>
                 </c:if>
                 <c:if test="${not empty success}">
-                    <p style="color:green">${success}</p>
+                    <div class="alert alert-success">
+                        ${success}
+                    </div>
                 </c:if>
 
-                <%-- (Form action logic giữ nguyên) --%>
-                    <c:choose>
-                        <c:when test="${document != null && document.id != null}">
-                            <c:set var="formAction"
-                                value="${pageContext.request.contextPath}/admin/document/update/${document.id}" />
-                        </c:when>
-                        <c:otherwise>
-                            <c:set var="formAction" value="${pageContext.request.contextPath}/admin/document/create" />
-                        </c:otherwise>
-                    </c:choose>
+                <%-- Form action logic --%>
+                <c:choose>
+                    <c:when test="${document != null && document.id != null}">
+                        <c:set var="formAction" value="${pageContext.request.contextPath}/admin/document/update/${document.id}" />
+                    </c:when>
+                    <c:otherwise>
+                        <c:set var="formAction" value="${pageContext.request.contextPath}/admin/document/create" />
+                    </c:otherwise>
+                </c:choose>
 
                     <form action="${formAction}" method="post" enctype="multipart/form-data" onsubmit="syncEditor()">
 
@@ -118,9 +125,16 @@
                                     required />
                             </div>
                             <div class="form-group">
-                                <label>Product ID:</label>
-                                <input type="text" name="productId"
-                                    value="${document != null ? document.productId : ''}" required />
+                                <label>Product:</label>
+                                <select name="productId" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="">-- Chọn sản phẩm --</option>
+                                    <c:forEach items="${products}" var="product">
+                                        <option value="${product.id}" 
+                                            ${document != null && document.productId == product.id ? 'selected' : ''}>
+                                            ${product.name} (ID: ${product.id})
+                                        </option>
+                                    </c:forEach>
+                                </select>
                             </div>
 
                             <div class="form-group editor-toolbar">
@@ -167,7 +181,7 @@
                                 <div class="form-group">
                                     <button type="submit" class="btn btn-save">${document != null ? 'Cập nhật' :
                                         'Tạo'}</button>
-                                    <a href="${pageContext.request.contextPath}/admin/document/list"
+                                    <a href="${pageContext.request.contextPath}/admin/document"
                                         class="btn btn-cancel">Hủy</a>
                                 </div>
                     </form>
@@ -272,6 +286,38 @@
                         if (editor.innerHTML.trim() === '') {
                             editor.innerHTML = '<p>&nbsp;</p>';
                         }
+                    </script>
+
+                    <script>
+                        // Sidebar toggle
+                        (function () {
+                            const sidebar = document.getElementById('sidebar');
+                            const toggle = document.getElementById('navToggle');
+                            if (!sidebar || !toggle) return;
+
+                            function isCollapsed() {
+                                return localStorage.getItem('admin_sidebar_collapsed') === '1';
+                            }
+
+                            function apply() {
+                                const collapsed = isCollapsed();
+                                if (window.innerWidth <= 800) {
+                                    sidebar.classList.toggle('open', collapsed);
+                                    sidebar.classList.remove('collapsed');
+                                } else {
+                                    sidebar.classList.toggle('collapsed', collapsed);
+                                    sidebar.classList.remove('open');
+                                }
+                            }
+
+                            apply();
+                            toggle.addEventListener('click', function () {
+                                const current = isCollapsed();
+                                localStorage.setItem('admin_sidebar_collapsed', current ? '0' : '1');
+                                apply();
+                            });
+                            window.addEventListener('resize', apply);
+                        })();
                     </script>
 
         </body>

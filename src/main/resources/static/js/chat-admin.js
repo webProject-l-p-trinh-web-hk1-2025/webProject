@@ -95,6 +95,11 @@ async function findAndDisplayConnectedUsers() {
   const connectedUsersResponse = await fetch("/users");
   let connectedUsers = await connectedUsersResponse.json();
 
+  // Load unread counts from sessionStorage (set by admin-chat-notifications.js)
+  const unreadCounts = JSON.parse(
+    sessionStorage.getItem("chatUnreadCounts") || "{}"
+  );
+
   connectedUsers = connectedUsers.filter((user) => user.nickName !== nickname);
 
   if (currentRole !== "ADMIN") {
@@ -165,6 +170,16 @@ function appendUserElement(user, connectedUsersList) {
   receivedMsgs.textContent = "0";
   receivedMsgs.classList.add("nbr-msg", "hidden");
 
+  // Check unread count from sessionStorage
+  const unreadCounts = JSON.parse(
+    sessionStorage.getItem("chatUnreadCounts") || "{}"
+  );
+  const unreadCount = unreadCounts[user.nickName] || 0;
+  if (unreadCount > 0) {
+    receivedMsgs.textContent = unreadCount;
+    receivedMsgs.classList.remove("hidden");
+  }
+
   listItem.appendChild(userImage);
   listItem.appendChild(usernameSpan);
   listItem.appendChild(receivedMsgs);
@@ -191,6 +206,44 @@ function userItemClick(event) {
   if (nbrMsg) {
     nbrMsg.classList.add("hidden");
     nbrMsg.textContent = "0";
+  }
+
+  // Mark all messages from this user as read
+  if ((currentRole || "").toUpperCase() === "ADMIN" && selectedUserId) {
+    fetch(
+      `/admin/api/chat/mark-all-read/${encodeURIComponent(selectedUserId)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          // Update sessionStorage
+          const unreadCounts = JSON.parse(
+            sessionStorage.getItem("chatUnreadCounts") || "{}"
+          );
+          delete unreadCounts[selectedUserId];
+          sessionStorage.setItem(
+            "chatUnreadCounts",
+            JSON.stringify(unreadCounts)
+          );
+
+          // Update global badge via admin-chat-notifications.js
+          if (
+            window.AdminChatNotifications &&
+            window.AdminChatNotifications.updateBadge
+          ) {
+            const totalUnread = Object.values(unreadCounts).reduce(
+              (sum, count) => sum + count,
+              0
+            );
+            window.AdminChatNotifications.updateBadge(totalUnread);
+          }
+        }
+      })
+      .catch((err) => console.error("Failed to mark messages as read:", err));
   }
 }
 
@@ -507,6 +560,27 @@ async function onMessageReceived(payload) {
       let count = parseInt(nbrMsg.textContent) || 0;
       nbrMsg.textContent = count + 1;
       nbrMsg.classList.remove("hidden");
+    }
+  }
+
+  // Update sessionStorage for global badge sync
+  if ((currentRole || "").toUpperCase() === "ADMIN") {
+    const unreadCounts = JSON.parse(
+      sessionStorage.getItem("chatUnreadCounts") || "{}"
+    );
+    unreadCounts[senderId] = (unreadCounts[senderId] || 0) + 1;
+    sessionStorage.setItem("chatUnreadCounts", JSON.stringify(unreadCounts));
+
+    // Update global badge
+    if (
+      window.AdminChatNotifications &&
+      window.AdminChatNotifications.updateBadge
+    ) {
+      const totalUnread = Object.values(unreadCounts).reduce(
+        (sum, count) => sum + count,
+        0
+      );
+      window.AdminChatNotifications.updateBadge(totalUnread);
     }
   }
 }

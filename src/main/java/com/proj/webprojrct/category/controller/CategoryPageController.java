@@ -44,7 +44,7 @@ public class CategoryPageController {
         if (user.getRole() != UserRole.ADMIN) {
             throw new RuntimeException("Access denied: Only ADMIN users can create categories.");
         }
-        return "category_detail";
+        return "admin/category_detail";
     }
 
     @GetMapping("/admin/categories/new")
@@ -60,7 +60,7 @@ public class CategoryPageController {
 
         System.out.println("Debug: Loaded categories for creation form: " + dtos);
 
-        return "category_form";
+        return "admin/category_form";
     }
 
     @GetMapping("/admin/categories/edit")
@@ -74,7 +74,7 @@ public class CategoryPageController {
         List<CategoryDto> dtos = categoryService.getAll();
         model.addAttribute("category", dtos);
 
-        return "category_form";
+        return "admin/category_form";
     }
 
     @GetMapping("/admin/categories/edit/{id}")
@@ -89,6 +89,6 @@ public class CategoryPageController {
         model.addAttribute("category", dto);
         List<CategoryDto> dtos = categoryService.getAll();
         model.addAttribute("categorys", dtos);
-        return "category_form";
+        return "admin/category_form";
     }
 }

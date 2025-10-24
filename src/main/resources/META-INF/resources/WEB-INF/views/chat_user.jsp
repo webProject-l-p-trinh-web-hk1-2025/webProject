@@ -55,6 +55,22 @@
           }, 100);
         }
       });
+
+      // Update badge in header when user leaves chat page
+      window.addEventListener("beforeunload", function () {
+        // Notify parent window/other pages to refresh badge
+        if (typeof updateGlobalChatCount === "function") {
+          updateGlobalChatCount();
+        }
+      });
+
+      // Also update when page becomes hidden (user navigates away)
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+          // User is leaving the chat page, mark for badge refresh
+          sessionStorage.setItem("chatBadgeNeedsRefresh", "true");
+        }
+      });
     </script>
 
     <div id="mediaModal" class="hidden media-modal" onclick="closeMediaModal()">

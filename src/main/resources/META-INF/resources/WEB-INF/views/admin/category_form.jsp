@@ -1,11 +1,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> <%@ page
 contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
 <html>
   <head>
     <title>Thêm / Sửa danh mục</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="stylesheet" href="<c:url value='/css/admin-dashboard.css'/>" />
     <link rel="stylesheet" href="<c:url value='/css/categories_admin.css'/>" />
+    <link rel="stylesheet" href="<c:url value='/css/category_form.css'/>" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
@@ -22,7 +24,7 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
           </button>
           <ul class="metismenu" id="menu">
             <li>
-              <a href="${pageContext.request.contextPath}/admin/dashboard"
+              <a href="${pageContext.request.contextPath}/admin"
                 ><i class="icon icon-home"></i
                 ><span class="nav-text">Dashboard</span></a
               >
@@ -46,10 +48,35 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
               >
             </li>
             <li>
-              <a href="${pageContext.request.contextPath}/admin/chat"
-                ><i class="fas fa-comments"></i
-                ><span class="nav-text">Chat</span></a
+              <a href="${pageContext.request.contextPath}/admin/document"
+                ><i class="fas fa-file-alt"></i
+                ><span class="nav-text">Documents</span></a
               >
+            </li>
+            <li>
+              <a
+                href="${pageContext.request.contextPath}/admin/chat"
+                style="position: relative"
+              >
+                <i class="fas fa-comments"></i>
+                <span class="nav-text">Chat</span>
+                <span
+                  id="chat-notification-badge"
+                  style="
+                    display: none;
+                    position: absolute;
+                    top: 8px;
+                    right: 12px;
+                    background: #e53935;
+                    color: white;
+                    border-radius: 50%;
+                    padding: 2px 6px;
+                    font-size: 10px;
+                    min-width: 18px;
+                    text-align: center;
+                  "
+                ></span>
+              </a>
             </li>
           </ul>
         </div>
@@ -72,40 +99,53 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
               <div class="card-title">Thông tin danh mục</div>
             </div>
             <div class="card-body">
-              <form id="categoryForm" class="form-container">
+              <form id="categoryForm">
                 <input type="hidden" id="id" name="id" />
 
-                <div class="form-group">
-                  <div class="form-control">
-                    <label for="name">Tên danh mục *</label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      placeholder="Tên danh mục"
-                      required
-                      pattern=".{2,}"
-                      title="Tên danh mục phải có ít nhất 2 ký tự"
-                    />
-                    <div class="invalid-feedback">
-                      Vui lòng nhập tên danh mục (ít nhất 2 ký tự)
-                    </div>
-                  </div>
+                <div style="margin-bottom: 15px">
+                  <label
+                    for="name"
+                    style="display: block; margin-bottom: 5px; font-weight: 500"
+                    >Tên danh mục *</label
+                  >
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Tên danh mục"
+                    required
+                    style="
+                      width: 100%;
+                      padding: 8px 12px;
+                      border: 1px solid #ced4da;
+                      border-radius: 4px;
+                      font-size: 14px;
+                    "
+                  />
                 </div>
 
-                <div class="form-group">
-                  <div class="form-control">
-                    <label for="description">Mô tả (không bắt buộc)</label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      placeholder="Mô tả chi tiết về danh mục"
-                      style="height: 120px"
-                    ></textarea>
-                  </div>
+                <div style="margin-bottom: 15px">
+                  <label
+                    for="description"
+                    style="display: block; margin-bottom: 5px; font-weight: 500"
+                    >Mô tả (không bắt buộc)</label
+                  >
+                  <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Mô tả chi tiết về danh mục"
+                    style="
+                      width: 100%;
+                      padding: 8px 12px;
+                      border: 1px solid #ced4da;
+                      border-radius: 4px;
+                      font-size: 14px;
+                      height: 120px;
+                    "
+                  ></textarea>
                 </div>
 
-                <div class="form-actions">
+                <div style="margin-top: 20px; display: flex; gap: 10px">
                   <button
                     type="button"
                     class="btn btn-outline"
@@ -121,7 +161,15 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
             </div>
           </div>
 
-          <div id="status" class="alert mt-3 d-none"></div>
+          <div
+            id="status"
+            style="
+              display: none;
+              padding: 12px;
+              margin-top: 15px;
+              border-radius: 4px;
+            "
+          ></div>
         </div>
       </div>
     </div>
@@ -131,15 +179,6 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
       const api = ctx + "/api/categories";
       const form = document.getElementById("categoryForm");
       const status = document.getElementById("status");
-
-      // Bootstrap validation
-      form.addEventListener("submit", (event) => {
-        if (!form.checkValidity()) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        form.classList.add("was-validated");
-      });
 
       // If URL contains /edit/{id} we will fetch existing
       const path = location.pathname;
@@ -172,7 +211,6 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
       form.addEventListener("submit", async (ev) => {
         ev.preventDefault();
-        if (!form.checkValidity()) return;
 
         const id = document.getElementById("id").value;
         const payload = {
@@ -187,7 +225,7 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
         }
 
         try {
-          showStatus("Đang lưu...");
+          showStatus("Đang lưu...", "info");
           const method = id ? "PUT" : "POST";
           const url = id ? api + "/" + id : api;
           const res = await fetch(url, {
@@ -197,7 +235,7 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
           });
 
           if (res.ok) {
-            showSuccess("Đã lưu thành công!");
+            showStatus("Đã lưu thành công!", "success");
             setTimeout(() => (location.href = ctx + "/admin/categories"), 800);
           } else {
             const error = await res.text();
@@ -209,33 +247,62 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
         }
       });
 
-      function showStatus(message) {
-        status.className = "alert alert-info mt-3";
-        status.innerHTML = '<i class="bi bi-info-circle"></i> ' + message;
-        status.classList.remove("d-none");
+      function showStatus(message, type) {
+        status.style.display = "block";
+        if (type === "info") {
+          status.style.backgroundColor = "#d1ecf1";
+          status.style.color = "#0c5460";
+          status.style.border = "1px solid #bee5eb";
+        } else if (type === "success") {
+          status.style.backgroundColor = "#d4edda";
+          status.style.color = "#155724";
+          status.style.border = "1px solid #c3e6cb";
+        } else if (type === "error") {
+          status.style.backgroundColor = "#f8d7da";
+          status.style.color = "#721c24";
+          status.style.border = "1px solid #f5c6cb";
+        }
+        status.innerHTML = '<i class="fas fa-info-circle"></i> ' + message;
       }
 
       function showError(message) {
-        status.className = "alert alert-danger mt-3";
-        status.innerHTML =
-          '<i class="bi bi-exclamation-triangle"></i> ' + message;
-        status.classList.remove("d-none");
-      }
-
-      function showSuccess(message) {
-        status.className = "alert alert-success mt-3";
-        status.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
-        status.classList.remove("d-none");
+        showStatus(message, "error");
       }
     </script>
+
     <!-- Script để toggle sidebar -->
     <script>
-      document
-        .getElementById("navToggle")
-        .addEventListener("click", function () {
-          document.getElementById("sidebar").classList.toggle("minimized");
-          document.querySelector(".main-content").classList.toggle("expanded");
+      (function () {
+        const sidebar = document.getElementById("sidebar");
+        const toggle = document.getElementById("navToggle");
+        if (!sidebar || !toggle) return;
+
+        function isCollapsed() {
+          return localStorage.getItem("admin_sidebar_collapsed") === "1";
+        }
+
+        function apply() {
+          const collapsed = isCollapsed();
+          if (window.innerWidth <= 800) {
+            sidebar.classList.toggle("open", collapsed);
+            sidebar.classList.remove("collapsed");
+          } else {
+            sidebar.classList.toggle("collapsed", collapsed);
+            sidebar.classList.remove("open");
+          }
+        }
+
+        apply();
+        toggle.addEventListener("click", function () {
+          const current = isCollapsed();
+          localStorage.setItem("admin_sidebar_collapsed", current ? "0" : "1");
+          apply();
         });
+        window.addEventListener("resize", apply);
+      })();
     </script>
+
+    <!-- Admin chat notification script -->
+    <script src="${pageContext.request.contextPath}/js/admin-chat-notifications.js"></script>
   </body>
 </html>

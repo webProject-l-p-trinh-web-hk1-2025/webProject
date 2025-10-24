@@ -132,9 +132,7 @@ public class AdminProductController {
         productRepository.deleteById(id);
     }
 
-
-
-     //admin
+    //admin
     @GetMapping("/edit")
     public String edit() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -160,7 +158,7 @@ public class AdminProductController {
         return "admin/product_edit";
     }
 
-    // Deal admin
+    /////////////////////////////////////// Deal admin/////////////////////////////////////////////////////////////////////////////////////
     @ResponseBody
     @PostMapping("/{id}/deal-toggle")
     public ProductResponse toggleDeal(@PathVariable Long id, @RequestBody java.util.Map<String, Object> body) {
@@ -170,10 +168,10 @@ public class AdminProductController {
                 || authentication instanceof AnonymousAuthenticationToken) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
         }
-        
+
         Boolean onDeal = false;
         Integer dealPercentage = null;
-        
+
         if (body != null && body.containsKey("onDeal")) {
             Object v = body.get("onDeal");
             onDeal = Boolean.valueOf(String.valueOf(v));
@@ -186,8 +184,11 @@ public class AdminProductController {
                 dealPercentage = 0;
             }
         }
-        
+
         return productService.setDealStatus(id, onDeal, dealPercentage);
     }
+
+
+/////////////////////////////////////// Deal admin/////////////////////////////////////////////////////////////////////////////////////
 
 }

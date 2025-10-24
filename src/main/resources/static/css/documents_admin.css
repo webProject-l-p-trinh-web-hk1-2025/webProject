@@ -1,6 +1,6 @@
-/* CSS cho trang quản lý người dùng */
+/* CSS cho trang quản lý tài liệu */
 
-/* Ghi đè và bổ sung style cho phù hợp với giao diện admin */
+/* Giao diện chung */
 .container {
   padding: 20px;
 }
@@ -76,6 +76,8 @@ tbody tr:hover {
   display: inline-block;
   transition: all 0.2s;
   border: none;
+  margin-right: 5px;
+  text-decoration: none;
 }
 
 .btn-primary {
@@ -87,31 +89,26 @@ tbody tr:hover {
   background-color: #1565c0;
 }
 
-.btn-success {
+.btn-success,
+.btn-edit,
+.btn-view {
   background-color: #43a047;
   color: white;
 }
 
-.btn-success:hover {
+.btn-success:hover,
+.btn-edit:hover,
+.btn-view:hover {
   background-color: #388e3c;
 }
 
-.btn-edit {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.btn-edit:hover {
-  background-color: #e0a800;
-}
-
-.btn-view {
-  background-color: #17a2b8;
+.btn-warning {
+  background-color: #fb8c00;
   color: white;
 }
 
-.btn-view:hover {
-  background-color: #138496;
+.btn-warning:hover {
+  background-color: #f57c00;
 }
 
 .btn-danger,
@@ -126,99 +123,69 @@ tbody tr:hover {
 }
 
 .btn-outline {
-  background: transparent;
-  border: 1px solid #ddd;
-  color: #555;
+  background-color: transparent;
+  color: #1976d2;
+  border: 1px solid #1976d2;
 }
 
 .btn-outline:hover {
-  background: #f5f5f5;
+  background-color: rgba(25, 118, 210, 0.04);
 }
 
-/* Bộ lọc và form */
+/* Thanh tìm kiếm và lọc */
 .filter-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 15px;
   margin-bottom: 20px;
-  background: #f8fafd;
   padding: 15px;
+  background: #fff;
   border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .filter-group {
-  display: flex;
-  flex-direction: column;
+  flex: 1;
+  min-width: 200px;
 }
 
-.filter-group label {
-  margin-bottom: 5px;
-  font-weight: 500;
-  font-size: 13px;
-  color: #555;
-}
-
-.filter-input,
-select {
+.filter-input {
+  width: 100%;
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid #ced4da;
   border-radius: 4px;
-  min-width: 120px;
   font-size: 14px;
 }
 
-.filter-input:focus,
-select:focus {
+.filter-input:focus {
   border-color: #1976d2;
   outline: none;
 }
 
-/* Form sửa và tạo */
-.form-container {
-  padding: 20px;
-  background: #f8fafd;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  border: 1px solid #edf2f9;
-}
-
-.form-group {
-  margin-bottom: 15px;
+/* Image gallery */
+.img-gallery {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
-}
-
-.form-control {
-  flex: 1;
-  min-width: 120px;
-}
-
-.form-control label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.form-control input,
-.form-control select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
   gap: 10px;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 
-/* Badge styles */
+.img-gallery img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #edf2f9;
+  transition: transform 0.2s;
+}
+
+.img-gallery img:hover {
+  transform: scale(1.05);
+}
+
+/* Badge cho trạng thái */
 .badge {
+  display: inline-block;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -230,67 +197,67 @@ select:focus {
   color: #2e7d32;
 }
 
+.badge-warning {
+  background-color: #fff8e1;
+  color: #f57f17;
+}
+
 .badge-danger {
   background-color: #ffebee;
   color: #c62828;
 }
 
-/* Avatar */
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-/* Action buttons */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.action-btn {
-  padding: 6px 10px;
-  font-size: 13px;
-  border-radius: 4px;
-}
-
-/* Alert messages */
+/* Thông báo */
 .alert {
-  padding: 12px;
-  margin-bottom: 15px;
+  padding: 12px 15px;
+  margin-bottom: 20px;
   border-radius: 4px;
-}
-
-.alert-danger {
-  background: #ffebee;
-  color: #c62828;
+  border-left: 4px solid;
 }
 
 .alert-success {
-  background: #e8f5e9;
+  background-color: #e8f5e9;
+  border-left-color: #2e7d32;
   color: #2e7d32;
 }
 
-/* Hiển thị form chỉnh sửa */
-.edit-form-row td {
-  padding: 15px;
-  background-color: #f8fafd;
+.alert-warning {
+  background-color: #fff8e1;
+  border-left-color: #f57f17;
+  color: #f57f17;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .filter-container {
-    flex-direction: column;
-  }
+.alert-danger {
+  background-color: #ffebee;
+  border-left-color: #c62828;
+  color: #c62828;
+}
 
-  .form-group {
-    flex-direction: column;
-  }
+/* Phân trang */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 5px;
+}
 
-  .page-title {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
+.pagination .page-item {
+  display: inline-block;
+  min-width: 32px;
+  height: 32px;
+  text-align: center;
+  line-height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination .page-item.active {
+  background-color: #1976d2;
+  color: white;
+}
+
+.pagination .page-item:not(.active):hover {
+  background-color: rgba(25, 118, 210, 0.04);
 }

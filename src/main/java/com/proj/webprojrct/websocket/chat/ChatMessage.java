@@ -28,4 +28,8 @@ public class ChatMessage {
     private String mediaPath;
     private String mediaType;
     private Date timestamp;
+    
+    @jakarta.persistence.Column(name = "is_read", nullable = false)
+    @lombok.Builder.Default
+    private Boolean isRead = false; // Mặc định là chưa đọc
 }

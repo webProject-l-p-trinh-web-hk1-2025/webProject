@@ -11,6 +11,6 @@ public class AdminCategoryController {
     @GetMapping
     public String index() {
         // return the JSP view for admin categories
-        return "category_list";
+        return "admin/category_list";
     }
 }

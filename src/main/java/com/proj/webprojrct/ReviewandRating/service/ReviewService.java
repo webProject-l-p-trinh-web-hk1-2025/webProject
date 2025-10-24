@@ -65,4 +65,44 @@ public class ReviewService {
         Optional<Review> r = reviewRepository.findById(reviewId);
         return r.map(reviewMapper::toDto);
     }
+
+    /**
+     * Get rating statistics for a product
+     * @param productId the product ID
+     * @return Map containing average rating, total reviews, and rating distribution
+     */
+    public java.util.Map<String, Object> getRatingStatistics(Long productId) {
+        java.util.Map<String, Object> stats = new java.util.HashMap<>();
+        
+        // Get average rating
+        Double avgRating = reviewRepository.getAverageRatingByProductId(productId);
+        stats.put("averageRating", avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : 0.0);
+        
+        // Get total reviews with rating
+        Long totalReviews = reviewRepository.countReviewsWithRatingByProductId(productId);
+        stats.put("totalReviews", totalReviews != null ? totalReviews : 0L);
+        
+        // Get rating distribution (count for each star rating 1-5)
+        int[] ratingDistribution = new int[5];
+        for (int i = 1; i <= 5; i++) {
+            Long count = reviewRepository.countByProductIdAndRating(productId, i);
+            ratingDistribution[i - 1] = count != null ? count.intValue() : 0;
+        }
+        stats.put("ratingDistribution", ratingDistribution);
+        
+        return stats;
+    }
+
+    /**
+     * Delete a review (admin only - authorization checked in controller)
+     * @param reviewId the review ID to delete
+     */
+    @Transactional
+    public void deleteReview(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đánh giá với ID: " + reviewId));
+        
+        // Delete will cascade to child reviews due to CascadeType.ALL
+        reviewRepository.delete(review);
+    }
 }

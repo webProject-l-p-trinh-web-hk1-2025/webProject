@@ -169,6 +169,52 @@
         </nav>
       </div>
 
+       <!-- ========== =============================================================================================== -->
+<!-- Deal Percentage Modal -->
+        <div id="dealModal" class="deal-modal" style="display: none;">
+          <div class="deal-modal-content">
+            <div class="deal-modal-header">
+              <h3> Thiết lập khuyến mãi</h3>
+              <button class="deal-modal-close" onclick="closeDealModal()">&times;</button>
+            </div>
+            <div class="deal-modal-body">
+              <p style="margin-bottom: 20px; color: #666;">Nhập phần trăm giảm giá cho sản phẩm này:</p>
+              <div class="percentage-input-group">
+                <input type="number" id="dealPercentageInput" min="0" max="100" value="10" class="percentage-input" 
+                       oninput="document.getElementById('dealPercentageSlider').value = this.value" />
+                <span class="percentage-symbol">%</span>
+              </div>
+              <div class="percentage-presets">
+                <button onclick="setPercentage(10)" class="preset-btn">10%</button>
+                <button onclick="setPercentage(20)" class="preset-btn">20%</button>
+                <button onclick="setPercentage(30)" class="preset-btn">30%</button>
+                <button onclick="setPercentage(50)" class="preset-btn">50%</button>
+              </div>
+              <div class="percentage-slider">
+                <input type="range" id="dealPercentageSlider" min="0" max="100" value="10" 
+                       oninput="document.getElementById('dealPercentageInput').value = this.value" 
+                       class="slider-input" />
+                <div class="slider-labels">
+                  <span>0%</span>
+                  <span>50%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+            </div>
+            <div class="deal-modal-footer">
+              <button onclick="closeDealModal()" class="btn-cancel">Hủy</button>
+              <button onclick="confirmDeal()" class="btn-confirm">✓ Xác nhận</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="status" class="text-muted text-center py-2"></div>
+        <nav aria-label="Page navigation">
+          <ul id="pagination" class="pagination justify-content-center"></ul>
+        </nav>
+      </div>
+
+       <!-- ========== =============================================================================================== -->
       <!-- ========== SCRIPT ========== -->
       <c:set var="ctx" value="${pageContext.request.contextPath}" />
 

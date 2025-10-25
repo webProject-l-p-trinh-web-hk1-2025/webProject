@@ -187,8 +187,8 @@
                                 <span class="badge ${user.role == 'ADMIN' ? 'badge-danger' : 'badge-success'}">${user.role}</span>
                             </td>
                             <td>
-                                <span class="badge ${user.active ? 'badge-success' : 'badge-danger'}">
-                                    ${user.active ? 'Đang hoạt động' : 'Ngưng hoạt động'}
+                                <span class="badge ${user.isActive ? 'badge-success' : 'badge-danger'}">
+                                    ${user.isActive ? 'Đang hoạt động' : 'Ngưng hoạt động'}
                                 </span>
                             </td>
                             <td>
@@ -238,9 +238,9 @@
                                         <tr>
                                             <td><label>Trạng thái:</label></td>
                                             <td>
-                                                <select name="active" style="width: 100%; padding: 5px;" required>
-                                                    <option value="true" ${user.active ? 'selected' : '' }>Đang hoạt động</option>
-                                                    <option value="false" ${!user.active ? 'selected' : '' }>Ngưng hoạt động</option>
+                                                <select name="isActive" style="width: 100%; padding: 5px;" required>
+                                                    <option value="true" ${user.isActive ? 'selected' : '' }>Đang hoạt động</option>
+                                                    <option value="false" ${!user.isActive ? 'selected' : '' }>Ngưng hoạt động</option>
                                                 </select>
                                             </td>
                                         </tr>

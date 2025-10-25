@@ -194,6 +194,11 @@ public class UserService {
         userToUpdate.setEmail(updateRequest.getEmail());
         userToUpdate.setAddress(updateRequest.getAddress());
         userToUpdate.setRole(updateRequest.getRole());
+        
+        // Cập nhật trạng thái active nếu có
+        if (updateRequest.getIsActive() != null) {
+            userToUpdate.setIsActive(updateRequest.getIsActive());
+        }
 
         userRepository.save(userToUpdate);
 

@@ -15,4 +15,5 @@ public class UserAdminUpdateRequest {
     private String fullname;
     private String email;
     private String address;
+    private Boolean isActive;
 }

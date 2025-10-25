@@ -74,7 +74,7 @@ public class AdminUserController {
             Model model, Authentication authentication) {
         try {
             userService.handleCreateUser(authentication, userCreateRequest);
-            return "redirect:/admin/users?success=Đã tạo người dùng thành công";
+            return "redirect:/admin/users";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             // reload users to show the page
@@ -93,7 +93,7 @@ public class AdminUserController {
             Model model, Authentication authentication) {
         try {
             userService.handleUpdateUser(authentication, updateRequest, userId);
-            return "redirect:/admin/users?success=Đã cập nhật người dùng thành công";
+            return "redirect:/admin/users";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             return "admin/users";
@@ -105,7 +105,7 @@ public class AdminUserController {
             Model model, Authentication authentication) {
         try {
             userService.handleDeleteUser(authentication, userId);
-            return "redirect:/admin/users?success=Đã xóa người dùng thành công";
+            return "redirect:/admin/users";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             return "redirect:/admin/users";

@@ -1,6 +1,7 @@
 package com.proj.webprojrct.admin.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import com.proj.webprojrct.document.dto.request.DocumentCreateRequest;
 import com.proj.webprojrct.document.service.DocumentService;
 import com.proj.webprojrct.product.dto.response.ProductResponse;
 import com.proj.webprojrct.product.service.ProductService;
+import com.proj.webprojrct.document.repository.DocumentRepository;
 
 import java.util.Map;
 
@@ -32,6 +34,9 @@ public class AdminDocumentController {
     
     @Autowired
     private ProductService productService;
+    
+    @Autowired
+    private DocumentRepository documentRepository;
     
       @GetMapping
     public String show(Model model) {
@@ -56,9 +61,16 @@ public class AdminDocumentController {
         model.addAttribute("document", null);
         model.addAttribute("formAction", "/admin/document/create");
         
-        // Load danh sách products để chọn
-        List<ProductResponse> products = productService.getAll();
-        model.addAttribute("products", products);
+        // Load danh sách products chưa có document
+        List<ProductResponse> allProducts = productService.getAll();
+        List<Long> productIdsWithDocuments = documentRepository.findAllProductIdsWithDocuments();
+        
+        // Lọc ra những sản phẩm chưa có document
+        List<ProductResponse> availableProducts = allProducts.stream()
+            .filter(product -> !productIdsWithDocuments.contains(product.getId()))
+            .collect(Collectors.toList());
+        
+        model.addAttribute("products", availableProducts);
         
         return "admin/document_form";
     }
@@ -89,9 +101,17 @@ public class AdminDocumentController {
         Document document = documentService.getDocument(id);
         model.addAttribute("document", document);
         
-        // Load danh sách products để chọn
-        List<ProductResponse> products = productService.getAll();
-        model.addAttribute("products", products);
+        // Load danh sách products chưa có document
+        List<ProductResponse> allProducts = productService.getAll();
+        List<Long> productIdsWithDocuments = documentRepository.findAllProductIdsWithDocuments();
+        
+        // Lọc ra những sản phẩm chưa có document, NHƯNG vẫn giữ lại sản phẩm hiện tại của document này
+        List<ProductResponse> availableProducts = allProducts.stream()
+            .filter(product -> !productIdsWithDocuments.contains(product.getId()) 
+                || product.getId().equals(document.getProductId()))
+            .collect(Collectors.toList());
+        
+        model.addAttribute("products", availableProducts);
         
         return "admin/document_form";
     }

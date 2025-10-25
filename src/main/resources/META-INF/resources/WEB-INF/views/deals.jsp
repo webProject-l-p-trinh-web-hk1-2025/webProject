@@ -413,57 +413,54 @@
                                 </c:if>
                             </div>
                             
-                            <div class="product-body" style="padding: 20px;">
-                                <p class="product-category" style="color: #d70018; font-weight: bold; margin-bottom: 10px;">
+                            <div class="product-body">
+                                <p class="product-category">
                                     ${product.category.name}
                                 </p>
-                                <h3 class="product-name" style="height: 50px; overflow: hidden; margin-bottom: 15px;">
-                                    <a href="${pageContext.request.contextPath}/product/${product.id}" 
-                                       style="color: #333; text-decoration: none; font-size: 14px; line-height: 1.4;">
+                                <h3 class="product-name">
+                                    <a href="${pageContext.request.contextPath}/product/${product.id}">
                                        ${product.name}
                                     </a>
                                 </h3>
                                 
                                 <!-- Price with original and discounted -->
-                                <div style="margin-bottom: 15px;">
-                                    <h4 class="product-price" style="margin: 0;">
-                                        <c:if test="${product.dealPercentage != null && product.dealPercentage > 0}">
-                                            <span style="color: #d70018; font-size: 18px; font-weight: bold;">
-                                                <fmt:formatNumber value="${product.price * (100 - product.dealPercentage) / 100}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
-                                            </span>
-                                            <del class="product-old-price" style="color: #999; font-size: 14px; margin-left: 10px;">
-                                                <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
-                                            </del>
-                                        </c:if>
-                                    </h4>
+                                <h4 class="product-price">
                                     <c:if test="${product.dealPercentage != null && product.dealPercentage > 0}">
-                                        <div style="color: #28a745; font-size: 12px; font-weight: bold;">
-                                            Tiết kiệm: <fmt:formatNumber value="${product.price * product.dealPercentage / 100}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
-                                        </div>
+                                        <c:set var="discountedPrice" value="${product.price * (100 - product.dealPercentage) / 100}"/>
+                                        <c:set var="savedAmount" value="${product.price - discountedPrice}"/>
+                                        <span style="color: #d70018; font-size: 18px; font-weight: bold;">
+                                            <fmt:formatNumber value="${discountedPrice}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                        </span>
+                                        <br>
+                                        <del style="color: #999; font-size: 14px;">
+                                            <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                        </del>
+                                        <span style="color: #ff4444; font-size: 12px; margin-left: 5px; font-weight: bold; background: #ffe8e8; padding: 1px 5px; border-radius: 3px;">
+                                            -${product.dealPercentage}%
+                                        </span>
+                                        <br>
+                                        <span style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
+                                            Tiết kiệm <fmt:formatNumber value="${savedAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                        </span>
                                     </c:if>
+                                </h4>
+                                
+                                <div class="product-rating">
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star-o"></i>
                                 </div>
                                 
-                                <div class="product-rating" style="margin-bottom: 15px;">
-                                    <i class="fa fa-star" style="color: #ffc107;"></i>
-                                    <i class="fa fa-star" style="color: #ffc107;"></i>
-                                    <i class="fa fa-star" style="color: #ffc107;"></i>
-                                    <i class="fa fa-star" style="color: #ffc107;"></i>
-                                    <i class="fa fa-star-o" style="color: #ddd;"></i>
-                                    <span style="color: #666; font-size: 12px; margin-left: 5px;">
-                                        (${50 + status.index * 3} đánh giá)
-                                    </span>
-                                </div>
-                                
-                                <div class="product-btns" style="margin-bottom: 15px;">
+                                <div class="product-btns">
                                     <button class="add-to-wishlist" data-product-id="${product.id}"
-                                        onclick="toggleFavorite(${product.id}, this)"
-                                        style="background: none; border: 1px solid #ddd; padding: 8px; border-radius: 5px; margin-right: 5px;">
+                                        onclick="toggleFavorite(${product.id}, this)">
                                         <i class="fa fa-heart-o"></i>
                                         <span class="tooltipp">Yêu thích</span>
                                     </button>
                                     <a href="${pageContext.request.contextPath}/product/${product.id}"
-                                       class="quick-view"
-                                       style="background: none; border: 1px solid #ddd; padding: 8px; border-radius: 5px; color: #333; text-decoration: none;">
+                                       class="quick-view">
                                         <i class="fa fa-eye"></i>
                                         <span class="tooltipp">Xem chi tiết</span>
                                     </a>
@@ -474,14 +471,12 @@
                                 <c:choose>
                                     <c:when test="${product.stock > 0}">
                                         <button class="add-to-cart-btn" data-product-id="${product.id}"
-                                            onclick="addToCart(${product.id})"
-                                            style="width: 100%; background: linear-gradient(45deg, #d70018, #ff6b6b); border: none; color: white; padding: 12px; font-weight: bold; border-radius: 0;">
+                                            onclick="addToCart(${product.id})">
                                             <i class="fa fa-shopping-cart"></i> THÊM VÀO GIỎ
                                         </button>
                                     </c:when>
                                     <c:otherwise>
-                                        <button class="add-to-cart-btn" disabled
-                                            style="width: 100%; background: #999; border: none; color: white; padding: 12px; border-radius: 0;">
+                                        <button class="add-to-cart-btn" disabled>
                                             <i class="fa fa-ban"></i> HẾT HÀNG
                                         </button>
                                     </c:otherwise>

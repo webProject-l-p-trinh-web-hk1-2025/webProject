@@ -138,9 +138,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                   <tr>
                     <th style="width: 60px">ID</th>
                     <th>Tiêu đề</th>
-                    <th>Mô tả</th>
-                    <th>ID Sản phẩm</th>
-                    <th>Hình ảnh</th>
+                    <th>Sản phẩm</th>
                     <th style="width: 120px">Thao tác</th>
                   </tr>
                 </thead>
@@ -150,38 +148,13 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                       <td>${doc.id}</td>
                       <td>${doc.title}</td>
                       <td>
-                        <div style="max-height: 100px; overflow: auto">
-                          <c:out value="${doc.description}" escapeXml="false" />
-                        </div>
-                      </td>
-                      <td>${doc.productId}</td>
-                      <td>
-                        <div class="img-gallery">
-                          <c:forEach
-                            var="img"
-                            items="${doc.images}"
-                            begin="0"
-                            end="2"
-                          >
-                            <img
-                              src="${pageContext.request.contextPath}${img.imageUrl}"
-                              alt="Image"
-                            />
-                          </c:forEach>
-                          <c:if test="${doc.images.size() > 3}">
-                            <div class="more-images">
-                              +${doc.images.size() - 3}
-                            </div>
+                        <c:forEach var="product" items="${products}">
+                          <c:if test="${product.id == doc.productId}">
+                            ${product.name} (ID: ${doc.productId})
                           </c:if>
-                        </div>
+                        </c:forEach>
                       </td>
                       <td>
-                        <a
-                          href="${pageContext.request.contextPath}/admin/document/${doc.id}"
-                          class="btn btn-view"
-                        >
-                          <i class="fas fa-eye"></i>
-                        </a>
                         <a
                           href="${pageContext.request.contextPath}/admin/document/edit/${doc.id}"
                           class="btn btn-edit"

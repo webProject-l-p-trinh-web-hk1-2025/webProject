@@ -1,4 +1,4 @@
-package com.proj.webprojrct.ReviewandRating.service;
+package com.proj.webprojrct.reviewandrating.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -6,13 +6,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.proj.webprojrct.ReviewandRating.dto.request.ReviewRequest;
-import com.proj.webprojrct.ReviewandRating.dto.response.ReviewResponse;
-import com.proj.webprojrct.ReviewandRating.entity.Review;
-import com.proj.webprojrct.ReviewandRating.mapper.ReviewMapper;
-import com.proj.webprojrct.ReviewandRating.repository.ReviewRepository;
 import com.proj.webprojrct.user.repository.UserRepository;
 import com.proj.webprojrct.product.repository.ProductRepository;
+import com.proj.webprojrct.reviewandrating.dto.request.ReviewRequest;
+import com.proj.webprojrct.reviewandrating.dto.response.ReviewResponse;
+import com.proj.webprojrct.reviewandrating.entity.Review;
+import com.proj.webprojrct.reviewandrating.mapper.ReviewMapper;
+import com.proj.webprojrct.reviewandrating.repository.ReviewRepository;
 
 import java.util.Optional;
 

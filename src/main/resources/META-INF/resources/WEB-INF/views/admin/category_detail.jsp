@@ -101,6 +101,10 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
             <div class="card-body">
               <h3 id="name"></h3>
               <p id="description" style="color: #6c757d"></p>
+              <p
+                id="parentCategory"
+                style="color: #6c757d; font-style: italic"
+              ></p>
               <div style="display: flex; gap: 10px; margin-top: 15px">
                 <a id="editBtn" class="btn btn-primary">
                   <i class="fas fa-edit"></i> Sửa
@@ -210,13 +214,35 @@ contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
             Promise.all([
               fetch(api + "/" + id).then((r) => r.json()),
               fetch(ctx + "/api/products").then((r) => r.json()),
+              fetch(api).then((r) => r.json()), // Load all categories for parent lookup
             ])
-              .then(([category, allProducts]) => {
+              .then(([category, allProducts, allCategories]) => {
                 // Update category info
                 document.getElementById("name").textContent =
                   category.name || "";
                 document.getElementById("description").textContent =
                   category.description || "Không có mô tả";
+
+                // Display parent category if exists
+                const parentCategoryElement =
+                  document.getElementById("parentCategory");
+                if (category.parentId) {
+                  const parentCat = allCategories.find(
+                    (c) => c.id === category.parentId
+                  );
+                  if (parentCat) {
+                    parentCategoryElement.innerHTML =
+                      '<i class="fas fa-folder"></i> Danh mục cha: <strong>' +
+                      parentCat.name +
+                      "</strong>";
+                  } else {
+                    parentCategoryElement.textContent = "";
+                  }
+                } else {
+                  parentCategoryElement.innerHTML =
+                    '<i class="fas fa-folder"></i> Đây là danh mục gốc';
+                }
+
                 document.getElementById("editBtn").href =
                   ctx + "/admin/categories/edit/" + category.id;
                 document.title = category.name + " - Chi tiết danh mục";

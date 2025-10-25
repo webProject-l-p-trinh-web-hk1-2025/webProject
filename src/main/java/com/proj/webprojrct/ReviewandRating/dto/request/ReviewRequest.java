@@ -1,4 +1,4 @@
-package com.proj.webprojrct.ReviewandRating.dto.request;
+package com.proj.webprojrct.reviewandrating.dto.request;
 
 import lombok.*;
 import jakarta.validation.constraints.Max;

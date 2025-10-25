@@ -22,7 +22,7 @@ import java.util.List;
 public class ProductPageController {
 
     private final ProductService productService;
-    
+
     @Autowired
     private CategoryService categoryService;
 
@@ -34,43 +34,36 @@ public class ProductPageController {
     // @GetMapping("/product_list")
     // public String list() {
     //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
     //     if (authentication == null || !authentication.isAuthenticated()
     //             || authentication instanceof AnonymousAuthenticationToken) {
     //         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
     //     }
     //     return "product_list";
     // }
-
     //admin
     // @GetMapping("/product_detail")
     // public String detail(Model model) {
     //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
     //     if (authentication == null || !authentication.isAuthenticated()
     //             || authentication instanceof AnonymousAuthenticationToken) {
     //         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
     //     }
     //     return "product_detail";
     // }
-
     // //admin
     // @GetMapping("/admin/products/edit")
     // public String edit() {
     //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
     //     if (authentication == null || !authentication.isAuthenticated()
     //             || authentication instanceof AnonymousAuthenticationToken) {
     //         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
     //     }
     //     return "product_edit";
     // }
-
     // //admin
     // @GetMapping("/admin/products/edit/{id}")
     // public String editById(@PathVariable Long id, Model model) {
     //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
     //     if (authentication == null || !authentication.isAuthenticated()
     //             || authentication instanceof AnonymousAuthenticationToken) {
     //         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
@@ -79,58 +72,61 @@ public class ProductPageController {
     //     model.addAttribute("product", p);
     //     return "product_edit";
     // }
-
     @GetMapping("/shop")
-    public String shop(@RequestParam(required = false) List<Long> category, 
-                      @RequestParam(required = false) List<String> brand,
-                      @RequestParam(required = false) String name,
-                      @RequestParam(required = false, defaultValue = "popular") String sort,
-                      @RequestParam(required = false, defaultValue = "12") int limit,
-                      @RequestParam(required = false, defaultValue = "1") int page,
-                      Model model) {
+    public String shop(@RequestParam(required = false) List<Long> category,
+            @RequestParam(required = false) List<String> brand,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false, defaultValue = "popular") String sort,
+            @RequestParam(required = false, defaultValue = "12") int limit,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            Model model) {
         try {
             List<ProductResponse> products = productService.getAll();
-            
+
             // Lọc theo tên sản phẩm (search) với fuzzy matching
             if (name != null && !name.trim().isEmpty()) {
                 String searchTerm = name.trim().toLowerCase();
                 String[] searchWords = searchTerm.split("\\s+");
-                
+
                 products = products.stream()
-                    .filter(p -> {
-                        if (p.getName() == null) return false;
-                        String productName = p.getName().toLowerCase();
-                        
-                        // Exact match
-                        if (productName.contains(searchTerm)) return true;
-                        
-                        // Check if any search word is in product name
-                        for (String word : searchWords) {
-                            if (word.length() >= 2 && productName.contains(word)) {
+                        .filter(p -> {
+                            if (p.getName() == null) {
+                                return false;
+                            }
+                            String productName = p.getName().toLowerCase();
+
+                            // Exact match
+                            if (productName.contains(searchTerm)) {
                                 return true;
                             }
-                        }
-                        
-                        // Fuzzy matching for typos
-                        return isFuzzyMatch(productName, searchTerm);
-                    })
-                    .collect(java.util.stream.Collectors.toList());
+
+                            // Check if any search word is in product name
+                            for (String word : searchWords) {
+                                if (word.length() >= 2 && productName.contains(word)) {
+                                    return true;
+                                }
+                            }
+
+                            // Fuzzy matching for typos
+                            return isFuzzyMatch(productName, searchTerm);
+                        })
+                        .collect(java.util.stream.Collectors.toList());
             }
-            
+
             // Lọc theo categories (có thể chọn nhiều)
             if (category != null && !category.isEmpty()) {
                 products = products.stream()
-                    .filter(p -> p.getCategory() != null && category.contains(p.getCategory().getId()))
-                    .collect(java.util.stream.Collectors.toList());
+                        .filter(p -> p.getCategory() != null && category.contains(p.getCategory().getId()))
+                        .collect(java.util.stream.Collectors.toList());
             }
-            
+
             // Lọc theo brands (có thể chọn nhiều)
             if (brand != null && !brand.isEmpty()) {
                 products = products.stream()
-                    .filter(p -> p.getBrand() != null && brand.contains(p.getBrand()))
-                    .collect(java.util.stream.Collectors.toList());
+                        .filter(p -> p.getBrand() != null && brand.contains(p.getBrand()))
+                        .collect(java.util.stream.Collectors.toList());
             }
-            
+
             // Sắp xếp
             java.util.Comparator<ProductResponse> comparator = null;
             switch (sort) {
@@ -146,32 +142,36 @@ public class ProductPageController {
                     comparator = java.util.Comparator.comparing(ProductResponse::getId).reversed();
                     break;
             }
-            
+
             if (comparator != null) {
                 products = products.stream()
-                    .sorted(comparator)
-                    .collect(java.util.stream.Collectors.toList());
+                        .sorted(comparator)
+                        .collect(java.util.stream.Collectors.toList());
             }
-            
+
             // Tính toán phân trang
             int totalProducts = products.size();
             int totalPages = (int) Math.ceil((double) totalProducts / limit);
-            
+
             // Đảm bảo page không vượt quá số trang
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
-            
+            if (page < 1) {
+                page = 1;
+            }
+            if (page > totalPages && totalPages > 0) {
+                page = totalPages;
+            }
+
             // Lấy products cho trang hiện tại
             int startIndex = (page - 1) * limit;
             int endIndex = Math.min(startIndex + limit, totalProducts);
-            
+
             List<ProductResponse> paginatedProducts;
             if (startIndex < totalProducts) {
                 paginatedProducts = products.subList(startIndex, endIndex);
             } else {
                 paginatedProducts = java.util.Collections.emptyList();
             }
-            
+
             model.addAttribute("products", paginatedProducts);
             model.addAttribute("categories", categoryService.getAll());
             model.addAttribute("brands", productService.getAllBrands());
@@ -232,21 +232,32 @@ public class ProductPageController {
             // Loại bỏ chính sản phẩm đang xem
             versionProducts.removeIf(p -> p.getId().equals(product.getId()));
         }
+
+        List<ProductResponse> sameProducts = new java.util.ArrayList<>();
+        // Sản phẩm cùng thương hiệu
+        if (product.getBrand() != null) {
+            List<ProductResponse> allProducts = productService.getAll();
+            for (ProductResponse p : allProducts) {
+                if (product.getBrand().equals(p.getBrand()) && !p.getId().equals(product.getId())) {
+                    sameProducts.add(p);
+                }
+            }
+        }
+        model.addAttribute("sameProducts", sameProducts);
         model.addAttribute("versionProducts", versionProducts);
 
         return "product_detail";
     }
 
-    
     @GetMapping("/deals")
     public String deals(Model model) {
         try {
             // Get all products with onDeal=true
             List<ProductResponse> allProducts = productService.getAll();
             List<ProductResponse> dealProducts = allProducts.stream()
-                .filter(p -> p.getOnDeal() != null && p.getOnDeal())
-                .collect(java.util.stream.Collectors.toList());
-            
+                    .filter(p -> p.getOnDeal() != null && p.getOnDeal())
+                    .collect(java.util.stream.Collectors.toList());
+
             model.addAttribute("products", dealProducts);
             model.addAttribute("categories", categoryService.getAll());
         } catch (Exception e) {
@@ -254,20 +265,21 @@ public class ProductPageController {
         }
         return "deals";
     }
-    
+
     // Helper method for fuzzy matching
     private boolean isFuzzyMatch(String productName, String searchTerm) {
-        if (searchTerm.length() < 3) return false;
-        
+        if (searchTerm.length() < 3) {
+            return false;
+        }
+
         int searchIndex = 0;
         for (int i = 0; i < productName.length() && searchIndex < searchTerm.length(); i++) {
             if (productName.charAt(i) == searchTerm.charAt(searchIndex)) {
                 searchIndex++;
             }
         }
-        
+
         // If we matched at least 70% of search term characters
         return searchIndex >= (searchTerm.length() * 0.7);
     }
 }
-

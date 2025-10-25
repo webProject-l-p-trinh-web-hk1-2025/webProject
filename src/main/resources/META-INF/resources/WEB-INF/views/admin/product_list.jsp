@@ -274,7 +274,7 @@
             // reflect current filters and page in the browser URL (so reload/back preserves state)
             try {
               const params = buildQueryParams(page);
-              const listPath = ctx + '/products_list';
+              const listPath = ctx + '/admin/products';
               const newUrl = listPath + '?' + params.toString();
               history.replaceState(null, '', newUrl);
             } catch (e) {

@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,22 +42,43 @@ public class AdminDocumentController {
     @Autowired
     private DocumentRepository documentRepository;
     
-      @GetMapping
-    public String show(Model model) {
-        List<Document> documents = documentService.getAllDocuments();
+    @GetMapping
+    public String show(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "sort", defaultValue = "id,asc") String sort,
+            Model model) {
+        
+        // Parse sort parameter
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams.length > 0 ? sortParams[0] : "id";
+        String sortDir = sortParams.length > 1 ? sortParams[1] : "asc";
+        
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+        
+        Page<Document> documentPage = documentService.getPagedDocuments(pageable, title);
         List<ProductResponse> products = productService.getAll();
-        model.addAttribute("documents", documents);
+        
+        model.addAttribute("documents", documentPage);
         model.addAttribute("products", products);
+        
+        // Add filter parameters to model
+        if (title != null) model.addAttribute("filterTitle", title);
+        model.addAttribute("filterSort", sort);
+        
         return "admin/document_list";
     }
 
     @GetMapping({"/all", "/list"})
-    public String showAllDocuments(Model model) {
-        List<Document> documents = documentService.getAllDocuments();
-        List<ProductResponse> products = productService.getAll();
-        model.addAttribute("documents", documents);
-        model.addAttribute("products", products);
-        return "admin/document_list";
+    public String showAllDocuments(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "sort", defaultValue = "id,asc") String sort,
+            Model model) {
+        return show(page, size, title, sort, model);
     }
 
     @GetMapping({"/create", "/new"})

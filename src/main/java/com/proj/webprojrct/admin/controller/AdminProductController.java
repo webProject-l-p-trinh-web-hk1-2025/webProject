@@ -8,6 +8,7 @@ import com.proj.webprojrct.storage.service.ProductStorageService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,8 +35,29 @@ public class AdminProductController {
 
     //admin
     @GetMapping
-    public String products(Model model) {
-        return "admin/product_list";
+    public String products(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "brand", required = false) String brand,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
+            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
+            @RequestParam(value = "sort", defaultValue = "id,asc") String sort,
+            Model model) {
+        
+        // Use service search method for pagination
+        Page<ProductResponse> productPage = productService.search(brand, name, minPrice, maxPrice, page, size, sort);
+        
+        model.addAttribute("products", productPage);
+        
+        // Add filter parameters to model
+        if (brand != null) model.addAttribute("filterBrand", brand);
+        if (name != null) model.addAttribute("filterName", name);
+        if (minPrice != null) model.addAttribute("filterMinPrice", minPrice);
+        if (maxPrice != null) model.addAttribute("filterMaxPrice", maxPrice);
+        model.addAttribute("filterSort", sort);
+        
+        return "admin/product_list_new";
     }
 
     // Trang form thêm mới

@@ -258,101 +258,11 @@
                 </tbody>
             </table>
             
-                <!-- Pagination controls -->
-            <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                <!-- Left side: Empty space or info text -->
-                <div style="min-width: 150px;">
-                    <span style="color: #666;">Tổng: ${users.totalElements} người dùng</span>
-                </div>
-                
-                <!-- Center: Pagination -->
-                <div style="display: flex; justify-content: center;">
-                    <ul class="pagination" style="display: flex; list-style: none; padding: 0; margin: 0;">
-                        <c:choose>
-                            <c:when test="${users.first}">
-                                <li style="margin: 0 2px;">
-                                    <a href="#" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #aaa; cursor: not-allowed;">
-                                        <i class="fas fa-angle-double-left"></i>
-                                    </a>
-                                </li>
-                                <li style="margin: 0 2px;">
-                                    <a href="#" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #aaa; cursor: not-allowed;">
-                                        <i class="fas fa-angle-left"></i>
-                                    </a>
-                                </li>
-                            </c:when>
-                            <c:otherwise>
-                                <li style="margin: 0 2px;">
-                                    <a href="?page=0&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
-                                        <i class="fas fa-angle-double-left"></i>
-                                    </a>
-                                </li>
-                                <li style="margin: 0 2px;">
-                                    <a href="?page=${users.number - 1}&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
-                                        <i class="fas fa-angle-left"></i>
-                                    </a>
-                                </li>
-                            </c:otherwise>
-                        </c:choose>
-                        
-                        <c:forEach begin="${Math.max(0, users.number - 2)}" end="${Math.min(users.totalPages - 1, users.number + 2)}" var="i">
-                            <c:choose>
-                                <c:when test="${i == users.number}">
-                                    <li style="margin: 0 2px;">
-                                        <a href="?page=${i}&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; background-color: #007bff; color: white;">
-                                            ${i + 1}
-                                        </a>
-                                    </li>
-                                </c:when>
-                                <c:otherwise>
-                                    <li style="margin: 0 2px;">
-                                        <a href="?page=${i}&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
-                                            ${i + 1}
-                                        </a>
-                                    </li>
-                                </c:otherwise>
-                            </c:choose>
-                        </c:forEach>
-                        
-                        <c:choose>
-                            <c:when test="${users.last}">
-                                <li style="margin: 0 2px;">
-                                    <a href="#" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #aaa; cursor: not-allowed;">
-                                        <i class="fas fa-angle-right"></i>
-                                    </a>
-                                </li>
-                                <li style="margin: 0 2px;">
-                                    <a href="#" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #aaa; cursor: not-allowed;">
-                                        <i class="fas fa-angle-double-right"></i>
-                                    </a>
-                                </li>
-                            </c:when>
-                            <c:otherwise>
-                                <li style="margin: 0 2px;">
-                                    <a href="?page=${users.number + 1}&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
-                                        <i class="fas fa-angle-right"></i>
-                                    </a>
-                                </li>
-                                <li style="margin: 0 2px;">
-                                    <a href="?page=${users.totalPages - 1}&size=${users.size}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
-                                        <i class="fas fa-angle-double-right"></i>
-                                    </a>
-                                </li>
-                            </c:otherwise>
-                        </c:choose>
-                    </ul>
-                </div>
-                
-                <!-- Right side: Page size selector -->
-                <div>
-                    <select id="pageSizeSelector" onchange="changePageSize(this.value)" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
-                        <option value="5" ${users.size == 5 ? 'selected' : ''}>5 dòng</option>
-                        <option value="10" ${users.size == 10 ? 'selected' : ''}>10 dòng</option>
-                        <option value="20" ${users.size == 20 ? 'selected' : ''}>20 dòng</option>
-                        <option value="50" ${users.size == 50 ? 'selected' : ''}>50 dòng</option>
-                    </select>
-                </div>
-            </div>                            </div>
+            <!-- Pagination -->
+            <c:set var="page" value="${users}" scope="request"/>
+            <c:set var="additionalParams" value="${filterPhone != null ? '&phone='.concat(filterPhone) : ''}${filterFullname != null ? '&fullname='.concat(filterFullname) : ''}${filterEmail != null ? '&email='.concat(filterEmail) : ''}${filterRole != null ? '&role='.concat(filterRole) : ''}${filterActive != null ? '&active='.concat(filterActive) : ''}" scope="request"/>
+            <jsp:include page="/common/pagination.jsp"/>
+                                        </div>
                         </div>
                     </div>
                 </div>
@@ -467,52 +377,6 @@
                     // update on resize
                     window.addEventListener('resize', apply);
                 })();
-                
-                // Hàm chuyển đổi kích thước trang
-                function changePageSize(size) {
-                    const url = new URL(window.location);
-                    url.searchParams.set('size', size);
-                    url.searchParams.set('page', '0'); // Reset về trang đầu tiên khi thay đổi kích thước
-                    window.location.href = url.toString();
-                }
-                
-                // Kiểm tra thông báo thành công từ URL
-                document.addEventListener('DOMContentLoaded', function() {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const successMsg = urlParams.get('success');
-                    if (successMsg) {
-                        const alertDiv = document.createElement('div');
-                        alertDiv.className = 'alert alert-success';
-                        alertDiv.style.padding = '12px';
-                        alertDiv.style.background = '#e8f5e9';
-                        alertDiv.style.color = '#2e7d32';
-                        alertDiv.style.marginBottom = '15px';
-                        alertDiv.style.borderRadius = '4px';
-                        
-                        const icon = document.createElement('i');
-                        icon.className = 'fas fa-check-circle';
-                        alertDiv.appendChild(icon);
-                        
-                        alertDiv.appendChild(document.createTextNode(' ' + successMsg));
-                        
-                        // Insert after page-title
-                        const pageTitle = document.querySelector('.page-title');
-                        pageTitle.parentNode.insertBefore(alertDiv, pageTitle.nextSibling);
-                        
-                        // Auto-hide after 5 seconds
-                        setTimeout(function() {
-                            alertDiv.style.opacity = '0';
-                            alertDiv.style.transition = 'opacity 1s';
-                            setTimeout(function() {
-                                alertDiv.remove();
-                                // Remove success parameter from URL without page reload
-                                const url = new URL(window.location);
-                                url.searchParams.delete('success');
-                                window.history.replaceState({}, '', url);
-                            }, 1000);
-                        }, 5000);
-                    }
-                });
             </script>
 
         </body>

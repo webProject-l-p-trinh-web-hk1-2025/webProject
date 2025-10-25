@@ -109,15 +109,22 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                 placeholder="Tìm theo tiêu đề"
                 type="text"
                 autocomplete="off"
+                value="${filterTitle}"
               />
             </div>
             <div class="filter-group">
               <label>Sắp xếp</label>
               <select id="sort" class="filter-input">
-                <option value="createdAt,desc">Mới nhất</option>
-                <option value="title,asc">Tiêu đề: A → Z</option>
-                <option value="title,desc">Tiêu đề: Z → A</option>
+                <option value="id,asc" ${filterSort == 'id,asc' ? 'selected' : ''}>ID: Thấp → Cao</option>
+                <option value="id,desc" ${filterSort == 'id,desc' ? 'selected' : ''}>ID: Cao → Thấp</option>
+                <option value="title,asc" ${filterSort == 'title,asc' ? 'selected' : ''}>Tiêu đề: A → Z</option>
+                <option value="title,desc" ${filterSort == 'title,desc' ? 'selected' : ''}>Tiêu đề: Z → A</option>
               </select>
+            </div>
+            <div class="filter-group" style="justify-content: flex-end;">
+              <button id="searchBtn" class="btn btn-primary" style="margin-top: auto;" onclick="applyFilters()">
+                <i class="fas fa-search"></i> Tìm kiếm
+              </button>
             </div>
           </div>
 
@@ -139,11 +146,11 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                     <th style="width: 60px">ID</th>
                     <th>Tiêu đề</th>
                     <th>Sản phẩm</th>
-                    <th style="width: 120px">Thao tác</th>
+                    <th style="width: 200px">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <c:forEach var="doc" items="${documents}">
+                  <c:forEach var="doc" items="${documents.content}">
                     <tr>
                       <td>${doc.id}</td>
                       <td>${doc.title}</td>
@@ -158,10 +165,16 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                         <a
                           href="${pageContext.request.contextPath}/admin/document/edit/${doc.id}"
                           class="btn btn-edit"
+                          title="Sửa"
                         >
                           <i class="fas fa-edit"></i>
                         </a>
-                        <a href="#" class="btn btn-delete" data-id="${doc.id}">
+                        <a
+                          href="${pageContext.request.contextPath}/admin/document/delete/${doc.id}"
+                          class="btn btn-delete"
+                          onclick="return confirm('Bạn có chắc chắn muốn xóa tài liệu này?')"
+                          title="Xóa"
+                        >
                           <i class="fas fa-trash"></i>
                         </a>
                       </td>
@@ -169,111 +182,66 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                   </c:forEach>
                 </tbody>
               </table>
+              
+              <!-- Pagination -->
+              <c:set var="page" value="${documents}" scope="request"/>
+              <c:set var="additionalParams" value="${filterTitle != null ? '&title='.concat(filterTitle) : ''}${filterSort != null ? '&sort='.concat(filterSort) : ''}" scope="request"/>
+              <jsp:include page="/common/pagination.jsp"/>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Script for document list handling -->
+    <!-- WebSocket libraries for chat notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script src="<c:url value='/js/admin-chat-notifications.js'/>"></script>
+    
     <script>
-      // Document ready handler
-      document.addEventListener("DOMContentLoaded", function () {
-        // Toggle sidebar
-        const navToggle = document.getElementById("navToggle");
-        const sidebar = document.getElementById("sidebar");
+      // Toggle sidebar
+      const navToggle = document.getElementById("navToggle");
+      const sidebar = document.getElementById("sidebar");
 
-        if (navToggle) {
-          navToggle.addEventListener("click", function () {
-            sidebar.classList.toggle("collapsed");
-          });
-        }
-
-        // Filter functionality
-        const titleInput = document.getElementById("title");
-        const sortSelect = document.getElementById("sort");
-        const showAllBtn = document.getElementById("showAllBtn");
-
-        // Add filtering logic here
-        if (titleInput && sortSelect) {
-          titleInput.addEventListener("input", applyFilters);
-          sortSelect.addEventListener("change", applyFilters);
-        }
-
-        if (showAllBtn) {
-          showAllBtn.addEventListener("click", function () {
-            if (titleInput) titleInput.value = "";
-            if (sortSelect) sortSelect.value = "createdAt,desc";
-            applyFilters();
-          });
-        }
-
-        function applyFilters() {
-          const titleFilter = (titleInput?.value || "").toLowerCase().trim();
-          const sortValue = sortSelect?.value || "createdAt,desc";
-          const [sortField, sortOrder] = sortValue.split(",");
-
-          const table = document.querySelector("table tbody");
-          if (!table) return;
-
-          const rows = Array.from(table.querySelectorAll("tr"));
-
-          // Filter rows
-          rows.forEach((row) => {
-            if (!titleFilter) {
-              row.style.display = "";
-              return;
-            }
-
-            const titleCell = row.cells[1]; // Tiêu đề is column 2
-            const titleText = (titleCell?.textContent || "").toLowerCase();
-
-            if (titleText.includes(titleFilter)) {
-              row.style.display = "";
-            } else {
-              row.style.display = "none";
-            }
-          });
-
-          // Sort visible rows
-          const visibleRows = rows.filter(
-            (row) => row.style.display !== "none"
-          );
-          visibleRows.sort((a, b) => {
-            let valA, valB;
-
-            if (sortField === "title") {
-              valA = (a.cells[1]?.textContent || "").toLowerCase();
-              valB = (b.cells[1]?.textContent || "").toLowerCase();
-            } else if (sortField === "createdAt") {
-              // Assuming column 3 or similar has date - adjust as needed
-              valA = a.cells[0]?.textContent || "0"; // ID as proxy for creation order
-              valB = b.cells[0]?.textContent || "0";
-            }
-
-            if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-            if (valA > valB) return sortOrder === "asc" ? 1 : -1;
-            return 0;
-          });
-
-          // Re-append sorted rows
-          visibleRows.forEach((row) => table.appendChild(row));
-        }
-
-        // Delete confirmation
-        const deleteButtons = document.querySelectorAll(".btn-delete");
-        deleteButtons.forEach((button) => {
-          button.addEventListener("click", function (e) {
-            e.preventDefault();
-            const id = this.getAttribute("data-id");
-            if (confirm("Bạn có chắc chắn muốn xóa tài liệu này?")) {
-              // Perform delete action, typically with AJAX or form submission
-              window.location.href =
-                `${pageContext.request.contextPath}/admin/document/delete/` +
-                id;
-            }
-          });
+      if (navToggle) {
+        navToggle.addEventListener("click", function () {
+          sidebar.classList.toggle("collapsed");
         });
+      }
+
+      // Filter functionality
+      function applyFilters() {
+        const title = document.getElementById('title').value.trim();
+        const sort = document.getElementById('sort').value;
+        
+        const url = new URL(window.location);
+        url.searchParams.set('page', '0'); // Reset to first page
+        url.searchParams.set('size', url.searchParams.get('size') || '10');
+        
+        if (title) {
+          url.searchParams.set('title', title);
+        } else {
+          url.searchParams.delete('title');
+        }
+        
+        url.searchParams.set('sort', sort);
+        
+        window.location.href = url.toString();
+      }
+
+      // Show all button
+      const showAllBtn = document.getElementById("showAllBtn");
+      if (showAllBtn) {
+        showAllBtn.addEventListener("click", function () {
+          window.location.href = '${pageContext.request.contextPath}/admin/document?page=0&size=10&sort=id,asc';
+        });
+      }
+      
+      // Enter key to search
+      document.getElementById('title').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          applyFilters();
+        }
       });
     </script>
   </body>

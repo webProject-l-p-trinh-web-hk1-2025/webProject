@@ -3,6 +3,8 @@ package com.proj.webprojrct.category.service;
 import com.proj.webprojrct.category.dto.CategoryDto;
 import com.proj.webprojrct.category.entity.Category;
 import com.proj.webprojrct.category.repository.CategoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +62,17 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryDto> getAll() {
         return repo.findAll().stream().map(this::map).collect(Collectors.toList());
+    }
+    
+    @Override
+    public Page<CategoryDto> getPagedCategories(Pageable pageable, String name) {
+        Page<Category> categoryPage;
+        if (name != null && !name.trim().isEmpty()) {
+            categoryPage = repo.findByNameContainingIgnoreCase(name, pageable);
+        } else {
+            categoryPage = repo.findAll(pageable);
+        }
+        return categoryPage.map(this::map);
     }
 
     private CategoryDto map(Category c) {

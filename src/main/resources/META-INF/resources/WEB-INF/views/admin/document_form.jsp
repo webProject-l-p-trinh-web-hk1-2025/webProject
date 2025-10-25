@@ -25,21 +25,40 @@
                 /* -- HẾT CSS MỚI -- */
 
                 .btn {
-                    padding: 6px 12px;
+                    padding: 8px 16px;
                     border: none;
                     border-radius: 4px;
                     cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    text-decoration: none;
+                    transition: all 0.2s;
                 }
 
                 .btn-save {
-                    background-color: #4CAF50;
+                    background-color: #43a047;
                     color: white;
                 }
 
+                .btn-save:hover {
+                    background-color: #388e3c;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 8px rgba(67, 160, 71, 0.3);
+                }
+
                 .btn-cancel {
-                    background-color: #f44336;
+                    background-color: #e53935;
                     color: white;
                     text-decoration: none;
+                }
+
+                .btn-cancel:hover {
+                    background-color: #d32f2f;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 8px rgba(229, 57, 53, 0.3);
                 }
 
                 .img-preview img {

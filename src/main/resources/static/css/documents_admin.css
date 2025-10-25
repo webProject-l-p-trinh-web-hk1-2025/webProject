@@ -73,11 +73,18 @@ tbody tr:hover {
   font-size: 14px;
   border-radius: 4px;
   cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: all 0.2s;
   border: none;
   margin-right: 5px;
   text-decoration: none;
+  font-weight: 500;
+}
+
+.btn i {
+  font-size: 14px;
 }
 
 .btn-primary {
@@ -87,19 +94,41 @@ tbody tr:hover {
 
 .btn-primary:hover {
   background-color: #1565c0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
 }
 
-.btn-success,
-.btn-edit,
-.btn-view {
+.btn-success {
   background-color: #43a047;
   color: white;
 }
 
-.btn-success:hover,
-.btn-edit:hover,
-.btn-view:hover {
+.btn-success:hover {
   background-color: #388e3c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(67, 160, 71, 0.3);
+}
+
+.btn-view {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.btn-view:hover {
+  background-color: #138496;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+.btn-edit {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.btn-edit:hover {
+  background-color: #e0a800;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
 }
 
 .btn-warning {
@@ -120,6 +149,8 @@ tbody tr:hover {
 .btn-danger:hover,
 .btn-delete:hover {
   background-color: #d32f2f;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(229, 57, 53, 0.3);
 }
 
 .btn-outline {

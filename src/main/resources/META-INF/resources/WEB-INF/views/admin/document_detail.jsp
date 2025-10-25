@@ -96,7 +96,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
               </a>
               <a
                 href="${pageContext.request.contextPath}/admin/document/edit/${document.id}"
-                class="btn btn-primary"
+                class="btn btn-edit"
               >
                 <i class="fas fa-edit"></i> Chỉnh sửa
               </a>
@@ -160,14 +160,14 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
           <div class="actions">
             <a
               href="${pageContext.request.contextPath}/admin/document/edit/${document.id}"
-              class="btn btn-primary"
+              class="btn btn-edit"
             >
               <i class="fas fa-edit"></i> Chỉnh sửa
             </a>
             <a
               href="#"
               id="deleteBtn"
-              class="btn btn-danger"
+              class="btn btn-delete"
               data-id="${document.id}"
             >
               <i class="fas fa-trash"></i> Xóa

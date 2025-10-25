@@ -7,6 +7,8 @@ import com.proj.webprojrct.document.repository.DocumentRepository;
 import com.proj.webprojrct.storage.service.DocumentStorageService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -161,5 +163,12 @@ public class DocumentService {
         
         // Xóa document (cascade sẽ xóa images trong DB)
         documentRepository.delete(document);
+    }
+    
+    public Page<Document> getPagedDocuments(Pageable pageable, String title) {
+        if (title != null && !title.trim().isEmpty()) {
+            return documentRepository.findByTitleContainingIgnoreCase(title, pageable);
+        }
+        return documentRepository.findAll(pageable);
     }
 }

@@ -231,10 +231,12 @@
             <ul id="pagination" class="pagination justify-content-center"></ul>
           </nav>
         </div>
+      </div>
+    </div>
 
-        <!-- ========== =============================================================================================== -->
-        <!-- ========== SCRIPT ========== -->
-        <c:set var="ctx" value="${pageContext.request.contextPath}" />
+    <!-- ========== =============================================================================================== -->
+    <!-- ========== SCRIPT ========== -->
+    <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
         <!-- WebSocket libraries for chat notifications -->
         <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
@@ -376,7 +378,7 @@
                 (p.onDeal ? '<span class="badge bg-success">Áp dụng -' + (p.dealPercentage || 0) + '%</span>' : '<span class="text-muted">Không</span>') +
                 '</td>' +
                 '<td>' +
-                '<a href="' + ctx + '/product_detail?id=' + p.id + '" class="btn btn-view" title="Xem chi tiết"><i class="fas fa-eye"></i></a>' +
+                '<a href="' + ctx + '/product/' + p.id + '" class="btn btn-view" title="Xem chi tiết"><i class="fas fa-eye"></i></a>' +
                 '<a href="' + ctx + '/admin/products/edit/' + p.id + '" class="btn btn-edit" title="Sửa"><i class="fas fa-edit"></i></a>' +
                 '<button class="btn btn-delete" onclick="deleteProduct(' + p.id + ')" title="Xóa"><i class="fas fa-trash"></i></button>' +
                 '<label style="margin:0; display:flex; align-items:center; gap:4px; white-space:nowrap;">' +
@@ -659,6 +661,7 @@
             nameInput.addEventListener('blur', () => setTimeout(() => { suggestionBox.style.display = 'none'; }, 150));
           }
         </script>
+        
         <!-- Script để toggle sidebar -->
         <script>
           (function () {

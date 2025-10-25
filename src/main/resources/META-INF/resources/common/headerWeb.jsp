@@ -16,14 +16,21 @@ isAuthenticated); %>
     <div class="container">
       <ul class="header-links pull-left">
         <li>
-          <a href="https://zalo.me/0889251007" target="_blank"><i class="fa fa-phone"></i> +84 889-251-007</a>
+          <a href="https://zalo.me/0889251007" target="_blank"
+            ><i class="fa fa-phone"></i> +84 889-251-007</a
+          >
         </li>
         <li>
-          <a href="mailto:kietccc21@gmail.com"><i class="fa fa-envelope-o"></i> kietccc21@gmail.com</a>
+          <a href="mailto:kietccc21@gmail.com"
+            ><i class="fa fa-envelope-o"></i> kietccc21@gmail.com</a
+          >
         </li>
         <li>
-          <a href="https://www.google.com/maps/place/Tr%C6%B0%E1%BB%9Dng+%C4%90%E1%BA%A1i+h%E1%BB%8Dc+S%C6%B0+ph%E1%BA%A1m+K%E1%BB%B9+thu%E1%BA%ADt+Th%C3%A0nh+ph%E1%BB%91+H%E1%BB%93+Ch%C3%AD+Minh/@10.8505683,106.7717721,17z/data=!4m6!3m5!1s0x31752763f23816ab:0x282f711441b6916f!8m2!3d10.8506324!4d106.7719131!16s%2Fm%2F02pz17z?entry=ttu&g_ep=EgoyMDI1MTAxNC4wIKXMDSoASAFQAw%3D%3D" target="_blank"
-            ><i class="fa fa-map-marker"></i> 1 Võ Văn Ngân, Linh Chiểu, Thủ Đức, TP.HCM</a
+          <a
+            href="https://www.google.com/maps/place/Tr%C6%B0%E1%BB%9Dng+%C4%90%E1%BA%A1i+h%E1%BB%8Dc+S%C6%B0+ph%E1%BA%A1m+K%E1%BB%B9+thu%E1%BA%ADt+Th%C3%A0nh+ph%E1%BB%91+H%E1%BB%93+Ch%C3%AD+Minh/@10.8505683,106.7717721,17z/data=!4m6!3m5!1s0x31752763f23816ab:0x282f711441b6916f!8m2!3d10.8506324!4d106.7719131!16s%2Fm%2F02pz17z?entry=ttu&g_ep=EgoyMDI1MTAxNC4wIKXMDSoASAFQAw%3D%3D"
+            target="_blank"
+            ><i class="fa fa-map-marker"></i> 1 Võ Văn Ngân, Linh Chiểu, Thủ
+            Đức, TP.HCM</a
           >
         </li>
       </ul>
@@ -198,15 +205,14 @@ isAuthenticated); %>
           <a href="${pageContext.request.contextPath}/deals">Khuyến mãi</a>
         </li>
         <c:if test="${isUserAuthenticated}">
-          <% 
-          Authentication navAuth = SecurityContextHolder.getContext().getAuthentication();
-          boolean isAdmin = navAuth.getAuthorities().stream()
-              .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-          boolean isSeller = navAuth.getAuthorities().stream()
-              .anyMatch(a -> a.getAuthority().equals("ROLE_SELLER"));
+          <% Authentication navAuth =
+          SecurityContextHolder.getContext().getAuthentication(); boolean
+          isAdmin = navAuth.getAuthorities().stream() .anyMatch(a ->
+          a.getAuthority().equals("ROLE_ADMIN")); boolean isSeller =
+          navAuth.getAuthorities().stream() .anyMatch(a ->
+          a.getAuthority().equals("ROLE_SELLER"));
           request.setAttribute("isAdmin", isAdmin);
-          request.setAttribute("isSeller", isSeller);
-          %>
+          request.setAttribute("isSeller", isSeller); %>
           <c:if test="${isAdmin}">
             <li>
               <a href="${pageContext.request.contextPath}/admin">Quản trị</a>
@@ -215,13 +221,33 @@ isAuthenticated); %>
           <!-- Admin hoặc Seller đều thấy menu Seller -->
           <c:if test="${isAdmin || isSeller}">
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+              <a
+                href="#"
+                class="dropdown-toggle"
+                data-toggle="dropdown"
+                role="button"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
                 Seller <i class="fa fa-angle-down"></i>
               </a>
               <ul class="dropdown-menu">
-                <li><a href="${pageContext.request.contextPath}/seller/orders">Đơn hàng của tôi</a></li>
-                <li><a href="${pageContext.request.contextPath}/seller/all-orders">Tất cả đơn hàng</a></li>
-                <li><a href="${pageContext.request.contextPath}/seller/orders-refund">Yêu cầu hoàn tiền</a></li>
+                <li>
+                  <a href="${pageContext.request.contextPath}/seller/orders"
+                    >Đơn hàng của tôi</a
+                  >
+                </li>
+                <li>
+                  <a href="${pageContext.request.contextPath}/seller/all-orders"
+                    >Tất cả đơn hàng</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="${pageContext.request.contextPath}/seller/orders-refund"
+                    >Yêu cầu hoàn tiền</a
+                  >
+                </li>
               </ul>
             </li>
           </c:if>
@@ -422,12 +448,12 @@ isAuthenticated); %>
 
             var header = document.querySelector('header');
             var navigation = document.getElementById('navigation');
-            
+
             // Create a wrapper for both header and nav
             var wrapper = document.createElement('div');
             wrapper.id = 'header-nav-wrapper';
             wrapper.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-            
+
             if (header && navigation && header.parentNode) {
               // Insert wrapper before header
               header.parentNode.insertBefore(wrapper, header);
@@ -531,5 +557,4 @@ isAuthenticated); %>
   #searchSuggestions {
     z-index: 10000 !important;
   }
-
 </style>

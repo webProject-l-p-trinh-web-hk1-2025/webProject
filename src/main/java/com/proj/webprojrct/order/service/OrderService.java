@@ -24,4 +24,7 @@ public interface OrderService {
     int getTotalOrdersByUserId(Long userId);
 
     double getTotalSpentByUserId(Long userId);
+    
+    // cập nhât số lượng
+    void updateProductStockAfterPayment(Long orderId);
 }

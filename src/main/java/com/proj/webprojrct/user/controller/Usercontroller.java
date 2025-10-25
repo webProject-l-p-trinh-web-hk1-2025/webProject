@@ -158,6 +158,11 @@ public class Usercontroller {
                 model.addAttribute("totalOrders", totalOrders);
                 model.addAttribute("totalSpent", totalSpent);
                 
+                // Lấy 3 đơn hàng gần nhất
+                var allOrders = orderService.getOrdersByUserId(userId);
+                var recentOrders = allOrders.stream().limit(3).toList();
+                model.addAttribute("orders", recentOrders);
+                
                 // Verification flags
                 boolean verifyPhone = u.getVerifyPhone() != null && u.getVerifyPhone();
                 boolean verifyEmail = u.getVerifyEmail() != null && u.getVerifyEmail();

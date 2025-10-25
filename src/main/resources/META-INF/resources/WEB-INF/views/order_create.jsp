@@ -371,7 +371,28 @@
                             itemDiv.className = 'order-item';
 
                             var productName = item.productName || 'Sản phẩm (ID: ' + item.productId + ')';
-                            var price = (item.price * item.quantity).toLocaleString('vi-VN');
+                            var itemTotal = (item.price * item.quantity).toLocaleString('vi-VN');
+
+                            // Tạo HTML cho giá sản phẩm
+                            var priceHTML = '';
+                            if (item.onDeal && item.dealPercentage > 0) {
+                                // Có deal - hiển thị giá giảm + giá gốc gạch ngang + badge
+                                var originalTotal = (item.originalPrice * item.quantity).toLocaleString('vi-VN');
+                                var savedAmount = ((item.originalPrice - item.price) * item.quantity).toLocaleString('vi-VN');
+                                
+                                priceHTML = 
+                                    '<div class="item-price" style="text-align: right;">' +
+                                        '<div style="font-size: 16px; font-weight: bold; color: #d70018; margin-bottom: 3px;">' + itemTotal + ' ₫</div>' +
+                                        '<div style="font-size: 13px; color: #999; text-decoration: line-through;">' + originalTotal + ' ₫</div>' +
+                                        '<div style="margin-top: 5px;">' +
+                                            '<span style="display: inline-block; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; margin-right: 3px;">-' + item.dealPercentage + '%</span>' +
+                                            '<span style="display: inline-block; background: linear-gradient(135deg, #26d97f 0%, #1abc9c 100%); color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold;">Tiết kiệm ' + savedAmount + ' ₫</span>' +
+                                        '</div>' +
+                                    '</div>';
+                            } else {
+                                // Không có deal - hiển thị giá thông thường
+                                priceHTML = '<div class="item-price">' + itemTotal + ' ₫</div>';
+                            }
 
                             // Dùng dấu '+' để nối chuỗi (an toàn hơn)
                             itemDiv.innerHTML =
@@ -379,7 +400,7 @@
                                 '<p class="item-name">' + productName + '</p>' +
                                 '<p class="item-info">Số lượng: ' + item.quantity + '</p>' +
                                 '</div>' +
-                                '<div class="item-price">' + price + ' ₫</div>';
+                                priceHTML;
 
                             itemsListDiv.appendChild(itemDiv);
                         });

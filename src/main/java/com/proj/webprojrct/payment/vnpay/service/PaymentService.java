@@ -2,6 +2,7 @@ package com.proj.webprojrct.payment.vnpay.service;
 
 import com.proj.webprojrct.order.entity.Order;
 import com.proj.webprojrct.order.repository.OrderRepository;
+import com.proj.webprojrct.order.service.OrderService;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -55,6 +56,8 @@ public class PaymentService {
     private final OrderRepository orderRepository;
 
     private final PaymentUrlVnpayRepository paymentUrlVnpayRepository;
+    
+    private final OrderService orderService;
 
     public PaymentResDto createPaymentUrl(Long orderId, HttpServletRequest request) throws UnsupportedEncodingException {
 
@@ -272,6 +275,18 @@ public class PaymentService {
             long orderId = Long.parseLong(request.getParameter("vnp_TxnRef"));
             PaymentUrlVnpay paymentUrl = paymentUrlVnpayRepository.findByOrderId(orderId);
             paymentUrlVnpayRepository.delete(paymentUrl);
+            
+            // Update product stock when payment is successful (responseCode = "00")
+            if ("00".equals(responseCode)) {
+                try {
+                    orderService.updateProductStockAfterPayment(orderId);
+                    System.out.println("✅ Successfully updated product stock for order: " + orderId);
+                } catch (Exception e) {
+                    System.err.println("❌ Failed to update product stock for order " + orderId + ": " + e.getMessage());
+                    e.printStackTrace();
+                    // Don't throw exception here to avoid breaking the payment flow
+                }
+            }
         } else {
             // Chữ ký không hợp lệ
             result.put("error", "Chữ ký không hợp lệ");
@@ -486,6 +501,16 @@ public class PaymentService {
                 .paidAt(createdAt)
                 .build();
         paymentRepository.save(payment);
+        
+        // cập nhật số lượng 
+        try {
+            orderService.updateProductStockAfterPayment(orderId);
+            System.out.println("Đã cập nhật thành công số lượng sản phẩm cho COD: " + orderId);
+        } catch (Exception e) {
+            System.err.println("Cập nhật thất bại " + orderId + ": " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Không thể cập nhật số lượng sản phẩm: " + e.getMessage());
+        }
     }
 
     public PaymentResDto getUrlVnpayPayment(Long orderId) {

@@ -399,22 +399,10 @@
                                 
                                 <!-- Deal labels -->
                                 <div class="product-label">
-                                    <c:choose>
-                                        <c:when test="${product.dealPercentage != null && product.dealPercentage > 0}">
-                                            <span class="sale" style="background: #ff4757;">-${product.dealPercentage}%</span>
-                                            <span class="new" style="background: #ff6b6b;">HOT</span>
-                                        </c:when>
-                                        <c:when test="${status.index % 3 == 0}">
-                                            <span class="sale" style="background: #ff4757;">-${30 + (status.index % 5) * 10}%</span>
-                                            <span class="new" style="background: #ff6b6b;">HOT</span>
-                                        </c:when>
-                                        <c:when test="${status.index % 3 == 1}">
-                                            <span class="sale" style="background: #ff4757;">-${25 + (status.index % 4) * 10}%</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="new" style="background: #ff9ff3;">SALE</span>
-                                        </c:otherwise>
-                                    </c:choose>
+                                    <c:if test="${product.dealPercentage != null && product.dealPercentage > 0}">
+                                        <span class="sale" style="background: #ff4757;">-${product.dealPercentage}%</span>
+                                        <span class="new" style="background: #ff6b6b;">HOT</span>
+                                    </c:if>
                                 </div>
                                 
                                 <!-- Flash sale countdown for first few products -->
@@ -439,35 +427,20 @@
                                 <!-- Price with original and discounted -->
                                 <div style="margin-bottom: 15px;">
                                     <h4 class="product-price" style="margin: 0;">
-                                        <c:choose>
-                                            <c:when test="${product.dealPercentage != null && product.dealPercentage > 0}">
-                                                <span style="color: #d70018; font-size: 18px; font-weight: bold;">
-                                                    <fmt:formatNumber value="${product.price * (100 - product.dealPercentage) / 100}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
-                                                </span>
-                                                <del class="product-old-price" style="color: #999; font-size: 14px; margin-left: 10px;">
-                                                    <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
-                                                </del>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span style="color: #d70018; font-size: 18px; font-weight: bold;">
-                                                    <fmt:formatNumber value="${product.price * 0.7}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
-                                                </span>
-                                                <del class="product-old-price" style="color: #999; font-size: 14px; margin-left: 10px;">
-                                                    <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
-                                                </del>
-                                            </c:otherwise>
-                                        </c:choose>
+                                        <c:if test="${product.dealPercentage != null && product.dealPercentage > 0}">
+                                            <span style="color: #d70018; font-size: 18px; font-weight: bold;">
+                                                <fmt:formatNumber value="${product.price * (100 - product.dealPercentage) / 100}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                            </span>
+                                            <del class="product-old-price" style="color: #999; font-size: 14px; margin-left: 10px;">
+                                                <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                            </del>
+                                        </c:if>
                                     </h4>
-                                    <div style="color: #28a745; font-size: 12px; font-weight: bold;">
-                                        <c:choose>
-                                            <c:when test="${product.dealPercentage != null && product.dealPercentage > 0}">
-                                                Tiết kiệm: <fmt:formatNumber value="${product.price * product.dealPercentage / 100}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
-                                            </c:when>
-                                            <c:otherwise>
-                                                Tiết kiệm: <fmt:formatNumber value="${product.price * 0.3}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
+                                    <c:if test="${product.dealPercentage != null && product.dealPercentage > 0}">
+                                        <div style="color: #28a745; font-size: 12px; font-weight: bold;">
+                                            Tiết kiệm: <fmt:formatNumber value="${product.price * product.dealPercentage / 100}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                        </div>
+                                    </c:if>
                                 </div>
                                 
                                 <div class="product-rating" style="margin-bottom: 15px;">

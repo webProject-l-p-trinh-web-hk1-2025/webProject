@@ -53,6 +53,51 @@
                         </div>
                         <!-- /Product main img -->
 
+                        <div>
+                          <h3 class="product-price" id="productPrice">
+                            <c:choose>
+                              <c:when
+                                test="${product.onDeal == true && product.dealPercentage != null && product.dealPercentage > 0}">
+                                <c:set var="discountedPrice"
+                                  value="${product.price * (100 - product.dealPercentage) / 100}" />
+                                <c:set var="savedAmount" value="${product.price - discountedPrice}" />
+                                <span style="color: #d70018; font-size: 28px; font-weight: bold;">
+                                  <fmt:formatNumber value="${discountedPrice}" type="currency" currencySymbol="₫"
+                                    maxFractionDigits="0" />
+                                </span>
+                                <del style="color: #999; font-size: 18px; margin-left: 10px;">
+                                  <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫"
+                                    maxFractionDigits="0" />
+                                </del>
+                                <span
+                                  style="color: #ff4444; font-size: 16px; margin-left: 10px; font-weight: bold; background: #ffe8e8; padding: 2px 8px; border-radius: 4px;">
+                                  -${product.dealPercentage}%
+                                </span>
+                                <span
+                                  style="color: #28a745; font-size: 16px; margin-left: 10px; font-weight: bold; background: #e8f5e8; padding: 2px 8px; border-radius: 4px;">
+                                  Tiết kiệm
+                                  <fmt:formatNumber value="${savedAmount}" type="currency" currencySymbol="₫"
+                                    maxFractionDigits="0" />
+                                </span>
+                              </c:when>
+                              <c:otherwise>
+                                <span style="color: #d70018; font-size: 28px; font-weight: bold;">
+                                  <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫"
+                                    maxFractionDigits="0" />
+                                </span>
+                              </c:otherwise>
+                            </c:choose>
+                          </h3>
+                          <span class="product-available" id="productStock">
+                            <c:choose>
+                              <c:when test="${product.stock > 0}">Còn hàng</c:when>
+                              <c:otherwise>Hết hàng</c:otherwise>
+                            </c:choose>
+                          </span>
+                        </div>
+                        <p id="productDescription">Loading product description...</p>
+
+
                         <!-- Product thumb imgs -->
                         <div class="col-md-2 col-md-pull-5">
                           <div id="product-imgs">
@@ -345,7 +390,9 @@
         battery: "<c:out value='${product.battery}'/>",
         simType: "<c:out value='${product.simType}'/>",
         os: "<c:out value='${product.os}'/>",
-        nfcSupport: "<c:out value='${product.nfcSupport}'/>"
+        nfcSupport: "<c:out value='${product.nfcSupport}'/>",
+        onDeal: ${product.onDeal != null ? product.onDeal : false},
+        dealPercentage: ${product.dealPercentage != null ? product.dealPercentage : 0}
       };
 
       // Version products from server (cùng dòng series)
@@ -410,7 +457,29 @@
 
                   // Update product details
                   document.getElementById('productName').textContent = p.name;
-                  document.getElementById('productPrice').textContent = formatPrice(p.price);
+
+                  // Hiển thị giá đã áp dụng deal
+                  const priceEl = document.getElementById('productPrice');
+
+                  if (p.onDeal === true && p.dealPercentage != null && p.dealPercentage > 0) {
+                    // Tính giá sau khi giảm
+                    const discountedPrice = p.price * (100 - p.dealPercentage) / 100;
+                    const savedAmount = p.price - discountedPrice;
+
+                    // Hiển thị giá đã giảm + giá gốc gạch ngang + badge giảm giá + tiền tiết kiệm
+                    priceEl.innerHTML =
+                      '<span style="color: #d70018; font-size: 28px; font-weight: bold;">' + formatPrice(discountedPrice) + '</span>' +
+                      ' <del style="color: #999; font-size: 18px; margin-left: 10px;">' + formatPrice(p.price) + '</del>' +
+                      ' <span style="color: #ff4444; font-size: 16px; margin-left: 10px; font-weight: bold; background: #ffe8e8; padding: 2px 8px; border-radius: 4px;">-' + p.dealPercentage + '%</span>' +
+                      ' <span style="color: #28a745; font-size: 16px; margin-left: 10px; font-weight: bold; background: #e8f5e8; padding: 2px 8px; border-radius: 4px;">Tiết kiệm ' + formatPrice(savedAmount) + '</span>';
+
+                    console.log('✅ Applied deal: ' + formatPrice(p.price) + ' → ' + formatPrice(discountedPrice) + ' (' + p.dealPercentage + '% off, save ' + formatPrice(savedAmount) + ')');
+                  } else {
+                    // Hiển thị giá gốc nếu không có deal
+                    priceEl.innerHTML = '<span style="color: #d70018; font-size: 28px; font-weight: bold;">' + formatPrice(p.price) + '</span>';
+                    console.log('No deal - showing original price: ' + formatPrice(p.price));
+                  }
+
                   document.getElementById('productStock').textContent = p.stock > 0 ? 'Còn hàng' : 'Hết hàng';
 
                   // Tạo short description từ specs cho phần product details

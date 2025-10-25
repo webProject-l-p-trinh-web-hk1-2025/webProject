@@ -863,6 +863,9 @@ textarea.input {
   box-shadow: 0px 0px 0px 0px #E4E7ED, 0px 0px 0px 1px #E4E7ED;
   -webkit-transition: 0.2s all;
   transition: 0.2s all;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .product:hover {
@@ -911,6 +914,9 @@ textarea.input {
   background-color: #FFF;
   text-align: center;
   z-index: 20;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .product .product-body .product-category {
@@ -922,6 +928,11 @@ textarea.input {
 .product .product-body .product-name {
   text-transform: uppercase;
   font-size: 14px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
 }
 
 .product .product-body .product-name>a {
@@ -935,6 +946,11 @@ textarea.input {
 .product .product-body .product-price {
   color: #D10024;
   font-size: 18px;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .product .product-body .product-price .product-old-price {
@@ -947,6 +963,7 @@ textarea.input {
   position: relative;
   margin: 15px 0px 10px;
   height: 20px;
+  margin-top: auto;
 }
 
 .product .product-body .product-rating>i {

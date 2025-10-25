@@ -1,5 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -50,6 +50,211 @@
     .btn-delete {
       background-color: #dc3545;
       color: white;
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    /* Deal Modal Styles */
+    .deal-modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .deal-modal-content {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .deal-modal-header {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 20px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .deal-modal-header h3 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .deal-modal-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 32px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      transition: opacity 0.2s;
+    }
+
+    .deal-modal-close:hover {
+      opacity: 0.8;
+    }
+
+    .deal-modal-body {
+      padding: 30px 25px;
+    }
+
+    .percentage-input-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+      gap: 10px;
+    }
+
+    .percentage-input {
+      width: 120px;
+      font-size: 48px;
+      font-weight: bold;
+      text-align: center;
+      border: 3px solid #28a745;
+      border-radius: 12px;
+      padding: 15px;
+      color: #28a745;
+      outline: none;
+    }
+
+    .percentage-input:focus {
+      border-color: #20c997;
+      box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+    }
+
+    .percentage-symbol {
+      font-size: 36px;
+      font-weight: bold;
+      color: #28a745;
+    }
+
+    .percentage-presets {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      padding: 10px 20px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #666;
+    }
+
+    .preset-btn:hover {
+      border-color: #28a745;
+      color: #28a745;
+      background: #f0fff4;
+      transform: translateY(-2px);
+    }
+
+    .percentage-slider {
+      margin-top: 20px;
+    }
+
+    .slider-input {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      outline: none;
+      -webkit-appearance: none;
+      background: linear-gradient(to right, #28a745 0%, #20c997 100%);
+      cursor: pointer;
+    }
+
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid #28a745;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .slider-input::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid #28a745;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .deal-modal-footer {
+      padding: 20px 25px;
+      background: #f8f9fa;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      border-radius: 0 0 16px 16px;
+    }
+
+    .btn-cancel,
+    .btn-confirm {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel {
+      background: #e0e0e0;
+      color: #666;
+    }
+
+    .btn-cancel:hover {
+      background: #d0d0d0;
+    }
+
+    .btn-confirm {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-confirm:hover {
+      box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+      transform: translateY(-2px);
     }
   </style>
 </head>
@@ -149,6 +354,7 @@
                   <th>Hãng</th>
                   <th>Giá</th>
                   <th>Tồn</th>
+                  <th style="width:120px;">Khuyến mãi</th>
                   <th style="width:250px;">Thao tác</th>
                 </tr>
               </thead>
@@ -162,9 +368,22 @@
                     <td>${product.brand}</td>
                     <td class="text-end">${product.price} ₫</td>
                     <td class="text-center">${product.stock}</td>
+                    <td class="text-center">
+                      <c:choose>
+                        <c:when test="${product.onDeal}">
+                          <span class="badge" style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">
+                            -${product.dealPercentage}%
+                          </span>
+                        </c:when>
+                        <c:otherwise>
+                          <span class="text-muted">Không</span>
+                        </c:otherwise>
+                      </c:choose>
+                    </td>
                     <td>
                       <a href="${pageContext.request.contextPath}/product/${product.id}" class="btn btn-view" title="Xem"><i class="fas fa-eye"></i></a>
                       <a href="${pageContext.request.contextPath}/admin/products/edit/${product.id}" class="btn btn-edit" title="Sửa"><i class="fas fa-edit"></i></a>
+                      <button type="button" class="btn btn-success" onclick="openDealModal('${product.id}')" title="Khuyến mãi"><i class="fas fa-percent"></i></button>
                       <form action="${pageContext.request.contextPath}/admin/products/${product.id}/delete" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
                         <button type="submit" class="btn btn-delete" title="Xóa"><i class="fas fa-trash"></i></button>
                       </form>
@@ -184,12 +403,116 @@
     </div>
   </div>
 
+  <!-- Deal Percentage Modal -->
+  <div id="dealModal" class="deal-modal" style="display: none;">
+    <div class="deal-modal-content">
+      <div class="deal-modal-header">
+        <h3>⚡ Thiết lập khuyến mãi</h3>
+        <button class="deal-modal-close" onclick="closeDealModal()">&times;</button>
+      </div>
+      <div class="deal-modal-body">
+        <p style="margin-bottom: 20px; color: #666;">Nhập phần trăm giảm giá cho sản phẩm này:</p>
+        <div class="percentage-input-group">
+          <input type="number" id="dealPercentageInput" min="0" max="100" value="10" class="percentage-input"
+            oninput="document.getElementById('dealPercentageSlider').value = this.value" />
+          <span class="percentage-symbol">%</span>
+        </div>
+        <div class="percentage-presets">
+          <button onclick="setPercentage(10)" class="preset-btn">10%</button>
+          <button onclick="setPercentage(20)" class="preset-btn">20%</button>
+          <button onclick="setPercentage(30)" class="preset-btn">30%</button>
+          <button onclick="setPercentage(50)" class="preset-btn">50%</button>
+        </div>
+        <div class="percentage-slider">
+          <input type="range" id="dealPercentageSlider" min="0" max="100" value="10"
+            oninput="document.getElementById('dealPercentageInput').value = this.value" class="slider-input" />
+          <div class="slider-labels">
+            <span>0%</span>
+            <span>50%</span>
+            <span>100%</span>
+          </div>
+        </div>
+      </div>
+      <div class="deal-modal-footer">
+        <button onclick="closeDealModal()" class="btn-cancel">Hủy</button>
+        <button onclick="confirmDeal()" class="btn-confirm">✓ Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
   <!-- WebSocket libraries for chat notifications -->
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
   <script src="<c:url value='/js/admin-chat-notifications.js'/>"></script>
 
   <script>
+    // Deal Modal functions
+    let currentProductId = null;
+
+    function openDealModal(productId) {
+      currentProductId = productId;
+      document.getElementById('dealModal').style.display = 'flex';
+      document.getElementById('dealPercentageInput').value = 10;
+      document.getElementById('dealPercentageSlider').value = 10;
+    }
+
+    function closeDealModal() {
+      document.getElementById('dealModal').style.display = 'none';
+      currentProductId = null;
+    }
+
+    function setPercentage(value) {
+      document.getElementById('dealPercentageInput').value = value;
+      document.getElementById('dealPercentageSlider').value = value;
+    }
+
+    function confirmDeal() {
+      const percentage = document.getElementById('dealPercentageInput').value;
+      
+      if (!currentProductId) {
+        alert('Lỗi: Không tìm thấy sản phẩm!');
+        return;
+      }
+
+      if (percentage < 0 || percentage > 100) {
+        alert('Vui lòng nhập phần trăm từ 0 đến 100!');
+        return;
+      }
+
+      // Gửi request đến server để cập nhật deal percentage
+      fetch('${pageContext.request.contextPath}/admin/products/' + currentProductId + '/deal-toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          onDeal: percentage > 0,
+          dealPercentage: parseInt(percentage)
+        })
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Đã thiết lập khuyến mãi ' + percentage + '% cho sản phẩm!');
+          closeDealModal();
+          window.location.reload();
+        } else {
+          alert('Lỗi khi thiết lập khuyến mãi!');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Lỗi khi thiết lập khuyến mãi!');
+      });
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(event) {
+      const modal = document.getElementById('dealModal');
+      if (event.target === modal) {
+        closeDealModal();
+      }
+    });
+
     // Toggle sidebar
     const navToggle = document.getElementById("navToggle");
     const sidebar = document.getElementById("sidebar");

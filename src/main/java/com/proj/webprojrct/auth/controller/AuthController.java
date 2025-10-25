@@ -104,15 +104,8 @@ public class AuthController {
 
     @GetMapping("/home")
     public String homePage(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
-            CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-            User user = userDetails.getUser();
-            model.addAttribute("username", user.getFullName());
-            model.addAttribute("role", user.getRole().name());
-            model.addAttribute("phone", user.getPhone());
-        }
-        return "home";
+        // Redirect to main home controller to ensure consistent data loading
+        return "redirect:/";
     }
 
     @GetMapping("/refresh")

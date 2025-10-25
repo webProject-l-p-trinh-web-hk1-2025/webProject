@@ -197,25 +197,46 @@ public class PaymentService {
             String responseCode = request.getParameter("vnp_ResponseCode");
             String transactionStatus = request.getParameter("vnp_TransactionStatus");
 
-            // Thông báo vnp_ResponseCode
+            // Thông báo vnp_ResponseCode - Bảng mã lỗi truy vấn giao dịch querydr
+            Map<String, String> queryResponseMessages = new HashMap<>();
+            queryResponseMessages.put("00", "Yêu cầu thành công");
+            queryResponseMessages.put("02", "Mã định danh kết nối không hợp lệ (kiểm tra lại TmnCode)");
+            queryResponseMessages.put("03", "Dữ liệu gửi sang không đúng định dạng");
+            queryResponseMessages.put("91", "Không tìm thấy giao dịch yêu cầu");
+            queryResponseMessages.put("94", "Yêu cầu trùng lặp, duplicate request trong thời gian giới hạn của API");
+            queryResponseMessages.put("97", "Checksum không hợp lệ");
+            queryResponseMessages.put("99", "Các lỗi khác (lỗi còn lại, không có trong danh sách mã lỗi đã liệt kê)");
+
+            // Thông báo vnp_ResponseCode - Bảng mã lỗi yêu cầu hoàn trả (refund)
+            Map<String, String> refundResponseMessages = new HashMap<>();
+            refundResponseMessages.put("00", "Yêu cầu thành công");
+            refundResponseMessages.put("02", "Mã định danh kết nối không hợp lệ (kiểm tra lại TmnCode)");
+            refundResponseMessages.put("03", "Dữ liệu gửi sang không đúng định dạng");
+            refundResponseMessages.put("91", "Không tìm thấy giao dịch yêu cầu hoàn trả");
+            refundResponseMessages.put("94", "Giao dịch đã được gửi yêu cầu hoàn tiền trước đó. Yêu cầu này VNPAY đang xử lý");
+            refundResponseMessages.put("95", "Giao dịch này không thành công bên VNPAY. VNPAY từ chối xử lý yêu cầu");
+            refundResponseMessages.put("97", "Checksum không hợp lệ");
+            refundResponseMessages.put("99", "Các lỗi khác (lỗi còn lại, không có trong danh sách mã lỗi đã liệt kê)");
+
+            // Thông báo vnp_ResponseCode - Mã lỗi thanh toán
             Map<String, String> responseMessages = new HashMap<>();
             responseMessages.put("00", "Giao dịch thành công");
-            responseMessages.put("07", "Trừ tiền thành công. Giao dịch bị nghi ngờ");
-            responseMessages.put("09", "Thẻ/TK chưa đăng ký InternetBanking");
-            responseMessages.put("10", "Xác thực thẻ/TK sai quá 3 lần");
-            responseMessages.put("11", "Hết hạn chờ thanh toán");
-            responseMessages.put("12", "Thẻ/TK bị khóa");
-            responseMessages.put("13", "Sai mật khẩu OTP quá 3 lần");
-            responseMessages.put("24", "Khách hàng hủy giao dịch");
-            responseMessages.put("51", "Không đủ số dư");
-            responseMessages.put("65", "Vượt hạn mức giao dịch trong ngày");
+            responseMessages.put("07", "Trừ tiền thành công. Giao dịch bị nghi ngờ (liên quan tới lừa đảo, giao dịch bất thường)");
+            responseMessages.put("09", "Giao dịch không thành công do: Thẻ/Tài khoản của khách hàng chưa đăng ký dịch vụ InternetBanking tại ngân hàng");
+            responseMessages.put("10", "Giao dịch không thành công do: Khách hàng xác thực thông tin thẻ/tài khoản không đúng quá 3 lần");
+            responseMessages.put("11", "Giao dịch không thành công do: Đã hết hạn chờ thanh toán. Xin quý khách vui lòng thực hiện lại giao dịch");
+            responseMessages.put("12", "Giao dịch không thành công do: Thẻ/Tài khoản của khách hàng bị khóa");
+            responseMessages.put("13", "Giao dịch không thành công do Quý khách nhập sai mật khẩu xác thực giao dịch (OTP). Xin quý khách vui lòng thực hiện lại giao dịch");
+            responseMessages.put("24", "Giao dịch không thành công do: Khách hàng hủy giao dịch");
+            responseMessages.put("51", "Giao dịch không thành công do: Tài khoản của quý khách không đủ số dư để thực hiện giao dịch");
+            responseMessages.put("65", "Giao dịch không thành công do: Tài khoản của Quý khách đã vượt quá hạn mức giao dịch trong ngày");
             responseMessages.put("75", "Ngân hàng thanh toán đang bảo trì");
-            responseMessages.put("79", "Sai mật khẩu thanh toán quá số lần quy định");
-            responseMessages.put("99", "Lỗi khác");
+            responseMessages.put("79", "Giao dịch không thành công do: KH nhập sai mật khẩu thanh toán quá số lần quy định. Xin quý khách vui lòng thực hiện lại giao dịch");
+            responseMessages.put("99", "Các lỗi khác (lỗi còn lại, không có trong danh sách mã lỗi đã liệt kê)");
 
-            // Thông báo vnp_TransactionStatus
+            // Thông báo vnp_TransactionStatus - Bảng mã lỗi tình trạng thanh toán
             Map<String, String> statusMessages = new HashMap<>();
-            statusMessages.put("00", "Giao dịch thành công");
+            statusMessages.put("00", "Giao dịch thanh toán thành công");
             statusMessages.put("01", "Giao dịch chưa hoàn tất");
             statusMessages.put("02", "Giao dịch bị lỗi");
             statusMessages.put("04", "Giao dịch đảo (Khách hàng đã bị trừ tiền tại Ngân hàng nhưng GD chưa thành công ở VNPAY)");
@@ -223,6 +244,24 @@ public class PaymentService {
             statusMessages.put("06", "VNPAY đã gửi yêu cầu hoàn tiền sang Ngân hàng (GD hoàn tiền)");
             statusMessages.put("07", "Giao dịch bị nghi ngờ gian lận");
             statusMessages.put("09", "GD Hoàn trả bị từ chối");
+
+            // Log thông tin chi tiết ra console
+            System.out.println("\n========================================");
+            System.out.println("=== VNPAY PAYMENT RETURN CALLBACK ===");
+            System.out.println("========================================");
+            System.out.println("Mã phản hồi (vnp_ResponseCode): " + responseCode);
+            System.out.println("Chi tiết: " + responseMessages.getOrDefault(responseCode, "Mã lỗi không xác định"));
+            System.out.println("----------------------------------------");
+            System.out.println("Trạng thái giao dịch (vnp_TransactionStatus): " + transactionStatus);
+            System.out.println("Chi tiết: " + statusMessages.getOrDefault(transactionStatus, "Trạng thái không xác định"));
+            System.out.println("========================================");
+            
+            // Log tất cả parameters từ VNPAY
+            System.out.println("\n=== ALL VNPAY PARAMETERS ===");
+            request.getParameterMap().forEach((key, value) -> {
+                System.out.println(key + " = " + (value.length > 0 ? value[0] : ""));
+            });
+            System.out.println("========================================\n");
 
             result.put("responseCode", responseCode);
             result.put("responseMessage", responseMessages.getOrDefault(responseCode, "Không xác định"));

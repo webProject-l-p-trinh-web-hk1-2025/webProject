@@ -1,16 +1,11 @@
 package com.proj.webprojrct.product.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.proj.webprojrct.product.service.ProductService;
 import com.proj.webprojrct.category.service.CategoryService;
@@ -212,25 +207,29 @@ public class ProductPageController {
         }
         model.addAttribute("relatedProducts", relatedProducts);
 
-        // Sản phẩm cùng dòng (cùng parentId của category, ví dụ iPhone)
+        // Sản phẩm cùng dòng (cùng series, khác model variant)
+        // Ví dụ: iPhone 15 → hiện iPhone 15 Pro, iPhone 15 Pro Max, iPhone 15 Plus
         List<ProductResponse> versionProducts = new java.util.ArrayList<>();
-        if (product.getCategory() != null && product.getCategory().getParentId() != null) {
-            // Tìm tất cả category con có cùng parentId
-            Long parentId = product.getCategory().getParentId();
-            List<com.proj.webprojrct.category.dto.CategoryDto> allCategories = categoryService.getAll();
-            java.util.List<Long> childCategoryIds = new java.util.ArrayList<>();
-            for (var cat : allCategories) {
-                if (parentId.equals(cat.getParentId())) {
-                    childCategoryIds.add(cat.getId());
+        if (product.getName() != null && product.getBrand() != null) {
+            String currentSeries = extractSeriesName(product.getName());
+
+            List<ProductResponse> allProducts = productService.getAll();
+            for (ProductResponse p : allProducts) {
+                if (p.getId().equals(product.getId())) {
+                    continue; // Skip current product
+
+                                }if (p.getName() == null || p.getBrand() == null) {
+                    continue;
+                }
+
+                // Cùng brand và cùng series
+                if (product.getBrand().equals(p.getBrand())) {
+                    String productSeries = extractSeriesName(p.getName());
+                    if (currentSeries.equals(productSeries)) {
+                        versionProducts.add(p);
+                    }
                 }
             }
-            // Lấy tất cả sản phẩm thuộc các category này
-            for (Long catId : childCategoryIds) {
-                List<ProductResponse> products = productService.getByCategoryId(catId);
-                versionProducts.addAll(products);
-            }
-            // Loại bỏ chính sản phẩm đang xem
-            versionProducts.removeIf(p -> p.getId().equals(product.getId()));
         }
 
         List<ProductResponse> sameProducts = new java.util.ArrayList<>();
@@ -281,5 +280,69 @@ public class ProductPageController {
 
         // If we matched at least 70% of search term characters
         return searchIndex >= (searchTerm.length() * 0.7);
+    }
+
+    /**
+     * Extract series name from product name Example: "iPhone 15 Pro Max 256GB
+     * Titan Đen" → "iPhone 15" Example: "Samsung Galaxy S24 Ultra 512GB" →
+     * "Galaxy S24" Example: "Xiaomi 14 Ultra 16GB/512GB" → "Xiaomi 14"
+     */
+    private String extractSeriesName(String productName) {
+        if (productName == null || productName.trim().isEmpty()) {
+            return "";
+        }
+
+        String name = productName.trim();
+
+        // List of known series patterns (brand + series number)
+        // Pattern: Brand + Number (e.g., iPhone 15, Galaxy S24, Xiaomi 14)
+        String[] patterns = {
+            // Apple
+            "iPhone SE", "iPhone 17", "iPhone 16", "iPhone 15", "iPhone 14", "iPhone 13",
+            "iPhone 12", "iPhone 11", "iPad Pro", "iPad Air", "iPad Mini",
+            // Samsung
+            "Galaxy S24", "Galaxy S23", "Galaxy S22", "Galaxy S21",
+            "Galaxy Z Fold6", "Galaxy Z Fold5", "Galaxy Z Flip6", "Galaxy Z Flip5",
+            "Galaxy A55", "Galaxy A54", "Galaxy A35", "Galaxy A34", "Galaxy A25", "Galaxy A15",
+            "Galaxy M55", "Galaxy M35",
+            // Xiaomi
+            "Xiaomi 14", "Xiaomi 13", "Xiaomi 12",
+            "Redmi Note 13", "Redmi Note 12", "Redmi Note 11",
+            "Redmi 13", "Redmi 12", "POCO X6", "POCO F6", "POCO M6",
+            // OPPO
+            "OPPO Find X7", "OPPO Find X6", "OPPO Reno12", "OPPO Reno11",
+            "OPPO A79", "OPPO A78", "OPPO A60", "OPPO A58",
+            // Vivo
+            "vivo V30", "vivo V29", "vivo Y58", "vivo Y36", "vivo Y28",
+            // Realme
+            "realme 12", "realme 11", "realme C67", "realme C65", "realme C55",
+            // OnePlus
+            "OnePlus 12", "OnePlus 11", "OnePlus Nord CE4",
+            // Google
+            "Google Pixel 9", "Google Pixel 8", "Google Pixel 7"
+        };
+
+        // Find matching series (longest first to match correctly)
+        for (String pattern : patterns) {
+            if (name.startsWith(pattern)) {
+                return pattern;
+            }
+        }
+
+        // Fallback: Extract brand + first number/word
+        // Example: "ASUS ROG Phone 8" → "ASUS ROG Phone 8"
+        String[] words = name.split("\\s+");
+        if (words.length >= 2) {
+            // Try to find pattern: Brand + Number
+            for (int i = 0; i < words.length - 1; i++) {
+                if (words[i + 1].matches(".*\\d+.*")) { // Contains digit
+                    return String.join(" ", java.util.Arrays.copyOfRange(words, 0, i + 2));
+                }
+            }
+            // If no number found, return first 2 words
+            return words[0] + " " + words[1];
+        }
+
+        return words.length > 0 ? words[0] : "";
     }
 }

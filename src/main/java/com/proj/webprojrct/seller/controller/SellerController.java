@@ -32,15 +32,52 @@ public class SellerController {
     private final PaymentService paymentService;
 
     @GetMapping("/seller/all-orders")
-    public String getAllSellerOrders(Model model) {
+    public String getAllSellerOrders(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status,
+            Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/login";
         }
         try {
-            List<OrderSellerResponse> orderSellerResponse = sellerService.getAllOrders(authentication);
-
-            model.addAttribute("orders", orderSellerResponse);
+            List<OrderSellerResponse> allOrders = sellerService.getAllOrders(authentication);
+            
+            // Filter by status if provided
+            if (status != null && !status.isEmpty() && !status.equals("ALL")) {
+                allOrders = allOrders.stream()
+                    .filter(order -> status.equals(order.getStatus()))
+                    .collect(java.util.stream.Collectors.toList());
+            }
+            
+            // Calculate pagination
+            int totalOrders = allOrders.size();
+            int totalPages = (int) Math.ceil((double) totalOrders / size);
+            
+            // Validate page number
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+            
+            // Get orders for current page
+            int startIndex = (page - 1) * size;
+            int endIndex = Math.min(startIndex + size, totalOrders);
+            
+            List<OrderSellerResponse> paginatedOrders;
+            if (startIndex < totalOrders) {
+                paginatedOrders = allOrders.subList(startIndex, endIndex);
+            } else {
+                paginatedOrders = java.util.Collections.emptyList();
+            }
+            
+            model.addAttribute("orders", paginatedOrders);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("totalOrders", totalOrders);
+            model.addAttribute("startIndex", startIndex + 1);
+            model.addAttribute("endIndex", endIndex);
+            model.addAttribute("selectedStatus", status != null ? status : "ALL");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             return "redirect:/home";
@@ -49,15 +86,53 @@ public class SellerController {
     }
 
     @GetMapping("/seller/orders")
-    public String getSellerOrders(Model model) {
+    public String getSellerOrders(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status,
+            Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/login";
         }
         try {
-            List<OrderSellerResponse> orderSellerResponse = sellerService.getOrdersBySellerId(authentication);
-
-            model.addAttribute("orders", orderSellerResponse);
+            // Get ALL orders in system (same as all-orders page)
+            List<OrderSellerResponse> allOrders = sellerService.getAllOrders(authentication);
+            
+            // Filter by status if provided
+            if (status != null && !status.isEmpty() && !status.equals("ALL")) {
+                allOrders = allOrders.stream()
+                    .filter(order -> status.equals(order.getStatus()))
+                    .collect(java.util.stream.Collectors.toList());
+            }
+            
+            // Calculate pagination
+            int totalOrders = allOrders.size();
+            int totalPages = (int) Math.ceil((double) totalOrders / size);
+            
+            // Validate page number
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+            
+            // Get orders for current page
+            int startIndex = (page - 1) * size;
+            int endIndex = Math.min(startIndex + size, totalOrders);
+            
+            List<OrderSellerResponse> paginatedOrders;
+            if (startIndex < totalOrders) {
+                paginatedOrders = allOrders.subList(startIndex, endIndex);
+            } else {
+                paginatedOrders = java.util.Collections.emptyList();
+            }
+            
+            model.addAttribute("orders", paginatedOrders);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("totalOrders", totalOrders);
+            model.addAttribute("startIndex", startIndex + 1);
+            model.addAttribute("endIndex", endIndex);
+            model.addAttribute("selectedStatus", status != null ? status : "ALL");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             return "redirect:/home";

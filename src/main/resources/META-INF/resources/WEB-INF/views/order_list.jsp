@@ -17,19 +17,20 @@
                             font-size: 28px;
                             font-weight: bold;
                             text-align: center;
+                            border-bottom: 3px solid #d10024;
+                            padding-bottom: 15px;
                         }
 
                         .order-card {
                             background: white;
-                            border-radius: 8px;
-                            padding: 25px;
+                            border-radius: 12px;
+                            padding: 20px;
                             margin-bottom: 20px;
-                            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                            transition: transform 0.2s, box-shadow 0.2s;
+                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                            transition: box-shadow 0.3s ease;
                         }
 
                         .order-card:hover {
-                            transform: translateY(-2px);
                             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
                         }
 
@@ -95,7 +96,7 @@
 
                         .order-items {
                             display: flex;
-                            gap: 15px;
+                            gap: 10px;
                             margin-bottom: 15px;
                             flex-wrap: wrap;
                         }
@@ -219,6 +220,7 @@
                             border: 1px solid #f5c6cb;
                         }
 
+                        /* Responsive adjustments */
                         @media (max-width: 768px) {
                             .order-header {
                                 flex-direction: column;
@@ -244,30 +246,26 @@
                 <body>
 
                     <!-- BREADCRUMB -->
-                    <c:if test="${empty hideHeader}">
-                        <div id="breadcrumb" class="section">
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <ul class="breadcrumb-tree">
-                                            <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                                            <li class="active">Đơn hàng của tôi</li>
-                                        </ul>
-                                    </div>
+                    <div id="breadcrumb" class="section">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul class="breadcrumb-tree">
+                                        <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
+                                        <li class="active">Đơn hàng của tôi</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
-                        <!-- /BREADCRUMB -->
-                    </c:if>
+                    </div>
+                    <!-- /BREADCRUMB -->
 
                     <!-- ORDER LIST SECTION -->
                     <div class="section">
                         <div class="container">
-                            <c:if test="${empty hideHeader}">
-                                <h1 class="order-list-title">
-                                    <i class="fa fa-list-alt"></i> Đơn hàng của tôi
-                                </h1>
-                            </c:if>
+                            <h1 class="order-list-title">
+                                <i class="fa fa-list-alt"></i> Danh sách đơn hàng
+                            </h1>
 
                             <div id="messageContainer" class="alert-message"></div>
 
@@ -325,15 +323,24 @@
                                                     <div class="order-items">
                                                         <c:forEach var="item" items="${order.items}" varStatus="status">
                                                             <c:if test="${status.index < 6}">
-                                                                <img src="${pageContext.request.contextPath}${item.productImageUrl}"
-                                                                    alt="${item.productName}" class="order-item-image"
-                                                                    title="${item.productName}" />
+                                                                <c:choose>
+                                                                    <c:when test="${fn:startsWith(item.productImageUrl, '/uploads/')}">
+                                                                        <img src="${pageContext.request.contextPath}${item.productImageUrl}"
+                                                                            alt="${item.productName}" class="order-item-image"
+                                                                            title="${item.productName}"/>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <img src="${pageContext.request.contextPath}/uploads/products/${item.productImageUrl}"
+                                                                            alt="${item.productName}" class="order-item-image"
+                                                                            title="${item.productName}"/>
+                                                                    </c:otherwise>
+                                                                </c:choose>
                                                             </c:if>
                                                         </c:forEach>
-                                                        <c:if test="${order.items.size() > 6}">
+                                                        <c:if test="${fn:length(order.items) > 6}">
                                                             <div class="order-item-image"
                                                                 style="display: flex; align-items: center; justify-content: center; background: #e9ecef; font-weight: bold; color: #666;">
-                                                                +${order.items.size() - 6}
+                                                                +${fn:length(order.items) - 6}
                                                             </div>
                                                         </c:if>
                                                     </div>
@@ -383,33 +390,20 @@
                     </div>
                     <!-- /ORDER LIST SECTION -->
 
-
                     <script>
-                        // Pagination variables
+                        // Simple pagination and cancel logic (cleaned)
                         const ORDERS_PER_PAGE = 5;
                         let currentPage = 1;
-                        let totalOrders = 0;
 
                         document.addEventListener('DOMContentLoaded', function () {
-                            console.log('[Pagination] DOMContentLoaded fired');
-                            const orderCards = document.querySelectorAll('.order-card');
-                            console.log('[Pagination] Found order cards:', orderCards.length);
+                            const orderCards = Array.from(document.querySelectorAll('.order-card'));
+                            const totalOrders = orderCards.length;
 
-                            // Use DOM count as the source of truth to avoid mismatches
-                            totalOrders = orderCards.length;
-
-                            // Update server-side total span if present to reflect actual DOM count
                             const totalSpan = document.getElementById('totalOrdersCount');
-                            if (totalSpan) {
-                                totalSpan.textContent = totalOrders;
-                                console.log('[Pagination] Updated totalOrdersCount to:', totalOrders);
-                            }
+                            if (totalSpan) totalSpan.textContent = totalOrders;
 
-                            if (totalOrders > 0) {
-                                console.log('[Pagination] Calling showPage(1)');
-                                showPage(1);
-                            } else {
-                                console.log('[Pagination] No orders to display');
+                            if (totalOrders > 0) showPage(1);
+                            else {
                                 const displayCountElement = document.getElementById('displayCount');
                                 if (displayCountElement) displayCountElement.textContent = '0';
                                 const pageInfo = document.getElementById('pageInfo');
@@ -419,7 +413,8 @@
                                 if (prevBtn) prevBtn.disabled = true;
                                 if (nextBtn) nextBtn.disabled = true;
                             }
-                            // Attach cancel button handlers (use data-order-id to avoid JSP parsing issues)
+
+                            // Attach cancel handlers
                             document.querySelectorAll('.btn-cancel').forEach(function (btn) {
                                 btn.addEventListener('click', function () {
                                     const id = this.getAttribute('data-order-id');
@@ -429,43 +424,27 @@
                         });
 
                         function showPage(page) {
-                            console.log('[showPage] Called with page:', page);
                             const orderCards = document.querySelectorAll('.order-card');
+                            const totalOrders = orderCards.length;
                             const totalPages = Math.max(1, Math.ceil(totalOrders / ORDERS_PER_PAGE));
-                            console.log('[showPage] Total orders:', totalOrders, 'Total pages:', totalPages);
 
-                            // Validate page number
                             if (page < 1) page = 1;
                             if (page > totalPages) page = totalPages;
-
                             currentPage = page;
-                            console.log('[showPage] Current page set to:', currentPage);
 
-                            // Hide all orders
-                            orderCards.forEach(card => {
-                                card.style.display = 'none';
-                            });
-                            console.log('[showPage] Hidden all', orderCards.length, 'cards');
+                            orderCards.forEach(card => card.style.display = 'none');
 
-                            // Show orders for current page
                             const start = (page - 1) * ORDERS_PER_PAGE;
                             const end = start + ORDERS_PER_PAGE;
-                            console.log('[showPage] Showing orders from index', start, 'to', end);
-
-                            let displayedCount = 0;
+                            let displayed = 0;
                             for (let i = start; i < end && i < orderCards.length; i++) {
                                 orderCards[i].style.display = 'block';
-                                displayedCount++;
+                                displayed++;
                             }
-                            console.log('[showPage] Displayed', displayedCount, 'cards');
 
-                            // Update display count
                             const displayCountElement = document.getElementById('displayCount');
-                            if (displayCountElement) {
-                                displayCountElement.textContent = displayedCount;
-                            }
+                            if (displayCountElement) displayCountElement.textContent = displayed;
 
-                            // Update pagination UI
                             const pageInfoEl = document.getElementById('pageInfo');
                             if (pageInfoEl) pageInfoEl.textContent = 'Trang ' + currentPage + ' / ' + totalPages;
 
@@ -473,22 +452,6 @@
                             const nextBtn = document.getElementById('nextBtn');
                             if (prevBtn) prevBtn.disabled = currentPage === 1;
                             if (nextBtn) nextBtn.disabled = currentPage === totalPages;
-
-                            // Update button styles
-                            if (prevBtn) {
-                                prevBtn.style.opacity = (currentPage === 1) ? '0.5' : '1';
-                                prevBtn.style.cursor = (currentPage === 1) ? 'not-allowed' : 'pointer';
-                            }
-                            if (nextBtn) {
-                                nextBtn.style.opacity = (currentPage === totalPages) ? '0.5' : '1';
-                                nextBtn.style.cursor = (currentPage === totalPages) ? 'not-allowed' : 'pointer';
-                            }
-
-                            // Scroll to top of orders list if title exists
-                            const titleEl = document.querySelector('.order-list-title');
-                            if (titleEl) {
-                                try { titleEl.scrollIntoView({ behavior: 'smooth' }); } catch (e) { /* ignore */ }
-                            }
                         }
 
                         function changePage(direction) {
@@ -496,43 +459,36 @@
                         }
 
                         function cancelOrder(orderId) {
-                            if (!confirm("Bạn có chắc muốn hủy đơn hàng này?")) return;
-                            debugger;
+                            if (!confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
                             fetch('/api/orders/' + orderId + '/cancel', {
                                 method: 'PUT',
                                 credentials: 'include'
                             })
-                                .then(response => {
-                                    if (!response.ok) throw new Error("Không thể hủy đơn hàng");
-                                    return response.json();
-                                })
-                                .then(data => {
-                                    showMessage(data.message, 'success');
-                                    // Cập nhật trạng thái hiển thị
-                                    const statusEl = document.getElementById('status-' + orderId);
-                                    if (statusEl) statusEl.textContent = 'CANCELLED';
-
-                                    const btn = document.querySelector('#order-row-' + orderId + ' .btn-cancel');
-                                    if (btn) btn.style.display = 'none';
-                                })
-                                .catch(error => {
-                                    console.error(error);
-                                    showMessage('Lỗi khi hủy đơn hàng hoặc hoàn tiền!', 'error');
-                                });
+                            .then(response => {
+                                if (!response.ok) throw new Error('Không thể hủy đơn hàng');
+                                return response.json();
+                            })
+                            .then(data => {
+                                showMessage(data.message || 'Đã hủy đơn hàng', 'success');
+                                const statusEl = document.getElementById('status-' + orderId);
+                                if (statusEl) {
+                                    statusEl.textContent = 'CANCELLED';
+                                    statusEl.className = 'order-status-badge status-CANCELLED';
+                                }
+                                const btn = document.querySelector('#order-row-' + orderId + ' .btn-cancel');
+                                if (btn) btn.style.display = 'none';
+                            })
+                            .catch(() => showMessage('Lỗi khi hủy đơn hàng!', 'error'));
                         }
 
                         function showMessage(message, type) {
-                            var container = document.getElementById('messageContainer');
+                            const container = document.getElementById('messageContainer');
+                            if (!container) return;
                             container.textContent = message;
                             container.className = 'alert-message alert-' + type;
                             container.style.display = 'block';
-
-                            // Scroll to message
                             container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-                            setTimeout(function () {
-                                container.style.display = 'none';
-                            }, 5000);
+                            setTimeout(() => container.style.display = 'none', 5000);
                         }
                     </script>
 

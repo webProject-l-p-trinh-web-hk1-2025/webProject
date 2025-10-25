@@ -2,10 +2,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<title>Đơn hàng hoàn tiền - CellPhoneStore</title>
+<title>Tất cả đơn hàng - CellPhoneStore</title>
 
 <style>
-    .refund-orders-container {
+    .seller-orders-container {
         max-width: 1200px;
         margin: 40px auto;
         padding: 20px;
@@ -14,7 +14,7 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .refund-orders-container h1 {
+    .seller-orders-container h1 {
         color: #d70018;
         margin-bottom: 20px;
         font-size: 28px;
@@ -67,47 +67,22 @@
         border-radius: 4px;
     }
 
-    .refund-controls {
-        margin-top: 15px;
-        padding: 10px;
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-
-    .refund-controls label {
-        font-weight: bold;
-        margin-right: 5px;
-    }
-
-    .refund-controls select {
-        padding: 5px 10px;
-        margin: 0 10px 0 5px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-    }
-
-    .btn-refund {
-        background-color: #28a745;
+    .btn-accept {
+        background: #28a745;
         color: #fff;
-        border: none;
-        cursor: pointer;
         padding: 8px 15px;
         border-radius: 5px;
         font-weight: bold;
+        cursor: pointer;
+        border: none;
     }
 
-    .btn-refund:hover {
-        background-color: #218838;
-    }
-
-    .btn-refund:disabled {
-        background-color: #aaa;
-        cursor: not-allowed;
+    .btn-accept:hover {
+        background: #218838;
     }
 
     .btn-back {
-        background-color: #d70018;
+        background: #d70018;
         color: #fff;
         text-decoration: none;
         padding: 10px 20px;
@@ -117,27 +92,8 @@
     }
 
     .btn-back:hover {
-        background-color: #b30014;
+        background: #b30014;
         color: #fff;
-    }
-
-    .message {
-        margin-top: 15px;
-        padding: 10px;
-        border-radius: 5px;
-        display: none;
-    }
-
-    .success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-
-    .error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
     }
 
     .status-badge {
@@ -147,9 +103,11 @@
         font-weight: bold;
     }
 
-    .status-accepted { background: #17a2b8; color: #fff; }
-    .status-shipped { background: #007bff; color: #fff; }
-    .status-refunded { background: #6c757d; color: #fff; }
+    .status-pending { background: #ffc107; color: #000; }
+    .status-confirmed { background: #17a2b8; color: #fff; }
+    .status-shipping { background: #007bff; color: #fff; }
+    .status-delivered { background: #28a745; color: #fff; }
+    .status-cancelled { background: #dc3545; color: #fff; }
 </style>
 
 <!-- BREADCRUMB -->
@@ -159,8 +117,8 @@
             <div class="col-md-12">
                 <ul class="breadcrumb-tree">
                     <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                    <li><a href="${pageContext.request.contextPath}/seller/orders">Seller</a></li>
-                    <li class="active">Đơn hàng hoàn tiền</li>
+                    <li><a href="${pageContext.request.contextPath}/seller/orders">Đơn hàng Seller</a></li>
+                    <li class="active">Tất cả đơn hàng</li>
                 </ul>
             </div>
         </div>
@@ -173,34 +131,62 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <div class="refund-orders-container">
-                    <h1>Danh sách đơn hàng hoàn tiền</h1>
+                <div class="seller-orders-container">
+                    <h1>Tất cả đơn hàng trong hệ thống</h1>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        <i class="fa fa-info-circle"></i> Trang này hiển thị tất cả đơn hàng từ tất cả seller trong hệ thống. Chỉ dành cho Admin.
+                    </p>
                     <a href="${pageContext.request.contextPath}/" class="btn-back">
                         <i class="fa fa-arrow-left"></i> Quay về trang chính
                     </a>
 
-                    <div id="messageContainer" class="message"></div>
+                    <!-- Filter Status -->
+                    <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                        <label style="font-weight: bold; margin-right: 10px;">
+                            <i class="fa fa-filter"></i> Lọc theo trạng thái:
+                        </label>
+                        <select id="statusFilter" onchange="filterByStatus()" 
+                                style="padding: 8px 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                            <option value="ALL" ${selectedStatus == 'ALL' ? 'selected' : ''}>Tất cả</option>
+                            <option value="PENDING" ${selectedStatus == 'PENDING' ? 'selected' : ''}>Chờ xác nhận</option>
+                            <option value="ACCEPTED" ${selectedStatus == 'ACCEPTED' ? 'selected' : ''}>Đã chấp nhận</option>
+                            <option value="CANCELLED" ${selectedStatus == 'CANCELLED' ? 'selected' : ''}>Đã hủy</option>
+                        </select>
+                    </div>
+
+                    <script>
+                        function filterByStatus() {
+                            const status = document.getElementById('statusFilter').value;
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('status', status);
+                            url.searchParams.set('page', '1'); // Reset to page 1 when filtering
+                            window.location.href = url.toString();
+                        }
+                    </script>
 
                     <c:forEach var="order" items="${orders}">
-                        <div class="order-card" id="order-card-${order.orderId}">
+                        <div class="order-card">
                             <div class="order-header">
                                 <div>
                                     <strong>Order ID:</strong> ${order.orderId} &nbsp;|&nbsp;
                                     <strong>Status:</strong> 
-                                    <span class="status-badge status-${order.status.toLowerCase()}" id="status-${order.orderId}">
-                                        ${order.status}
-                                    </span>
+                                    <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
                                     &nbsp;|&nbsp;
                                     <strong>Payment:</strong> ${order.paymentMethod} - ${order.paymentStatus}
                                     &nbsp;|&nbsp;
                                     <strong>Total:</strong>
                                     <fmt:formatNumber value="${order.totalAmount}" type="currency" currencySymbol="₫" />
                                 </div>
+                                <!-- Admin view: NO ACTION BUTTONS -->
                             </div>
 
                             <div class="order-info">
                                 <div><strong>Shipping Address:</strong> ${order.shippingAddress}</div>
                                 <div><strong>Created At:</strong> ${order.createdAt}</div>
+                                <div style="margin-top: 10px; padding: 8px; background: #e8f4f8; border-left: 4px solid #17a2b8;">
+                                    <strong><i class="fa fa-user"></i> Customer Info:</strong> 
+                                    ${order.shippingAddress}
+                                </div>
                             </div>
 
                             <h4 style="margin-top: 15px; color: #333;">Sản phẩm trong đơn hàng</h4>
@@ -245,34 +231,56 @@
                                     </c:forEach>
                                 </tbody>
                             </table>
-
-                            <c:if test="${order.status == 'ACCEPTED' || order.status == 'SHIPPED'}">
-                                <div class="refund-controls">
-                                    <label for="trantype-${order.orderId}">Loại hoàn tiền:</label>
-                                    <select id="trantype-${order.orderId}">
-                                        <option value="02">Hoàn toàn</option>
-                                        <option value="03">Hoàn một phần</option>
-                                    </select>
-                                    
-                                    <label for="percent-${order.orderId}">Phần trăm:</label>
-                                    <select id="percent-${order.orderId}">
-                                        <option value="50">50%</option>
-                                        <option value="100" selected>100%</option>
-                                    </select>
-                                    
-                                    <button class="btn-refund" id="refund-btn-${order.orderId}"
-                                        onclick="processRefund(${order.orderId})">
-                                        <i class="fa fa-money"></i> Hoàn tiền
-                                    </button>
-                                </div>
-                            </c:if>
                         </div>
                     </c:forEach>
 
                     <c:if test="${empty orders}">
                         <div style="text-align: center; padding: 40px; color: #999;">
                             <i class="fa fa-inbox" style="font-size: 48px; margin-bottom: 10px;"></i>
-                            <p style="font-size: 18px;">Không có đơn hàng hoàn tiền nào.</p>
+                            <p style="font-size: 18px;">Không có đơn hàng nào.</p>
+                        </div>
+                    </c:if>
+
+                    <!-- Pagination -->
+                    <c:if test="${not empty orders && totalPages > 1}">
+                        <div style="text-align: center; margin-top: 30px;">
+                            <div class="store-pagination">
+                                <!-- Previous Button -->
+                                <c:if test="${currentPage > 1}">
+                                    <a href="${pageContext.request.contextPath}/seller/all-orders?page=${currentPage - 1}&size=${pageSize}" 
+                                       class="btn btn-default">
+                                        <i class="fa fa-angle-left"></i> Trước
+                                    </a>
+                                </c:if>
+                                
+                                <!-- Page Numbers -->
+                                <c:forEach begin="${currentPage - 2 < 1 ? 1 : currentPage - 2}" 
+                                           end="${currentPage + 2 > totalPages ? totalPages : currentPage + 2}" 
+                                           var="pageNum">
+                                    <c:choose>
+                                        <c:when test="${pageNum == currentPage}">
+                                            <span class="btn btn-primary">${pageNum}</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="${pageContext.request.contextPath}/seller/all-orders?page=${pageNum}&size=${pageSize}" 
+                                               class="btn btn-default">${pageNum}</a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+                                
+                                <!-- Next Button -->
+                                <c:if test="${currentPage < totalPages}">
+                                    <a href="${pageContext.request.contextPath}/seller/all-orders?page=${currentPage + 1}&size=${pageSize}" 
+                                       class="btn btn-default">
+                                        Sau <i class="fa fa-angle-right"></i>
+                                    </a>
+                                </c:if>
+                            </div>
+                            
+                            <!-- Page Info -->
+                            <div style="margin-top: 15px; color: #666;">
+                                Hiển thị ${startIndex} - ${endIndex} trong tổng số ${totalOrders} đơn hàng
+                            </div>
                         </div>
                     </c:if>
                 </div>
@@ -281,63 +289,3 @@
     </div>
 </div>
 <!-- /SECTION -->
-
-<script>
-    function processRefund(orderId) {
-        const btn = document.getElementById('refund-btn-' + orderId);
-        const trantypeEl = document.getElementById('trantype-' + orderId);
-        const percentEl = document.getElementById('percent-' + orderId);
-        
-        console.log("Processing refund for orderId:", orderId);
-        console.log("Trantype element:", trantypeEl);
-        console.log("Percent element:", percentEl);
-        
-        if (!trantypeEl || !percentEl) {
-            alert("Không tìm thấy các trường trantype/percent cho đơn hàng này.");
-            return;
-        }
-
-        const trantype = trantypeEl.value;
-        const percent = parseInt(percentEl.value);
-
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang xử lý...';
-
-        fetch('${pageContext.request.contextPath}/seller/orders-refund/' + orderId + '/process?trantype=' + trantype + '&percent=' + percent, {
-            method: 'POST'
-        })
-        .then(res => {
-            if (!res.ok) throw new Error("Hoàn tiền thất bại: " + res.status);
-            return res.text();
-        })
-        .then(msg => {
-            showMessage(msg, 'success');
-            const statusBadge = document.getElementById('status-' + orderId);
-            statusBadge.textContent = "REFUNDED";
-            statusBadge.className = "status-badge status-refunded";
-            btn.style.display = 'none';
-            
-            // Hide refund controls
-            const controls = btn.parentElement;
-            if (controls) {
-                controls.style.display = 'none';
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            showMessage(err.message, 'error');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa fa-money"></i> Hoàn tiền';
-        });
-    }
-
-    function showMessage(message, type) {
-        const container = document.getElementById('messageContainer');
-        container.textContent = message;
-        container.className = 'message ' + type;
-        container.style.display = 'block';
-        setTimeout(() => { 
-            container.style.display = 'none'; 
-        }, 5000);
-    }
-</script>

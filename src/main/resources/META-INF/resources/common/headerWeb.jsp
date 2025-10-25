@@ -16,15 +16,14 @@ isAuthenticated); %>
     <div class="container">
       <ul class="header-links pull-left">
         <li>
-          <a href="#"><i class="fa fa-phone"></i> +84 123-456-789</a>
+          <a href="https://zalo.me/0889251007" target="_blank"><i class="fa fa-phone"></i> +84 889-251-007</a>
         </li>
         <li>
-          <a href="#"><i class="fa fa-envelope-o"></i> contact@phonestore.vn</a>
+          <a href="mailto:kietccc21@gmail.com"><i class="fa fa-envelope-o"></i> kietccc21@gmail.com</a>
         </li>
         <li>
-          <a href="#"
-            ><i class="fa fa-map-marker"></i> 268 Lý Thường Kiệt, Quận 10,
-            TP.HCM</a
+          <a href="https://www.google.com/maps/place/Tr%C6%B0%E1%BB%9Dng+%C4%90%E1%BA%A1i+h%E1%BB%8Dc+S%C6%B0+ph%E1%BA%A1m+K%E1%BB%B9+thu%E1%BA%ADt+Th%C3%A0nh+ph%E1%BB%91+H%E1%BB%93+Ch%C3%AD+Minh/@10.8505683,106.7717721,17z/data=!4m6!3m5!1s0x31752763f23816ab:0x282f711441b6916f!8m2!3d10.8506324!4d106.7719131!16s%2Fm%2F02pz17z?entry=ttu&g_ep=EgoyMDI1MTAxNC4wIKXMDSoASAFQAw%3D%3D" target="_blank"
+            ><i class="fa fa-map-marker"></i> 1 Võ Văn Ngân, Linh Chiểu, Thủ Đức, TP.HCM</a
           >
         </li>
       </ul>
@@ -93,7 +92,7 @@ isAuthenticated); %>
 
         <!-- SEARCH BAR -->
         <div class="col-md-6">
-          <div class="header-search" style="position: relative">
+          <div class="header-search">
             <!-- Submit to the shop page with name parameter for search -->
             <form
               action="${pageContext.request.contextPath}/shop"
@@ -121,16 +120,17 @@ isAuthenticated); %>
               style="
                 position: absolute;
                 top: 100%;
-                left: 0;
-                right: 0;
+                left: 15px;
+                right: 15px;
                 background: white;
                 border: 1px solid #ddd;
                 border-top: none;
                 max-height: 400px;
                 overflow-y: auto;
-                z-index: 9999;
+                z-index: 10000;
                 display: none;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                border-radius: 0 0 4px 4px;
               "
             ></div>
           </div>
@@ -140,18 +140,6 @@ isAuthenticated); %>
         <!-- ACCOUNT -->
         <div class="col-md-3 clearfix">
           <div class="header-ctn">
-            <!-- Chat Support -->
-            <c:if test="${isUserAuthenticated}">
-              <div class="chat-support-btn">
-                <a href="${pageContext.request.contextPath}/user/chat">
-                  <i class="fa fa-comments"></i>
-                  <span>Chat</span>
-                  <div class="qty" id="chat-qty">0</div>
-                </a>
-              </div>
-            </c:if>
-            <!-- /Chat Support -->
-
             <!-- Wishlist -->
             <div>
               <a href="${pageContext.request.contextPath}/wishlist">
@@ -210,14 +198,31 @@ isAuthenticated); %>
           <a href="${pageContext.request.contextPath}/deals">Khuyến mãi</a>
         </li>
         <c:if test="${isUserAuthenticated}">
-          <% Authentication
-          navAuth=SecurityContextHolder.getContext().getAuthentication();
-          boolean isAdmin=navAuth.getAuthorities().stream() .anyMatch(a ->
-          a.getAuthority().equals("ROLE_ADMIN"));
-          request.setAttribute("isAdmin", isAdmin); %>
+          <% 
+          Authentication navAuth = SecurityContextHolder.getContext().getAuthentication();
+          boolean isAdmin = navAuth.getAuthorities().stream()
+              .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+          boolean isSeller = navAuth.getAuthorities().stream()
+              .anyMatch(a -> a.getAuthority().equals("ROLE_SELLER"));
+          request.setAttribute("isAdmin", isAdmin);
+          request.setAttribute("isSeller", isSeller);
+          %>
           <c:if test="${isAdmin}">
             <li>
               <a href="${pageContext.request.contextPath}/admin">Quản trị</a>
+            </li>
+          </c:if>
+          <!-- Admin hoặc Seller đều thấy menu Seller -->
+          <c:if test="${isAdmin || isSeller}">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                Seller <i class="fa fa-angle-down"></i>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="${pageContext.request.contextPath}/seller/orders">Đơn hàng của tôi</a></li>
+                <li><a href="${pageContext.request.contextPath}/seller/all-orders">Tất cả đơn hàng</a></li>
+                <li><a href="${pageContext.request.contextPath}/seller/orders-refund">Yêu cầu hoàn tiền</a></li>
+              </ul>
             </li>
           </c:if>
         </c:if>
@@ -301,91 +306,11 @@ isAuthenticated); %>
               });
           }
 
-          // Function to update chat unread count (global function)
-          function updateGlobalChatCount() {
-  <%
-              org.springframework.security.core.Authentication chatAuth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-      boolean isChatAuthenticated = chatAuth != null && chatAuth.isAuthenticated() && !(chatAuth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
-  %>
-  var isLoggedIn = <%= isChatAuthenticated %>;
-
-            if (!isLoggedIn) {
-              console.log('[Chat Badge] User not logged in');
-              return;
-            }
-
-            console.log('[Chat Badge] Fetching unread count...');
-            fetch('${pageContext.request.contextPath}/api/chat/unread-count', {
-              method: 'GET',
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            })
-              .then(function (response) {
-                if (response.ok) {
-                  return response.json();
-                }
-                return null;
-              })
-              .then(function (data) {
-                console.log('[Chat Badge] Unread count:', data);
-                if (data && data.unreadCount !== undefined) {
-                  var qtyElement = document.getElementById('chat-qty');
-                  if (qtyElement) {
-                    qtyElement.textContent = data.unreadCount;
-                    console.log('[Chat Badge] Updated to:', data.unreadCount);
-                  } else {
-                    console.warn('[Chat Badge] Element #chat-qty not found');
-                  }
-                }
-              })
-              .catch(function (error) {
-                console.error('[Chat Badge] Error updating chat count:', error);
-              });
-          }
-
           // Update counts on page load
           window.addEventListener('DOMContentLoaded', function () {
             updateGlobalCartCount();
             updateGlobalWishlistCount();
-
-            // Check if badge needs refresh (set by chat page)
-            if (sessionStorage.getItem('chatBadgeNeedsRefresh') === 'true') {
-              console.log('[Chat Badge] Forced refresh requested');
-              sessionStorage.removeItem('chatBadgeNeedsRefresh');
-              // Small delay to ensure DB is updated
-              setTimeout(function() {
-                updateGlobalChatCount();
-              }, 200);
-            } else {
-              updateGlobalChatCount();
-            }
-
             initSearchAutocomplete();
-          });
-
-          // Update chat badge when page becomes visible (user switches back to tab)
-          document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-              console.log('[Chat Badge] Page visible, refreshing badge...');
-              updateGlobalChatCount();
-            }
-          });
-
-          // Update chat badge when page is shown (including from back/forward cache)
-          window.addEventListener('pageshow', function(event) {
-            // event.persisted is true if page is loaded from cache
-            if (event.persisted) {
-              console.log('[Chat Badge] Page shown from cache, refreshing badge...');
-              updateGlobalChatCount();
-            }
-          });
-
-          // Update chat badge when user navigates back to this page
-          window.addEventListener('focus', function() {
-            console.log('[Chat Badge] Window focused, refreshing badge...');
-            updateGlobalChatCount();
           });
 
           // ========== SEARCH AUTOCOMPLETE ==========
@@ -497,57 +422,71 @@ isAuthenticated); %>
 
             var header = document.querySelector('header');
             var navigation = document.getElementById('navigation');
-            var headerHeight = header ? header.offsetHeight : 0;
-            var stickyOffset = headerHeight;
+            
+            // Create a wrapper for both header and nav
+            var wrapper = document.createElement('div');
+            wrapper.id = 'header-nav-wrapper';
+            wrapper.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            if (header && navigation && header.parentNode) {
+              // Insert wrapper before header
+              header.parentNode.insertBefore(wrapper, header);
+              // Move header and nav into wrapper
+              wrapper.appendChild(header);
+              wrapper.appendChild(navigation);
+            }
+
+            var wrapperHeight = wrapper ? wrapper.offsetHeight : 0;
+            var stickyOffset = 50; // Trigger earlier for smoother effect
 
             // Add placeholder to prevent content jump
             var placeholder = document.createElement('div');
             placeholder.id = 'header-placeholder';
             placeholder.style.display = 'none';
+            placeholder.style.transition = 'height 0.3s ease';
 
-            if (header && header.parentNode) {
-              header.parentNode.insertBefore(placeholder, header);
+            if (wrapper && wrapper.parentNode) {
+              wrapper.parentNode.insertBefore(placeholder, wrapper);
             }
 
             window.addEventListener('scroll', function () {
               var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
               if (scrollTop > stickyOffset) {
-                // Make header sticky
+                // Make wrapper sticky (header + nav together)
+                if (wrapper) {
+                  wrapper.style.position = 'fixed';
+                  wrapper.style.top = '0';
+                  wrapper.style.left = '0';
+                  wrapper.style.right = '0';
+                  wrapper.style.zIndex = '9999';
+                  wrapper.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+                }
+
                 if (header) {
-                  header.style.position = 'fixed';
-                  header.style.top = '0';
-                  header.style.left = '0';
-                  header.style.right = '0';
-                  header.style.zIndex = '9999';
-                  header.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                  header.style.animation = 'slideDown 0.3s ease-out';
+                  header.classList.add('sticky');
                 }
 
                 if (navigation) {
-                  navigation.style.position = 'fixed';
-                  navigation.style.top = header ? header.offsetHeight + 'px' : '0';
-                  navigation.style.left = '0';
-                  navigation.style.right = '0';
-                  navigation.style.zIndex = '9998';
-                  navigation.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+                  navigation.classList.add('sticky');
                 }
 
                 // Show placeholder to prevent content jump
                 placeholder.style.display = 'block';
-                placeholder.style.height = (headerHeight + (navigation ? navigation.offsetHeight : 0)) + 'px';
+                placeholder.style.height = wrapperHeight + 'px';
               } else {
                 // Reset to normal
+                if (wrapper) {
+                  wrapper.style.position = 'relative';
+                  wrapper.style.boxShadow = 'none';
+                }
+
                 if (header) {
-                  header.style.position = 'relative';
-                  header.style.boxShadow = 'none';
-                  header.style.animation = 'none';
+                  header.classList.remove('sticky');
                 }
 
                 if (navigation) {
-                  navigation.style.position = 'relative';
-                  navigation.style.top = '0';
-                  navigation.style.boxShadow = 'none';
+                  navigation.classList.remove('sticky');
                 }
 
                 placeholder.style.display = 'none';
@@ -569,15 +508,23 @@ isAuthenticated); %>
     }
   }
 
-  /* Ensure header transitions smoothly */
+  /* Smooth sticky header with transitions */
   header {
-    transition: box-shadow 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
   }
 
+  header.sticky {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  }
+
   #navigation {
-    transition: box-shadow 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
+  }
+
+  #navigation.sticky {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
   }
 
   /* Adjust search suggestions z-index when header is sticky */
@@ -585,52 +532,4 @@ isAuthenticated); %>
     z-index: 10000 !important;
   }
 
-  /* Chat Support button styling */
-  .header-ctn .chat-support-btn {
-    display: inline-block;
-    margin-left: 15px;
-  }
-
-  .header-ctn .chat-support-btn:first-child {
-    margin-left: 0;
-  }
-
-  .header-ctn .chat-support-btn > a {
-    display: block;
-    position: relative;
-    width: 90px;
-    text-align: center;
-    color: #fff;
-    text-decoration: none;
-    transition: opacity 0.3s;
-  }
-
-  .header-ctn .chat-support-btn > a:hover {
-    opacity: 0.8;
-  }
-
-  .header-ctn .chat-support-btn > a > i {
-    display: block;
-    font-size: 18px;
-    margin-bottom: 2px;
-  }
-
-  .header-ctn .chat-support-btn > a > span {
-    font-size: 12px;
-    display: block;
-  }
-
-  .header-ctn .chat-support-btn > a > .qty {
-    position: absolute;
-    right: 15px;
-    top: -10px;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
-    text-align: center;
-    border-radius: 50%;
-    font-size: 10px;
-    color: #fff;
-    background-color: #d10024;
-  }
 </style>

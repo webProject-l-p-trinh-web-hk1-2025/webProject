@@ -125,7 +125,7 @@
             <div class="col-md-12">
                 <ul class="breadcrumb-tree">
                     <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                    <li class="active">Đơn hàng của tôi (Seller)</li>
+                    <li class="active">Đơn hàng  (Seller)</li>
                 </ul>
             </div>
         </div>
@@ -139,9 +139,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="seller-orders-container">
-                    <h1>Đơn hàng của tôi (Seller)</h1>
+                    <h1>Đơn hàng</h1>
                     <p style="color: #666; margin-bottom: 20px;">
-                        <i class="fa fa-shopping-bag"></i> Quản lý đơn hàng bạn đã bán. Bạn có thể chấp nhận đơn hàng PENDING.
+                        <i class="fa fa-shopping-bag"></i> Quản lý tất cả đơn hàng trong hệ thống. Bạn có thể chấp nhận đơn hàng PENDING.
                     </p>
                     <a href="${pageContext.request.contextPath}/" class="btn-back">
                         <i class="fa fa-arrow-left"></i> Quay về trang chính

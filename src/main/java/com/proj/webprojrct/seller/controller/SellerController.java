@@ -96,7 +96,8 @@ public class SellerController {
             return "redirect:/login";
         }
         try {
-            List<OrderSellerResponse> allOrders = sellerService.getOrdersBySellerId(authentication);
+            // Get ALL orders in system (same as all-orders page)
+            List<OrderSellerResponse> allOrders = sellerService.getAllOrders(authentication);
             
             // Filter by status if provided
             if (status != null && !status.isEmpty() && !status.equals("ALL")) {

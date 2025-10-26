@@ -53,51 +53,6 @@
                         </div>
                         <!-- /Product main img -->
 
-                        <div>
-                          <h3 class="product-price" id="productPrice">
-                            <c:choose>
-                              <c:when
-                                test="${product.onDeal == true && product.dealPercentage != null && product.dealPercentage > 0}">
-                                <c:set var="discountedPrice"
-                                  value="${product.price * (100 - product.dealPercentage) / 100}" />
-                                <c:set var="savedAmount" value="${product.price - discountedPrice}" />
-                                <span style="color: #d70018; font-size: 28px; font-weight: bold;">
-                                  <fmt:formatNumber value="${discountedPrice}" type="currency" currencySymbol="₫"
-                                    maxFractionDigits="0" />
-                                </span>
-                                <del style="color: #999; font-size: 18px; margin-left: 10px;">
-                                  <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫"
-                                    maxFractionDigits="0" />
-                                </del>
-                                <span
-                                  style="color: #ff4444; font-size: 16px; margin-left: 10px; font-weight: bold; background: #ffe8e8; padding: 2px 8px; border-radius: 4px;">
-                                  -${product.dealPercentage}%
-                                </span>
-                                <span
-                                  style="color: #28a745; font-size: 16px; margin-left: 10px; font-weight: bold; background: #e8f5e8; padding: 2px 8px; border-radius: 4px;">
-                                  Tiết kiệm
-                                  <fmt:formatNumber value="${savedAmount}" type="currency" currencySymbol="₫"
-                                    maxFractionDigits="0" />
-                                </span>
-                              </c:when>
-                              <c:otherwise>
-                                <span style="color: #d70018; font-size: 28px; font-weight: bold;">
-                                  <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫"
-                                    maxFractionDigits="0" />
-                                </span>
-                              </c:otherwise>
-                            </c:choose>
-                          </h3>
-                          <span class="product-available" id="productStock">
-                            <c:choose>
-                              <c:when test="${product.stock > 0}">Còn hàng</c:when>
-                              <c:otherwise>Hết hàng</c:otherwise>
-                            </c:choose>
-                          </span>
-                        </div>
-                        <p id="productDescription">Loading product description...</p>
-
-
                         <!-- Product thumb imgs -->
                         <div class="col-md-2 col-md-pull-5">
                           <div id="product-imgs">
@@ -1392,52 +1347,6 @@
                       '<p style="color: #999;">Lỗi khi tải mô tả: ' + error.message + '</p>';
                   }
                 }
-
-                console.log('API URL:', apiUrl);
-                console.log('Product ID:', productId);
-
-                const response = await fetch(apiUrl);
-                console.log('Response status:', response.status);
-                console.log('Response OK:', response.ok);
-
-                if (!response.ok) {
-                  console.warn('No document found - Status:', response.status);
-                  document.getElementById('tabDescription').innerHTML =
-                    '<p style="color: #999;">Chưa có mô tả chi tiết cho sản phẩm này. <br><small>Vui lòng tạo document cho sản phẩm này trong trang admin.</small></p>';
-                  return;
-                }
-
-                const docData = await response.json();
-                console.log('=== DOCUMENT DATA ===');
-                console.log('Document ID:', docData.id);
-                console.log('Document Title:', docData.title);
-                console.log('Document Product ID:', docData.productId);
-                console.log('Description exists:', !!docData.description);
-                console.log('Description length:', docData.description ? docData.description.length : 0);
-                console.log('Description preview:', docData.description ? docData.description.substring(0, 100) : 'N/A');
-
-                const tabDescElement = document.getElementById('tabDescription');
-                console.log('Tab element found:', !!tabDescElement);
-
-                // Hiển thị document description vào tab Mô tả
-                if (docData.description && docData.description.trim()) {
-                  tabDescElement.innerHTML = docData.description;
-                  console.log('=== HTML INJECTED ===');
-                  console.log('Tab innerHTML length:', tabDescElement.innerHTML.length);
-                  console.log('Tab visible:', tabDescElement.offsetHeight > 0);
-                } else {
-                  console.warn('Document exists but description is empty');
-                  tabDescElement.innerHTML =
-                    '<p style="color: #999;">Document tồn tại nhưng chưa có nội dung mô tả.</p>';
-                }
-                              } catch (error) {
-                  console.error('=== ERROR ===');
-                  console.error('Error:', error.message);
-                  console.error('Stack:', error.stack);
-                  document.getElementById('tabDescription').innerHTML =
-                    '<p style="color: #999;">Lỗi khi tải mô tả: ' + error.message + '</p>';
-                }
-                            }
 
                 // ==================== REVIEW AND RATING FUNCTIONS ====================
 

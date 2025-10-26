@@ -30,25 +30,55 @@ public class HomeController {
                 User user = userDetails.getUser();
                 model.addAttribute("currentUser", user);
             }
-            
+
             // Lấy tất cả sản phẩm
             model.addAttribute("products", productService.getAll());
-            
+
             // Lấy tất cả categories (nếu cần cho phần khác)
             model.addAttribute("categories", categoryService.getAll());
-            
+
             // Lấy danh sách các thương hiệu (dùng cho phần Sản phẩm mới)
             model.addAttribute("brands", productService.getAllBrands());
-            
+
         } catch (Exception e) {
             model.addAttribute("error", "Không thể tải dữ liệu: " + e.getMessage());
         }
-        
+
         return "home";
     }
-    
+
     @GetMapping("/about")
     public String about() {
         return "about";
+    }
+
+    @GetMapping("/faq")
+    public String faq() {
+        return "faq";
+    }
+
+    @GetMapping("/warranty")
+    public String warranty() {
+        return "warranty";
+    }
+
+    @GetMapping("/return")
+    public String returnPolicy() {
+        return "return";
+    }
+
+    @GetMapping("/payment")
+    public String paymentGuide() {
+        return "payment";
+    }
+
+    @GetMapping("/shipping")
+    public String shipping() {
+        return "shipping";
+    }
+
+    @GetMapping("/contact")
+    public String contact() {
+        return "contact";
     }
 }

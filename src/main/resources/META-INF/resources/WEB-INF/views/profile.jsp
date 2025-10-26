@@ -97,8 +97,8 @@
                     padding: 16px 20px;
                     text-align: center;
                     border: none;
-                    background: transparent;
-                    color: #2B2D42;
+                    background: #fff !important;
+                    color: #2B2D42 !important;
                     font-size: 14px;
                     font-weight: 500;
                     cursor: pointer;
@@ -115,13 +115,13 @@
                 }
 
                 .profile-tab:hover {
-                    background: #FFF5F5;
-                    color: #D10024;
+                    background: #FFF5F5 !important;
+                    color: #D10024 !important;
                 }
 
                 .profile-tab.active {
-                    background: #D10024;
-                    color: #fff;
+                    background: #D10024 !important;
+                    color: #fff !important;
                     font-weight: 600;
                 }
 
@@ -1163,6 +1163,12 @@
                             <c:if test="${not empty passwordChangeMessage}">
                                 switchTab('account');
                             </c:if>
+
+                            // Check if URL has hash for tab navigation (e.g., #orders)
+                            const hash = window.location.hash.substring(1); // Remove the '#' character
+                            if (hash && ['overview', 'orders', 'offers', 'account'].includes(hash)) {
+                                switchTab(hash);
+                            }
                         });
 
                         // Preview avatar when file is selected

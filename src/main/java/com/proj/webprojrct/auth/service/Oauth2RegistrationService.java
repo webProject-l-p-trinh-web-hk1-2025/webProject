@@ -34,6 +34,9 @@ public class Oauth2RegistrationService {
 
         String generationPassword = generateRandomPassword(12);
 
+        if (userRepository.findByPhone(registerRequest.getPhone()).isPresent()) {
+            throw new RuntimeException("Số điện thoại đã tồn tại: " + registerRequest.getPhone());
+        }
         User user = new User();
         user.setFullName(registerRequest.getFullName());
         user.setEmail(registerRequest.getEmail());

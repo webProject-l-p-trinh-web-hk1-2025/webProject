@@ -519,7 +519,7 @@
                                         <img src="${pageContext.request.contextPath}${user.avatarUrl}" alt="avatar" />
                                     </c:when>
                                     <c:otherwise>
-                                        <img src="${pageContext.request.contextPath}/image/default-avatar.png"
+                                        <img src="${pageContext.request.contextPath}/uploads/avatars/defautl_avt.png"
                                             alt="avatar" />
                                     </c:otherwise>
                                 </c:choose>
@@ -894,15 +894,47 @@
                                                 <label
                                                     style="font-weight:600; color:#2B2D42; margin-bottom:8px; display:flex; align-items:center; gap:8px; font-size:14px;">
                                                     <i class="fa fa-envelope-o"></i> Email
+                                                    <c:if test="${verifyEmail}">
+                                                        <span style="color:#28a745; font-size:12px; font-weight:500;">
+                                                            <i class="fa fa-check-circle"></i> Đã xác thực
+                                                        </span>
+                                                    </c:if>
                                                 </label>
                                                 <input type="email" name="email"
-                                                    style="width:100%; padding:10px 15px; border:1px solid #E4E7ED; border-radius:3px; font-size:14px;"
-                                                    value="${user.email}" required>
+                                                    style="width:100%; padding:10px 15px; border:1px solid #E4E7ED; border-radius:3px; font-size:14px; ${verifyEmail ? 'background:#F8F9FA; cursor:not-allowed;' : ''}"
+                                                    value="${user.email}" ${verifyEmail ? 'readonly' : 'required' }>
+                                                <c:if test="${verifyEmail}">
+                                                    <small
+                                                        style="color:#8D99AE; font-size:12px; display:block; margin-top:5px;">
+                                                        <i class="fa fa-info-circle"></i> Email đã xác thực không thể
+                                                        thay đổi
+                                                    </small>
+                                                </c:if>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="row">
+                                        <div class="col-md-6">
+                                            <div style="margin-bottom:20px;">
+                                                <label
+                                                    style="font-weight:600; color:#2B2D42; margin-bottom:8px; display:flex; align-items:center; gap:8px; font-size:14px;">
+                                                    <i class="fa fa-phone"></i> Số điện thoại
+                                                    <c:if test="${verifyPhone}">
+                                                        <span style="color:#28a745; font-size:12px; font-weight:500;">
+                                                            <i class="fa fa-check-circle"></i> Đã xác thực
+                                                        </span>
+                                                    </c:if>
+                                                </label>
+                                                <input type="text" name="phone"
+                                                    style="width:100%; padding:10px 15px; border:1px solid #E4E7ED; border-radius:3px; font-size:14px; background:#F8F9FA; cursor:not-allowed;"
+                                                    value="${user.phone}" readonly>
+                                                <small
+                                                    style="color:#8D99AE; font-size:12px; display:block; margin-top:5px;">
+                                                    <i class="fa fa-info-circle"></i> Số điện thoại không thể thay đổi
+                                                </small>
+                                            </div>
+                                        </div>
                                         <div class="col-md-6">
                                             <div style="margin-bottom:20px;">
                                                 <label
@@ -914,7 +946,10 @@
                                                     rows="3">${user.address}</textarea>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
                                             <div style="margin-bottom:20px;">
                                                 <label
                                                     style="font-weight:600; color:#2B2D42; margin-bottom:8px; display:flex; align-items:center; gap:8px; font-size:14px;">
@@ -924,13 +959,13 @@
                                                 <!-- Avatar Preview -->
                                                 <div style="margin-bottom:15px; text-align:center;">
                                                     <img id="avatarPreview"
-                                                        src="${user.avatarUrl != null ? pageContext.request.contextPath.concat(user.avatarUrl) : pageContext.request.contextPath.concat('/img/default-avatar.png')}"
+                                                        src="${user.avatarUrl != null ? pageContext.request.contextPath.concat(user.avatarUrl) : pageContext.request.contextPath.concat('/uploads/avatars/defautl_avt.png')}"
                                                         alt="Avatar Preview"
                                                         style="width:150px; height:150px; object-fit:cover; border-radius:50%; border:3px solid #D10024; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
                                                 </div>
 
                                                 <!-- Custom File Upload Button -->
-                                                <div style="position:relative;">
+                                                <div style="position:relative; max-width:300px; margin:0 auto;">
                                                     <input type="file" name="avt" id="avatarInput" style="display:none;"
                                                         accept="image/*" onchange="previewAvatar(event)">
                                                     <button type="button"

@@ -129,7 +129,12 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                       >
                         <option value="">-- Chọn hãng --</option>
                       </select>
-                      <input type="hidden" name="brand" id="brandHidden" value="${product.brand}" />
+                      <input
+                        type="hidden"
+                        name="brand"
+                        id="brandHidden"
+                        value="${product.brand}"
+                      />
                     </div>
                   </div>
 
@@ -405,64 +410,65 @@ uri="http://java.sun.com/jsp/jstl/core" %>
       // Load danh mục cha (Hãng: Apple, Samsung, Xiaomi...)
       let currentProductCategoryParentId = null;
       (async () => {
-        const brandSelect = document.getElementById('brandCategorySelect');
-        const seriesSelect = document.getElementById('productSeriesSelect');
-        
+        const brandSelect = document.getElementById("brandCategorySelect");
+        const seriesSelect = document.getElementById("productSeriesSelect");
+
         // Load parent categories (Hãng)
         const res = await fetch(ctx + "/api/categories/parents");
         const parentCategories = await res.json();
-        
+
         parentCategories.forEach((c) => {
           const opt = document.createElement("option");
           opt.value = c.id;
           opt.textContent = c.name;
           brandSelect.append(opt);
         });
-        
+
         // Load sản phẩm hiện tại để set giá trị
         try {
           const p = await (await fetch(ctx + "/api/products/" + id)).json();
-          
+
           // Nếu có category, tìm parent của nó
           if (p.category && p.category.id) {
             const allCats = await (await fetch(ctx + "/api/categories")).json();
-            const currentCat = allCats.find(cat => cat.id === p.category.id);
-            
+            const currentCat = allCats.find((cat) => cat.id === p.category.id);
+
             if (currentCat && currentCat.parentId) {
               // Set hãng (parent category)
               brandSelect.value = currentCat.parentId;
               currentProductCategoryParentId = currentCat.parentId;
-              
+
               // Load dòng sản phẩm của hãng này
               await loadProductSeries(currentCat.parentId, p.category.id);
             }
           }
-          
+
           // Load existing images
           renderExistingImages(p);
         } catch (e) {
-          console.error('Error loading product:', e);
+          console.error("Error loading product:", e);
         }
       })();
-      
+
       // Function để load dòng sản phẩm khi chọn hãng
       async function loadProductSeries(parentId, selectedCategoryId = null) {
-        const seriesSelect = document.getElementById('productSeriesSelect');
-        const brandSelect = document.getElementById('brandCategorySelect');
-        const brandHidden = document.getElementById('brandHidden');
-        
+        const seriesSelect = document.getElementById("productSeriesSelect");
+        const brandSelect = document.getElementById("brandCategorySelect");
+        const brandHidden = document.getElementById("brandHidden");
+
         // Clear old options
-        seriesSelect.innerHTML = '<option value="">-- Chọn dòng sản phẩm --</option>';
-        
+        seriesSelect.innerHTML =
+          '<option value="">-- Chọn dòng sản phẩm --</option>';
+
         if (!parentId) {
           seriesSelect.disabled = true;
           return;
         }
-        
+
         // Load child categories (Dòng sản phẩm)
         const res = await fetch(ctx + "/api/categories/children/" + parentId);
         const childCategories = await res.json();
-        
+
         childCategories.forEach((c) => {
           const opt = document.createElement("option");
           opt.value = c.id;
@@ -472,20 +478,23 @@ uri="http://java.sun.com/jsp/jstl/core" %>
           }
           seriesSelect.append(opt);
         });
-        
+
         seriesSelect.disabled = false;
-        
+
         // Update hidden brand field với tên hãng đã chọn
-        const selectedBrandOption = brandSelect.options[brandSelect.selectedIndex];
+        const selectedBrandOption =
+          brandSelect.options[brandSelect.selectedIndex];
         if (selectedBrandOption && selectedBrandOption.value) {
           brandHidden.value = selectedBrandOption.textContent;
         }
       }
-      
+
       // Event listener cho khi chọn hãng
-      document.getElementById('brandCategorySelect').addEventListener('change', function() {
-        loadProductSeries(this.value);
-      });
+      document
+        .getElementById("brandCategorySelect")
+        .addEventListener("change", function () {
+          loadProductSeries(this.value);
+        });
 
       // Submit update
       document
@@ -545,8 +554,8 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                   body: fd,
                 });
               }
-              alert("Cập nhật thành công!");
-              location.href = ctx + "/admin/products/edit/" + id;
+
+              location.href = ctx + "/admin/products";
               return;
             }
 
@@ -607,18 +616,26 @@ uri="http://java.sun.com/jsp/jstl/core" %>
             del.className = "delete-img";
             del.innerHTML = '<i class="fas fa-trash"></i>';
             del.title = "Xóa ảnh";
+
+            // Thay đổi: Xóa câu lệnh xác nhận 'confirm'
             del.addEventListener("click", async (ev) => {
               ev.stopPropagation();
-              if (!confirm("Bạn có chắc muốn xóa ảnh này?")) return;
+
+              // Bắt đầu ngay quá trình xóa mà không cần hỏi người dùng
               const d = await fetch(ctx + "/api/products/images/" + it.id, {
                 method: "DELETE",
               });
+
               if (d.ok) {
+                // Xóa phần tử ảnh khỏi giao diện nếu API báo thành công
                 wrap.remove();
               } else {
-                alert("Xóa ảnh thất bại");
+                // Xử lý lỗi (ví dụ: thông báo lỗi cho người dùng)
+                console.error("Lỗi khi xóa ảnh từ server.");
+                alert("Đã xảy ra lỗi khi xóa ảnh. Vui lòng thử lại.");
               }
             });
+
             wrap.appendChild(del);
           }
 

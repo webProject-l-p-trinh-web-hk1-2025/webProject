@@ -114,7 +114,7 @@
                   <i class="fas fa-plus"></i> Thêm sản phẩm
                 </a>
                 <button class="btn btn-outline" id="showAllBtn">
-                  <i class="fas fa-list"></i> Hiển thị tất cả
+                  <i class="fas fa-list"></i>
                 </button>
               </div>
             </div>

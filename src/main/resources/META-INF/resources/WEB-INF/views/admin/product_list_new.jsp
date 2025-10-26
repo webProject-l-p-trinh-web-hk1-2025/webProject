@@ -300,9 +300,7 @@
             <a href="${pageContext.request.contextPath}/admin/products/new" class="btn btn-primary">
               <i class="fas fa-plus"></i> Thêm sản phẩm
             </a>
-            <button class="btn btn-outline" onclick="window.location.href='${pageContext.request.contextPath}/admin/products?page=0&size=10&sort=id,asc'">
-              <i class="fas fa-list"></i> Hiển thị tất cả
-            </button>
+           
           </div>
         </div>
 
@@ -384,7 +382,7 @@
                       <a href="${pageContext.request.contextPath}/product/${product.id}" class="btn btn-view" title="Xem"><i class="fas fa-eye"></i></a>
                       <a href="${pageContext.request.contextPath}/admin/products/edit/${product.id}" class="btn btn-edit" title="Sửa"><i class="fas fa-edit"></i></a>
                       <button type="button" class="btn btn-success" onclick="openDealModal('${product.id}')" title="Khuyến mãi"><i class="fas fa-percent"></i></button>
-                      <form action="${pageContext.request.contextPath}/admin/products/${product.id}/delete" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
+                      <form action="${pageContext.request.contextPath}/admin/products/${product.id}/delete" method="post" style="display:inline;" >
                         <button type="submit" class="btn btn-delete" title="Xóa"><i class="fas fa-trash"></i></button>
                       </form>
                     </td>

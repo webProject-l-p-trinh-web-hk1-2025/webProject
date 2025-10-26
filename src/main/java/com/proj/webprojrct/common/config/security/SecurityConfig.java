@@ -16,6 +16,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import com.proj.webprojrct.auth.service.CustomOauth2UserService;
+import com.proj.webprojrct.auth.service.OAuth2AuthenticationFailureHandler;
+import com.proj.webprojrct.auth.service.OAuth2AuthenticationSuccessHandler;
 import org.springframework.http.HttpMethod;
 
 @Configuration
@@ -28,6 +31,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtFilter;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomOauth2UserService customOauth2UserService;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+    private final OAuth2AuthenticationSuccessHandler oauth2SuccessHandler;
 
     // @Bean
     // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -57,7 +63,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/about", "/product/**", "/products", "/shop", "/deals", "/cart", "/wishlist", "/css/**", "/js/**", "/fonts/**", "/img/**", "/image/**", "/uploads/**", "/favicon.ico", "/error", "/error/**", "/webjars/**", "/WEB-INF/views/**", "/WEB-INF/decorators/**", "/common/**").permitAll()
+                .requestMatchers("/", "/oauth2/**", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/about", "/product/**", "/products", "/shop", "/deals", "/cart", "/wishlist", "/css/**", "/js/**", "/fonts/**", "/img/**", "/image/**", "/uploads/**", "/favicon.ico", "/error", "/error/**", "/webjars/**", "/WEB-INF/views/**", "/WEB-INF/decorators/**", "/common/**").permitAll()
                 .requestMatchers("/api/products/**", "/api/categories/**", "/api/media/**", "/api/cart/**", "/api/favorite/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
@@ -70,6 +76,13 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(form -> form.disable())
+                .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login") // if you use a custom login page
+                .defaultSuccessUrl("/", true) // or use a successHandler
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
+                .successHandler(oauth2SuccessHandler)
+                .failureHandler(oAuth2AuthenticationFailureHandler)
+                )
                 .httpBasic(httpBasic -> httpBasic.disable());
 
         return http.build();

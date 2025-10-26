@@ -14,6 +14,8 @@ import com.proj.webprojrct.common.config.security.CustomUserDetails;
 import jakarta.servlet.http.HttpSession;
 
 import java.lang.annotation.Repeatable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -257,16 +259,19 @@ public class AuthController {
     }
 
     @PostMapping("/change-password")
-    public String changePassword(@ModelAttribute ChangePassRequest request, Model model) {
+    public String changePassword(@ModelAttribute ChangePassRequest request, RedirectAttributes redirectAttributes) {
         String message;
+        boolean success = true;
         try {
             message = authService.changePassword(request);
         } catch (RuntimeException ex) {
-            message = ex.getMessage(); // nếu user không tồn tại thì ném RuntimeException
+            message = ex.getMessage();
+            success = false;
         }
 
-        model.addAttribute("message", message);
-        return "change-password";
+        redirectAttributes.addFlashAttribute("passwordChangeMessage", message);
+        redirectAttributes.addFlashAttribute("passwordChangeSuccess", success);
+        return "redirect:/profile";
     }
 
     @GetMapping("/change-password")
@@ -331,6 +336,62 @@ public class AuthController {
             model.addAttribute("error", e.getMessage());
         }
         return "verify-otp";
+    }
+
+    // API endpoints for AJAX calls
+    @PostMapping("/api/send-otp")
+    @ResponseBody
+    public Map<String, Object> sendOtpAPI(@RequestParam("type") String type) {
+        Map<String, Object> response = new HashMap<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
+            response.put("success", false);
+            response.put("message", "Bạn cần đăng nhập để thực hiện chức năng này");
+            return response;
+        }
+
+        try {
+            String msg;
+            if ("email".equals(type)) {
+                msg = authService.sendOtpEmail();
+            } else if ("phone".equals(type)) {
+                msg = authService.sendOtpPhone();
+            } else {
+                response.put("success", false);
+                response.put("message", "Loại xác thực không hợp lệ");
+                return response;
+            }
+            response.put("success", true);
+            response.put("message", msg);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        }
+        return response;
+    }
+
+    @PostMapping("/api/verify-otp")
+    @ResponseBody
+    public Map<String, Object> verifyOtpAPI(@RequestParam("otp") String otpInput) {
+        Map<String, Object> response = new HashMap<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
+            response.put("success", false);
+            response.put("message", "Bạn cần đăng nhập để thực hiện chức năng này");
+            return response;
+        }
+
+        try {
+            String msg = authService.verifyOtp(otpInput);
+            response.put("success", true);
+            response.put("message", msg);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        }
+        return response;
     }
 
 }

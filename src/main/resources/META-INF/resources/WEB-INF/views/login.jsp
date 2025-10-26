@@ -55,6 +55,15 @@
           </form>
 
           <hr />
+          <div class="text-center mb-3">
+            <a class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2"
+              href="<c:url value='/oauth2/authorization/google' />">
+              <!-- use official Google G logo -->
+              <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google"
+                style="height:18px; width:18px;" />
+              Đăng nhập bằng Google
+            </a>
+          </div>
           <p class="text-center mb-0">
             Chưa có tài khoản?
             <a href="<c:url value='/register' />" class="text-link">Đăng ký ngay</a>

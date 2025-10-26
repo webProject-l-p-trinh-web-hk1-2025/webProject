@@ -40,9 +40,9 @@
 									<div class="checkbox-filter">
 										<c:forEach items="${categories}" var="cat">
 											<div class="input-checkbox">
-												<input type="checkbox" id="category-${cat.id}" 
-													   class="category-filter" value="${cat.id}"
-													   ${selectedCategories.contains(cat.id) ? 'checked' : ''}>
+												<input type="checkbox" id="category-${cat.id}" class="category-filter"
+													value="${cat.id}" ${selectedCategories.contains(cat.id) ? 'checked'
+													: '' }>
 												<label for="category-${cat.id}">
 													<span></span>
 													${cat.name}
@@ -59,9 +59,9 @@
 									<div class="checkbox-filter">
 										<c:forEach items="${brands}" var="brand" varStatus="status">
 											<div class="input-checkbox">
-												<input type="checkbox" id="brand-${status.index}" 
-													   class="brand-filter" value="${brand}"
-													   ${selectedBrands.contains(brand) ? 'checked' : ''}>
+												<input type="checkbox" id="brand-${status.index}" class="brand-filter"
+													value="${brand}" ${selectedBrands.contains(brand) ? 'checked' : ''
+													}>
 												<label for="brand-${status.index}">
 													<span></span>
 													${brand}
@@ -79,7 +79,7 @@
 								<!-- Search result info -->
 								<c:if test="${not empty searchName}">
 									<div class="alert alert-info" style="margin-bottom: 20px;">
-										<i class="fa fa-search"></i> 
+										<i class="fa fa-search"></i>
 										Kết quả tìm kiếm cho: <strong>"${searchName}"</strong>
 										<c:if test="${totalProducts == 0}">
 											- Không tìm thấy sản phẩm nào
@@ -90,25 +90,28 @@
 									</div>
 								</c:if>
 								<!-- /Search result info -->
-								
+
 								<!-- store top filter -->
 								<div class="store-filter clearfix">
 									<div class="store-sort">
 										<label>
 											Sắp xếp theo:
 											<select class="input-select" id="sort-select">
-												<option value="popular" ${selectedSort == 'popular' ? 'selected' : ''}>Phổ biến</option>
-												<option value="price-asc" ${selectedSort == 'price-asc' ? 'selected' : ''}>Giá thấp đến cao</option>
-												<option value="price-desc" ${selectedSort == 'price-desc' ? 'selected' : ''}>Giá cao đến thấp</option>
+												<option value="popular" ${selectedSort=='popular' ? 'selected' : '' }>
+													Phổ biến</option>
+												<option value="price-asc" ${selectedSort=='price-asc' ? 'selected' : ''
+													}>Giá thấp đến cao</option>
+												<option value="price-desc" ${selectedSort=='price-desc' ? 'selected'
+													: '' }>Giá cao đến thấp</option>
 											</select>
 										</label>
 
 										<label>
 											Hiển thị:
 											<select class="input-select" id="limit-select">
-												<option value="12" ${selectedLimit == 12 ? 'selected' : ''}>12</option>
-												<option value="20" ${selectedLimit == 20 ? 'selected' : ''}>20</option>
-												<option value="50" ${selectedLimit == 50 ? 'selected' : ''}>50</option>
+												<option value="12" ${selectedLimit==12 ? 'selected' : '' }>12</option>
+												<option value="20" ${selectedLimit==20 ? 'selected' : '' }>20</option>
+												<option value="50" ${selectedLimit==50 ? 'selected' : '' }>50</option>
 											</select>
 										</label>
 									</div>
@@ -152,27 +155,41 @@
 													</h3>
 													<h4 class="product-price">
 														<c:choose>
-															<c:when test="${product.onDeal == true && product.dealPercentage != null && product.dealPercentage > 0}">
-																<c:set var="discountedPrice" value="${product.price * (100 - product.dealPercentage) / 100}"/>
-																<c:set var="savedAmount" value="${product.price - discountedPrice}"/>
-																<span style="color: #d70018; font-size: 18px; font-weight: bold;">
-																	<fmt:formatNumber value="${discountedPrice}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+															<c:when
+																test="${product.onDeal == true && product.dealPercentage != null && product.dealPercentage > 0}">
+																<c:set var="discountedPrice"
+																	value="${product.price * (100 - product.dealPercentage) / 100}" />
+																<c:set var="savedAmount"
+																	value="${product.price - discountedPrice}" />
+																<span
+																	style="color: #d70018; font-size: 18px; font-weight: bold;">
+																	<fmt:formatNumber value="${discountedPrice}"
+																		type="currency" currencySymbol="₫"
+																		maxFractionDigits="0" />
 																</span>
 																<br>
 																<del style="color: #999; font-size: 14px;">
-																	<fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+																	<fmt:formatNumber value="${product.price}"
+																		type="currency" currencySymbol="₫"
+																		maxFractionDigits="0" />
 																</del>
-																<span style="color: #ff4444; font-size: 12px; margin-left: 5px; font-weight: bold; background: #ffe8e8; padding: 1px 5px; border-radius: 3px;">
+																<span
+																	style="color: #ff4444; font-size: 12px; margin-left: 5px; font-weight: bold; background: #ffe8e8; padding: 1px 5px; border-radius: 3px;">
 																	-${product.dealPercentage}%
 																</span>
 																<br>
-																<span style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
-																	Tiết kiệm <fmt:formatNumber value="${savedAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+																<span
+																	style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
+																	Tiết kiệm
+																	<fmt:formatNumber value="${savedAmount}"
+																		type="currency" currencySymbol="₫"
+																		maxFractionDigits="0" />
 																</span>
 															</c:when>
 															<c:otherwise>
-																<fmt:formatNumber value="${product.price}" type="currency"
-																	currencySymbol="₫" maxFractionDigits="0" />
+																<fmt:formatNumber value="${product.price}"
+																	type="currency" currencySymbol="₫"
+																	maxFractionDigits="0" />
 															</c:otherwise>
 														</c:choose>
 													</h4>
@@ -222,28 +239,35 @@
 
 								<!-- store bottom filter -->
 								<div class="store-filter clearfix">
-									<span class="store-qty">Hiển thị ${startIndex}-${endIndex} trong tổng số ${totalProducts} sản phẩm</span>
+									<span class="store-qty">Hiển thị ${startIndex}-${endIndex} trong tổng số
+										${totalProducts} sản phẩm</span>
 									<ul class="store-pagination">
 										<c:if test="${currentPage > 1}">
-											<li><a href="#" onclick="goToPage(${currentPage - 1}); return false;"><i class="fa fa-angle-left"></i></a></li>
+											<li><a href="#" onclick="goToPage(${currentPage - 1}); return false;"><i
+														class="fa fa-angle-left"></i></a></li>
 										</c:if>
-										
+
 										<c:forEach begin="1" end="${totalPages}" var="pageNum">
 											<c:choose>
 												<c:when test="${pageNum == currentPage}">
 													<li class="active">${pageNum}</li>
 												</c:when>
-												<c:when test="${pageNum == 1 || pageNum == totalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)}">
-													<li><a href="#" onclick="goToPage(${pageNum}); return false;">${pageNum}</a></li>
+												<c:when
+													test="${pageNum == 1 || pageNum == totalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)}">
+													<li><a href="#"
+															onclick="goToPage(${pageNum}); return false;">${pageNum}</a>
+													</li>
 												</c:when>
-												<c:when test="${pageNum == currentPage - 2 || pageNum == currentPage + 2}">
+												<c:when
+													test="${pageNum == currentPage - 2 || pageNum == currentPage + 2}">
 													<li class="disabled"><span>...</span></li>
 												</c:when>
 											</c:choose>
 										</c:forEach>
-										
+
 										<c:if test="${currentPage < totalPages}">
-											<li><a href="#" onclick="goToPage(${currentPage + 1}); return false;"><i class="fa fa-angle-right"></i></a></li>
+											<li><a href="#" onclick="goToPage(${currentPage + 1}); return false;"><i
+														class="fa fa-angle-right"></i></a></li>
 										</c:if>
 									</ul>
 								</div>
@@ -267,10 +291,14 @@
 										<button class="newsletter-btn"><i class="fa fa-envelope"></i> Đăng ký</button>
 									</form>
 									<ul class="newsletter-follow">
-										<li><a href="https://www.facebook.com/nhan.le.24813" target="_blank"><i class="fa fa-facebook"></i></a></li>
-										<li><a href="https://x.com/Apple" target="_blank"><i class="fa fa-twitter"></i></a></li>
-										<li><a href="https://www.instagram.com/apple/" target="_blank"><i class="fa fa-instagram"></i></a></li>
-										<li><a href="https://www.pinterest.com/apple/" target="_blank"><i class="fa fa-pinterest"></i></a></li>
+										<li><a href="https://www.facebook.com/nhan.le.24813" target="_blank"><i
+													class="fa fa-facebook"></i></a></li>
+										<li><a href="https://x.com/Apple" target="_blank"><i
+													class="fa fa-twitter"></i></a></li>
+										<li><a href="https://www.instagram.com/apple/" target="_blank"><i
+													class="fa fa-instagram"></i></a></li>
+										<li><a href="https://www.pinterest.com/apple/" target="_blank"><i
+													class="fa fa-pinterest"></i></a></li>
 									</ul>
 								</div>
 							</div>
@@ -287,89 +315,89 @@
 %>
 var IS_LOGGED_IN = <%= isAuthenticated %>;
 
-// ========== FILTER & PAGINATION FUNCTIONS ==========
+					// ========== FILTER & PAGINATION FUNCTIONS ==========
 
-// Hàm để build URL với các filter hiện tại
-function buildFilterUrl(newPage) {
-	var url = '${pageContext.request.contextPath}/shop?';
-	var params = [];
-	
-	// Thêm search name nếu có
-	var searchName = '${searchName}';
-	if (searchName && searchName.trim() !== '') {
-		params.push('name=' + encodeURIComponent(searchName));
-	}
-	
-	// Thêm categories được chọn
-	var categoryCheckboxes = document.querySelectorAll('.category-filter:checked');
-	categoryCheckboxes.forEach(function(checkbox) {
-		params.push('category=' + checkbox.value);
-	});
-	
-	// Thêm brands được chọn
-	var brandCheckboxes = document.querySelectorAll('.brand-filter:checked');
-	brandCheckboxes.forEach(function(checkbox) {
-		params.push('brand=' + encodeURIComponent(checkbox.value));
-	});
-	
-	// Thêm sort
-	var sortSelect = document.getElementById('sort-select');
-	if (sortSelect && sortSelect.value) {
-		params.push('sort=' + sortSelect.value);
-	}
-	
-	// Thêm limit
-	var limitSelect = document.getElementById('limit-select');
-	if (limitSelect && limitSelect.value) {
-		params.push('limit=' + limitSelect.value);
-	}
-	
-	// Thêm page
-	if (newPage) {
-		params.push('page=' + newPage);
-	}
-	
-	return url + params.join('&');
-}
+					// Hàm để build URL với các filter hiện tại
+					function buildFilterUrl(newPage) {
+						var url = '${pageContext.request.contextPath}/shop?';
+						var params = [];
 
-// Hàm apply filters (khi chọn/bỏ chọn checkbox hoặc thay đổi dropdown)
-function applyFilters() {
-	var url = buildFilterUrl(1); // Reset về trang 1 khi thay đổi filter
-	window.location.href = url;
-}
+						// Thêm search name nếu có
+						var searchName = '${searchName}';
+						if (searchName && searchName.trim() !== '') {
+							params.push('name=' + encodeURIComponent(searchName));
+						}
 
-// Hàm chuyển trang
-function goToPage(page) {
-	var url = buildFilterUrl(page);
-	window.location.href = url;
-}
+						// Thêm categories được chọn
+						var categoryCheckboxes = document.querySelectorAll('.category-filter:checked');
+						categoryCheckboxes.forEach(function (checkbox) {
+							params.push('category=' + checkbox.value);
+						});
 
-// Gắn event listeners khi DOM loaded
-document.addEventListener('DOMContentLoaded', function() {
-	// Event listeners cho checkboxes
-	var categoryCheckboxes = document.querySelectorAll('.category-filter');
-	categoryCheckboxes.forEach(function(checkbox) {
-		checkbox.addEventListener('change', applyFilters);
-	});
-	
-	var brandCheckboxes = document.querySelectorAll('.brand-filter');
-	brandCheckboxes.forEach(function(checkbox) {
-		checkbox.addEventListener('change', applyFilters);
-	});
-	
-	// Event listeners cho dropdowns
-	var sortSelect = document.getElementById('sort-select');
-	if (sortSelect) {
-		sortSelect.addEventListener('change', applyFilters);
-	}
-	
-	var limitSelect = document.getElementById('limit-select');
-	if (limitSelect) {
-		limitSelect.addEventListener('change', applyFilters);
-	}
-});
+						// Thêm brands được chọn
+						var brandCheckboxes = document.querySelectorAll('.brand-filter:checked');
+						brandCheckboxes.forEach(function (checkbox) {
+							params.push('brand=' + encodeURIComponent(checkbox.value));
+						});
 
-// ========== CART & WISHLIST FUNCTIONS ==========
+						// Thêm sort
+						var sortSelect = document.getElementById('sort-select');
+						if (sortSelect && sortSelect.value) {
+							params.push('sort=' + sortSelect.value);
+						}
+
+						// Thêm limit
+						var limitSelect = document.getElementById('limit-select');
+						if (limitSelect && limitSelect.value) {
+							params.push('limit=' + limitSelect.value);
+						}
+
+						// Thêm page
+						if (newPage) {
+							params.push('page=' + newPage);
+						}
+
+						return url + params.join('&');
+					}
+
+					// Hàm apply filters (khi chọn/bỏ chọn checkbox hoặc thay đổi dropdown)
+					function applyFilters() {
+						var url = buildFilterUrl(1); // Reset về trang 1 khi thay đổi filter
+						window.location.href = url;
+					}
+
+					// Hàm chuyển trang
+					function goToPage(page) {
+						var url = buildFilterUrl(page);
+						window.location.href = url;
+					}
+
+					// Gắn event listeners khi DOM loaded
+					document.addEventListener('DOMContentLoaded', function () {
+						// Event listeners cho checkboxes
+						var categoryCheckboxes = document.querySelectorAll('.category-filter');
+						categoryCheckboxes.forEach(function (checkbox) {
+							checkbox.addEventListener('change', applyFilters);
+						});
+
+						var brandCheckboxes = document.querySelectorAll('.brand-filter');
+						brandCheckboxes.forEach(function (checkbox) {
+							checkbox.addEventListener('change', applyFilters);
+						});
+
+						// Event listeners cho dropdowns
+						var sortSelect = document.getElementById('sort-select');
+						if (sortSelect) {
+							sortSelect.addEventListener('change', applyFilters);
+						}
+
+						var limitSelect = document.getElementById('limit-select');
+						if (limitSelect) {
+							limitSelect.addEventListener('change', applyFilters);
+						}
+					});
+
+					// ========== CART & WISHLIST FUNCTIONS ==========
 
 					function addToCart(productId) {
 						if (!IS_LOGGED_IN) {

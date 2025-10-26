@@ -144,25 +144,26 @@ public class Usercontroller {
         try {
             UserResponse userResponse = userService.handleGetUserProfile(authentication);
             model.addAttribute("user", userResponse);
-            
+
             // Get user statistics
             try {
                 CustomUserDetails cud = (CustomUserDetails) authentication.getPrincipal();
                 com.proj.webprojrct.user.entity.User u = cud.getUser();
                 Long userId = u.getId();
-                
+
                 // Get total orders and total spent
                 int totalOrders = orderService.getTotalOrdersByUserId(userId);
                 double totalSpent = orderService.getTotalSpentByUserId(userId);
-                
+
                 model.addAttribute("totalOrders", totalOrders);
                 model.addAttribute("totalSpent", totalSpent);
-                
-                // Lấy 3 đơn hàng gần nhất
+
+                // Lấy tất cả đơn hàng và 3 đơn gần nhất
                 var allOrders = orderService.getOrdersByUserId(userId);
                 var recentOrders = allOrders.stream().limit(3).toList();
-                model.addAttribute("orders", recentOrders);
-                
+                model.addAttribute("recentOrders", recentOrders);
+                model.addAttribute("orders", allOrders);
+
                 // Verification flags
                 boolean verifyPhone = u.getVerifyPhone() != null && u.getVerifyPhone();
                 boolean verifyEmail = u.getVerifyEmail() != null && u.getVerifyEmail();
@@ -186,11 +187,13 @@ public class Usercontroller {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails cud = (CustomUserDetails) authentication.getPrincipal();
         Long userId = cud.getUser().getId();
-        
+
         // Get user's orders (already sorted newest first in service)
         var orders = orderService.getOrdersByUserId(userId);
+        var recentOrders = orders.stream().limit(3).toList();
+        model.addAttribute("3orders", recentOrders);
         model.addAttribute("orders", orders);
-        
+
         return "profile_history";
     }
 

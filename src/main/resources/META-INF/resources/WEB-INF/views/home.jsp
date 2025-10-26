@@ -9,9 +9,10 @@
                 <meta http-equiv="X-UA-Compatible" content="IE=edge">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                 <title>CellPhoneStore - Trang chủ</title>
-                
+
                 <style>
                     /* Flash Sale Countdown Styling */
+
                     .hot-deal-countdown {
                         display: flex;
                         justify-content: center;
@@ -27,7 +28,7 @@
                         align-items: center;
                     }
 
-                    .hot-deal-countdown li > div {
+                    .hot-deal-countdown li>div {
                         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                         border-radius: 15px;
                         padding: 25px 20px;
@@ -43,19 +44,17 @@
                         animation: pulse 2s ease-in-out infinite;
                     }
 
-                    .hot-deal-countdown li > div::before {
+                    .hot-deal-countdown li>div::before {
                         content: '';
                         position: absolute;
                         top: -50%;
                         left: -50%;
                         width: 200%;
                         height: 200%;
-                        background: linear-gradient(
-                            45deg,
-                            transparent,
-                            rgba(255, 255, 255, 0.1),
-                            transparent
-                        );
+                        background: linear-gradient(45deg,
+                                transparent,
+                                rgba(255, 255, 255, 0.1),
+                                transparent);
                         transform: rotate(45deg);
                         animation: shine 3s infinite;
                     }
@@ -178,12 +177,29 @@
                         animation: staggerFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
                     }
 
-                    .tab-pane.active .product:nth-child(1) { animation-delay: 0.1s; }
-                    .tab-pane.active .product:nth-child(2) { animation-delay: 0.15s; }
-                    .tab-pane.active .product:nth-child(3) { animation-delay: 0.2s; }
-                    .tab-pane.active .product:nth-child(4) { animation-delay: 0.25s; }
-                    .tab-pane.active .product:nth-child(5) { animation-delay: 0.3s; }
-                    .tab-pane.active .product:nth-child(6) { animation-delay: 0.35s; }
+                    .tab-pane.active .product:nth-child(1) {
+                        animation-delay: 0.1s;
+                    }
+
+                    .tab-pane.active .product:nth-child(2) {
+                        animation-delay: 0.15s;
+                    }
+
+                    .tab-pane.active .product:nth-child(3) {
+                        animation-delay: 0.2s;
+                    }
+
+                    .tab-pane.active .product:nth-child(4) {
+                        animation-delay: 0.25s;
+                    }
+
+                    .tab-pane.active .product:nth-child(5) {
+                        animation-delay: 0.3s;
+                    }
+
+                    .tab-pane.active .product:nth-child(6) {
+                        animation-delay: 0.35s;
+                    }
 
                     /* Auto-rotate Progress Indicator */
                     .section-tab-nav li.active::after {
@@ -199,10 +215,13 @@
 
                     /* Animations */
                     @keyframes pulse {
-                        0%, 100% {
+
+                        0%,
+                        100% {
                             transform: scale(1);
                             box-shadow: 0 10px 30px rgba(255, 68, 68, 0.4);
                         }
+
                         50% {
                             transform: scale(1.05);
                             box-shadow: 0 15px 40px rgba(255, 68, 68, 0.6);
@@ -214,6 +233,7 @@
                             left: -50%;
                             top: -50%;
                         }
+
                         100% {
                             left: 150%;
                             top: 150%;
@@ -225,6 +245,7 @@
                             opacity: 0;
                             transform: translateY(30px);
                         }
+
                         to {
                             opacity: 1;
                             transform: translateY(0);
@@ -236,6 +257,7 @@
                             opacity: 0;
                             transform: translateY(-20px);
                         }
+
                         to {
                             opacity: 1;
                             transform: translateY(0);
@@ -246,6 +268,7 @@
                         from {
                             opacity: 0;
                         }
+
                         to {
                             opacity: 1;
                         }
@@ -256,6 +279,7 @@
                             opacity: 1;
                             transform: translateY(0);
                         }
+
                         to {
                             opacity: 0;
                             transform: translateY(-20px);
@@ -267,6 +291,7 @@
                             opacity: 0;
                             transform: translateY(30px) scale(0.95);
                         }
+
                         to {
                             opacity: 1;
                             transform: translateY(0) scale(1);
@@ -277,6 +302,7 @@
                         from {
                             width: 0;
                         }
+
                         to {
                             width: 100%;
                         }
@@ -300,7 +326,7 @@
                         right: -50%;
                         width: 200%;
                         height: 200%;
-                        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
                         animation: rotate 20s linear infinite;
                     }
 
@@ -308,22 +334,25 @@
                         0% {
                             transform: rotate(0deg);
                         }
+
                         100% {
                             transform: rotate(360deg);
                         }
                     }
 
-        .hot-deal h2 {
-            color: #ffffff;
-            font-size: 42px;
-            font-weight: 900;
-            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
-            margin: 30px 0 20px 0;
-            position: relative;
-            z-index: 1;
-            animation: fadeInUp 1s ease-out 0.2s both;
-            letter-spacing: 2px;
-        }                    .hot-deal p {
+                    .hot-deal h2 {
+                        color: #ffffff;
+                        font-size: 42px;
+                        font-weight: 900;
+                        text-shadow: 0 3px 10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+                        margin: 30px 0 20px 0;
+                        position: relative;
+                        z-index: 1;
+                        animation: fadeInUp 1s ease-out 0.2s both;
+                        letter-spacing: 2px;
+                    }
+
+                    .hot-deal p {
                         color: #ffffff;
                         font-size: 24px;
                         font-weight: 700;
@@ -359,7 +388,7 @@
                             gap: 10px;
                         }
 
-                        .hot-deal-countdown li > div {
+                        .hot-deal-countdown li>div {
                             padding: 15px;
                             min-width: 70px;
                         }
@@ -490,26 +519,47 @@
                                                                     </h3>
                                                                     <h4 class="product-price">
                                                                         <c:choose>
-                                                                            <c:when test="${product.onDeal == true && product.dealPercentage != null && product.dealPercentage > 0}">
-                                                                                <c:set var="discountedPrice" value="${product.price * (100 - product.dealPercentage) / 100}"/>
-                                                                                <c:set var="savedAmount" value="${product.price - discountedPrice}"/>
-                                                                                <span style="color: #d70018; font-size: 18px; font-weight: bold;">
-                                                                                    <fmt:formatNumber value="${discountedPrice}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                                            <c:when
+                                                                                test="${product.onDeal == true && product.dealPercentage != null && product.dealPercentage > 0}">
+                                                                                <c:set var="discountedPrice"
+                                                                                    value="${product.price * (100 - product.dealPercentage) / 100}" />
+                                                                                <c:set var="savedAmount"
+                                                                                    value="${product.price - discountedPrice}" />
+                                                                                <span
+                                                                                    style="color: #d70018; font-size: 18px; font-weight: bold;">
+                                                                                    <fmt:formatNumber
+                                                                                        value="${discountedPrice}"
+                                                                                        type="currency"
+                                                                                        currencySymbol="₫"
+                                                                                        maxFractionDigits="0" />
                                                                                 </span>
                                                                                 <br>
-                                                                                <del style="color: #999; font-size: 14px;">
-                                                                                    <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                                                <del
+                                                                                    style="color: #999; font-size: 14px;">
+                                                                                    <fmt:formatNumber
+                                                                                        value="${product.price}"
+                                                                                        type="currency"
+                                                                                        currencySymbol="₫"
+                                                                                        maxFractionDigits="0" />
                                                                                 </del>
-                                                                                <span style="color: #ff4444; font-size: 12px; margin-left: 5px; font-weight: bold; background: #ffe8e8; padding: 1px 5px; border-radius: 3px;">
+                                                                                <span
+                                                                                    style="color: #ff4444; font-size: 12px; margin-left: 5px; font-weight: bold; background: #ffe8e8; padding: 1px 5px; border-radius: 3px;">
                                                                                     -${product.dealPercentage}%
                                                                                 </span>
                                                                                 <br>
-                                                                                <span style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
-                                                                                    Tiết kiệm <fmt:formatNumber value="${savedAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                                                <span
+                                                                                    style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
+                                                                                    Tiết kiệm
+                                                                                    <fmt:formatNumber
+                                                                                        value="${savedAmount}"
+                                                                                        type="currency"
+                                                                                        currencySymbol="₫"
+                                                                                        maxFractionDigits="0" />
                                                                                 </span>
                                                                             </c:when>
                                                                             <c:otherwise>
-                                                                                <fmt:formatNumber value="${product.price}"
+                                                                                <fmt:formatNumber
+                                                                                    value="${product.price}"
                                                                                     type="currency" currencySymbol="₫"
                                                                                     maxFractionDigits="0" />
                                                                             </c:otherwise>
@@ -585,25 +635,25 @@
                                         <li>
                                             <div>
                                                 <h3 id="home-days">00</h3>
-                                
+
                                             </div>
                                         </li>
                                         <li>
                                             <div>
                                                 <h3 id="home-hours">00</h3>
-                                                
+
                                             </div>
                                         </li>
                                         <li>
                                             <div>
                                                 <h3 id="home-minutes">00</h3>
-                                                
+
                                             </div>
                                         </li>
                                         <li>
                                             <div>
                                                 <h3 id="home-seconds">00</h3>
-                                                
+
                                             </div>
                                         </li>
                                     </ul>
@@ -666,22 +716,32 @@
                                             </h3>
                                             <h4 class="product-price">
                                                 <c:choose>
-                                                    <c:when test="${product.onDeal == true && product.dealPercentage != null && product.dealPercentage > 0}">
-                                                        <c:set var="discountedPrice" value="${product.price * (100 - product.dealPercentage) / 100}"/>
-                                                        <c:set var="savedAmount" value="${product.price - discountedPrice}"/>
-                                                        <span style="color: #d70018; font-size: 18px; font-weight: bold;">
-                                                            <fmt:formatNumber value="${discountedPrice}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                    <c:when
+                                                        test="${product.onDeal == true && product.dealPercentage != null && product.dealPercentage > 0}">
+                                                        <c:set var="discountedPrice"
+                                                            value="${product.price * (100 - product.dealPercentage) / 100}" />
+                                                        <c:set var="savedAmount"
+                                                            value="${product.price - discountedPrice}" />
+                                                        <span
+                                                            style="color: #d70018; font-size: 18px; font-weight: bold;">
+                                                            <fmt:formatNumber value="${discountedPrice}" type="currency"
+                                                                currencySymbol="₫" maxFractionDigits="0" />
                                                         </span>
                                                         <br>
                                                         <del style="color: #999; font-size: 14px;">
-                                                            <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                            <fmt:formatNumber value="${product.price}" type="currency"
+                                                                currencySymbol="₫" maxFractionDigits="0" />
                                                         </del>
-                                                        <span style="color: #ff4444; font-size: 12px; margin-left: 5px; font-weight: bold; background: #ffe8e8; padding: 1px 5px; border-radius: 3px;">
+                                                        <span
+                                                            style="color: #ff4444; font-size: 12px; margin-left: 5px; font-weight: bold; background: #ffe8e8; padding: 1px 5px; border-radius: 3px;">
                                                             -${product.dealPercentage}%
                                                         </span>
                                                         <br>
-                                                        <span style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
-                                                            Tiết kiệm <fmt:formatNumber value="${savedAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                        <span
+                                                            style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
+                                                            Tiết kiệm
+                                                            <fmt:formatNumber value="${savedAmount}" type="currency"
+                                                                currencySymbol="₫" maxFractionDigits="0" />
                                                         </span>
                                                     </c:when>
                                                     <c:otherwise>
@@ -888,7 +948,7 @@
                         const duration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
                         const endTime = startTime + duration;
 
-                        const timer = setInterval(function() {
+                        const timer = setInterval(function () {
                             const currentTime = new Date().getTime();
                             const timeLeft = endTime - currentTime;
 
@@ -920,7 +980,7 @@
                     }
 
                     // Start countdown when page loads
-                    window.addEventListener('DOMContentLoaded', function() {
+                    window.addEventListener('DOMContentLoaded', function () {
                         updateHomeCountdown();
                         initProductTabsAutoRotate();
                     });
@@ -929,17 +989,17 @@
                     function initProductTabsAutoRotate() {
                         const tabNavItems = document.querySelectorAll('.section-tab-nav li');
                         const tabPanes = document.querySelectorAll('.tab-pane');
-                        
+
                         if (tabNavItems.length === 0 || tabPanes.length === 0) return;
-                        
+
                         let currentIndex = 0;
                         let autoRotateInterval;
                         let isUserInteracting = false;
-                        
+
                         // Function to switch to a specific tab
                         function switchToTab(index) {
                             if (index === currentIndex) return;
-                            
+
                             // Remove active class and add fade-out animation to current tab
                             tabPanes.forEach(pane => {
                                 if (pane.classList.contains('active')) {
@@ -949,19 +1009,19 @@
                                     }, 400);
                                 }
                             });
-                            
+
                             // Update nav items
                             tabNavItems.forEach(item => item.classList.remove('active'));
                             tabNavItems[index].classList.add('active');
-                            
+
                             // Show new tab with animation
                             setTimeout(() => {
                                 tabPanes[index].classList.add('active');
                             }, 400);
-                            
+
                             currentIndex = index;
                         }
-                        
+
                         // Auto-rotate every 5 seconds
                         function startAutoRotate() {
                             autoRotateInterval = setInterval(() => {
@@ -971,7 +1031,7 @@
                                 }
                             }, 5000); // 5 seconds per tab
                         }
-                        
+
                         // Stop auto-rotate temporarily when user interacts
                         function pauseAutoRotate() {
                             isUserInteracting = true;
@@ -979,7 +1039,7 @@
                                 isUserInteracting = false;
                             }, 10000); // Resume after 10 seconds of no interaction
                         }
-                        
+
                         // Add click handlers to tabs
                         tabNavItems.forEach((item, index) => {
                             item.addEventListener('click', (e) => {
@@ -988,17 +1048,17 @@
                                 switchToTab(index);
                             });
                         });
-                        
+
                         // Start auto-rotation
                         startAutoRotate();
-                        
+
                         // Pause on hover
                         const productsSection = document.querySelector('.products-tabs');
                         if (productsSection) {
                             productsSection.addEventListener('mouseenter', () => {
                                 isUserInteracting = true;
                             });
-                            
+
                             productsSection.addEventListener('mouseleave', () => {
                                 isUserInteracting = false;
                             });

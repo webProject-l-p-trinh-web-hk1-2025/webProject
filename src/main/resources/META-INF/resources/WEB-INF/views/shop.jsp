@@ -9,39 +9,39 @@
 				<meta http-equiv="X-UA-Compatible" content="IE=edge">
 				<meta name="viewport" content="width=device-width, initial-scale=1">
 				<title>Sản phẩm - CellPhoneStore</title>
-				
+
 				<style>
 					/* Hover animation cho product cards */
 					.product {
 						transition: all 0.3s ease;
 						cursor: pointer;
 					}
-					
+
 					.product:hover {
 						transform: translateY(-10px);
 						box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 						z-index: 10;
 					}
-					
+
 					.product-img {
 						overflow: hidden;
 						position: relative;
 					}
-					
+
 					.product-img img {
 						transition: transform 0.3s ease;
 					}
-					
+
 					.product:hover .product-img img {
 						transform: scale(1.05);
 					}
-					
+
 					/* Smooth transition cho buttons */
 					.product-btns button,
 					.add-to-cart-btn {
 						transition: all 0.3s ease;
 					}
-					
+
 					.product:hover .add-to-cart-btn {
 						background-color: #D10024 !important;
 					}
@@ -79,7 +79,7 @@
 											<c:when test="${empty series}">
 												<!-- Chưa chọn thương hiệu -->
 												<p style="color: #999; font-style: italic; padding: 10px 0;">
-													<i class="fa fa-info-circle"></i> 
+													<i class="fa fa-info-circle"></i>
 													Vui lòng chọn thương hiệu bên dưới để xem danh mục sản phẩm
 												</p>
 											</c:when>
@@ -87,11 +87,13 @@
 												<!-- Đã chọn thương hiệu - hiển thị series -->
 												<c:forEach items="${series}" var="s">
 													<div class="input-checkbox">
-														<input type="checkbox" id="series-${s.seriesName}" class="series-filter"
-															value="${s.seriesName}" ${selectedSeries.contains(s.seriesName) ? 'checked' : '' }>
+														<input type="checkbox" id="series-${s.seriesName}"
+															class="series-filter" value="${s.seriesName}"
+															${selectedSeries.contains(s.seriesName) ? 'checked' : '' }>
 														<label for="series-${s.seriesName}">
 															<span></span>
-															${s.seriesName} <small style="color: #999;">(${s.productCount})</small>
+															${s.seriesName} <small
+																style="color: #999;">(${s.productCount})</small>
 														</label>
 													</div>
 												</c:forEach>
@@ -195,7 +197,7 @@
 													</c:if>
 												</div>
 												<div class="product-body">
-													<p class="product-category">${product.category.name}</p>
+													<p class="product-category">${product.brand}</p>
 													<h3 class="product-name">
 														<a
 															href="${pageContext.request.contextPath}/product/${product.id}">${product.name}</a>
@@ -429,10 +431,10 @@ var IS_LOGGED_IN = <%= isAuthenticated %>;
 
 						var brandCheckboxes = document.querySelectorAll('.brand-filter');
 						brandCheckboxes.forEach(function (checkbox) {
-							checkbox.addEventListener('change', function() {
+							checkbox.addEventListener('change', function () {
 								// Khi thay đổi brand, xóa tất cả series selections (vì series sẽ thay đổi)
 								var seriesCheckboxes = document.querySelectorAll('.series-filter:checked');
-								seriesCheckboxes.forEach(function(cb) {
+								seriesCheckboxes.forEach(function (cb) {
 									cb.checked = false;
 								});
 								applyFilters();
@@ -538,7 +540,7 @@ var IS_LOGGED_IN = <%= isAuthenticated %>;
 					function loadAllProductRatings() {
 						// Lấy tất cả product IDs từ các thẻ rating
 						const ratingElements = document.querySelectorAll('[id^="rating-"]');
-						
+
 						ratingElements.forEach(element => {
 							const productId = element.id.replace('rating-', '');
 							loadProductRating(productId);
@@ -549,14 +551,14 @@ var IS_LOGGED_IN = <%= isAuthenticated %>;
 					async function loadProductRating(productId) {
 						try {
 							const response = await fetch('${pageContext.request.contextPath}/api/reviews/product/' + productId + '/stats');
-							
+
 							if (!response.ok) {
 								console.error('Failed to load rating for product ' + productId);
 								return;
 							}
 
 							const stats = await response.json();
-							
+
 							// Update rating stars cho sản phẩm này
 							displayProductStars('rating-' + productId, stats.averageRating);
 						} catch (error) {

@@ -1,5 +1,4 @@
-﻿
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
             <!DOCTYPE html>
@@ -512,7 +511,7 @@
                                                                     </c:if>
                                                                 </div>
                                                                 <div class="product-body">
-                                                                    <p class="product-category">${product.category.name}
+                                                                    <p class="product-category">${product.brand}
                                                                     </p>
                                                                     <h3 class="product-name">
                                                                         <a
@@ -566,7 +565,8 @@
                                                                             </c:otherwise>
                                                                         </c:choose>
                                                                     </h4>
-                                                                    <div class="product-rating" id="rating-new-${product.id}">
+                                                                    <div class="product-rating"
+                                                                        id="rating-new-${product.id}">
                                                                         <i class="fa fa-star-o"></i>
                                                                         <i class="fa fa-star-o"></i>
                                                                         <i class="fa fa-star-o"></i>
@@ -609,7 +609,8 @@
                                                         </c:if>
                                                     </c:forEach>
                                                 </div>
-                                                <div id="slick-nav-brand-${status.index}" class="products-slick-nav"></div>
+                                                <div id="slick-nav-brand-${status.index}" class="products-slick-nav">
+                                                </div>
                                             </div>
                                             <!-- /tab -->
                                         </c:forEach>
@@ -632,7 +633,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="hot-deal">
-                                    
+
                                     <h2 class="text-uppercase">Flash Sale hôm nay</h2>
                                     <p>Giảm giá lên đến 50%</p>
                                     <a class="primary-btn cta-btn" href="${pageContext.request.contextPath}/deals">Mua
@@ -685,7 +686,7 @@
                                             </c:if>
                                         </div>
                                         <div class="product-body">
-                                            <p class="product-category">${product.category.name}</p>
+                                            <p class="product-category">${product.brand}</p>
                                             <h3 class="product-name">
                                                 <a
                                                     href="${pageContext.request.contextPath}/product/${product.id}">${product.name}</a>
@@ -727,12 +728,12 @@
                                                 </c:choose>
                                             </h4>
                                             <div class="product-rating" id="rating-hot-${product.id}">
-                                                                        <i class="fa fa-star-o"></i>
-                                                                        <i class="fa fa-star-o"></i>
-                                                                        <i class="fa fa-star-o"></i>
-                                                                        <i class="fa fa-star-o"></i>
-                                                                        <i class="fa fa-star-o"></i>
-                                                                    </div>
+                                                <i class="fa fa-star-o"></i>
+                                                <i class="fa fa-star-o"></i>
+                                                <i class="fa fa-star-o"></i>
+                                                <i class="fa fa-star-o"></i>
+                                                <i class="fa fa-star-o"></i>
+                                            </div>
                                             <div class="product-btns">
                                                 <button class="add-to-wishlist" data-product-id="${product.id}"
                                                     onclick="toggleFavorite(${product.id}, this)">
@@ -914,7 +915,7 @@
                     function loadAllProductRatings() {
                         // Lấy tất cả product IDs từ các thẻ rating (cả new và hot products)
                         const ratingElements = document.querySelectorAll('[id^="rating-"]');
-                        
+
                         ratingElements.forEach(element => {
                             const productId = element.id.replace('rating-new-', '').replace('rating-hot-', '');
                             loadProductRating(productId, element.id);
@@ -925,14 +926,14 @@
                     async function loadProductRating(productId, elementId) {
                         try {
                             const response = await fetch('${pageContext.request.contextPath}/api/reviews/product/' + productId + '/stats');
-                            
+
                             if (!response.ok) {
                                 console.error('Failed to load rating for product ' + productId);
                                 return;
                             }
 
                             const stats = await response.json();
-                            
+
                             // Update rating stars cho sản phẩm này
                             displayProductStars(elementId, stats.averageRating);
                         } catch (error) {

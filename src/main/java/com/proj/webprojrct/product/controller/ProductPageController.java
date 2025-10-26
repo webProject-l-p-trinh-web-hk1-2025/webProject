@@ -123,15 +123,26 @@ public class ProductPageController {
                         .filter(p -> p.getBrand() != null && brand.contains(p.getBrand()))
                         .collect(java.util.stream.Collectors.toList());
             }
-            
-            // Lọc theo series (có thể chọn nhiều)
+
+            // Lọc theo series (có thể chọn nhiều) - lọc theo category con từ DB
             if (series != null && !series.isEmpty()) {
+                // Lấy tất cả categories từ database
+                List<com.proj.webprojrct.category.dto.CategoryDto> allCategories = categoryService.getAll();
+
+                // Tạo set chứa tên các category con (series) được chọn
+                java.util.Set<Long> seriesCategoryIds = new java.util.HashSet<>();
+                for (String seriesName : series) {
+                    for (com.proj.webprojrct.category.dto.CategoryDto cat : allCategories) {
+                        if (cat.getParentId() != null && seriesName.equals(cat.getName())) {
+                            seriesCategoryIds.add(cat.getId());
+                        }
+                    }
+                }
+
+                // Lọc products theo category IDs
                 products = products.stream()
-                        .filter(p -> {
-                            if (p.getName() == null) return false;
-                            String productSeries = extractSeriesName(p.getName());
-                            return series.contains(productSeries);
-                        })
+                        .filter(p -> p.getCategory() != null
+                        && seriesCategoryIds.contains(p.getCategory().getId()))
                         .collect(java.util.stream.Collectors.toList());
             }
 
@@ -181,10 +192,10 @@ public class ProductPageController {
             }
 
             model.addAttribute("products", paginatedProducts);
-            
+
             // Lấy series động dựa theo brand đã chọn (thay vì categories từ DB)
             List<com.proj.webprojrct.product.dto.ProductSeriesDto> availableSeries;
-            
+            System.out.println("Selected brands: " + brand);
             if (brand != null && !brand.isEmpty()) {
                 // Có chọn brand → Tự động generate series từ products của các brand đã chọn
                 availableSeries = generateSeriesByBrands(allProducts, brand);
@@ -192,7 +203,7 @@ public class ProductPageController {
                 // Chưa chọn brand → Không hiện series (để user chọn brand trước)
                 availableSeries = java.util.Collections.emptyList();
             }
-            
+
             model.addAttribute("series", availableSeries);
             model.addAttribute("brands", productService.getAllBrands());
             model.addAttribute("selectedCategories", category != null ? category : java.util.Collections.emptyList());
@@ -244,7 +255,8 @@ public class ProductPageController {
                 if (p.getId().equals(product.getId())) {
                     continue; // Skip current product
 
-                                }if (p.getName() == null || p.getBrand() == null) {
+                }
+                if (p.getName() == null || p.getBrand() == null) {
                     continue;
                 }
 
@@ -373,55 +385,61 @@ public class ProductPageController {
     }
 
     /**
-     * Tự động generate danh sách series từ products của các brand đã chọn
-     * @param products Danh sách tất cả sản phẩm
-     * @param brands Danh sách brand đã chọn
-     * @return Danh sách series được tạo tự động
+     * Lấy danh sách category con (subcategories) từ database dựa theo brands đã
+     * chọn Trả về dưới dạng ProductSeriesDto để tương thích với code hiện tại
+     *
+     * @param products Danh sách sản phẩm để đếm
+     * @param brands Danh sách brands đã chọn
+     * @return Danh sách ProductSeriesDto (seriesName = category name, brand =
+     * parent category name)
      */
     private List<com.proj.webprojrct.product.dto.ProductSeriesDto> generateSeriesByBrands(
-            List<ProductResponse> products, 
+            List<ProductResponse> products,
             List<String> brands) {
-        
-        // Map để đếm số lượng sản phẩm cho mỗi series
-        java.util.Map<String, com.proj.webprojrct.product.dto.ProductSeriesDto> seriesMap = 
-            new java.util.LinkedHashMap<>();
-        
-        // Duyệt qua products và group theo series
-        for (ProductResponse product : products) {
-            // Chỉ xử lý products của brands đã chọn
-            if (product.getBrand() == null || !brands.contains(product.getBrand())) {
-                continue;
+
+        List<com.proj.webprojrct.product.dto.ProductSeriesDto> result = new java.util.ArrayList<>();
+
+        // Lấy tất cả categories từ database
+        List<com.proj.webprojrct.category.dto.CategoryDto> allCategories = categoryService.getAll();
+
+        // Tạo map: category parent name -> category parent ID
+        java.util.Map<String, Long> brandToCategoryId = new java.util.HashMap<>();
+        for (com.proj.webprojrct.category.dto.CategoryDto cat : allCategories) {
+            if (cat.getParentId() == null && brands.contains(cat.getName())) {
+                brandToCategoryId.put(cat.getName(), cat.getId());
             }
-            
-            if (product.getName() == null) {
-                continue;
-            }
-            
-            // Extract series name từ product name
-            String seriesName = extractSeriesName(product.getName());
-            
-            // Tạo hoặc update series trong map
-            if (!seriesMap.containsKey(seriesName)) {
-                seriesMap.put(seriesName, new com.proj.webprojrct.product.dto.ProductSeriesDto(
-                    seriesName, 
-                    product.getBrand()
-                ));
-            }
-            
-            // Tăng product count
-            com.proj.webprojrct.product.dto.ProductSeriesDto seriesDto = seriesMap.get(seriesName);
-            seriesDto.setProductCount(seriesDto.getProductCount() + 1);
         }
-        
-        // Convert map to list và sort theo brand, sau đó theo series name
-        return seriesMap.values().stream()
-                .sorted((s1, s2) -> {
-                    // Sort theo brand trước
-                    int brandCompare = s1.getBrand().compareTo(s2.getBrand());
-                    if (brandCompare != 0) return brandCompare;
-                    // Sau đó sort theo series name
-                    return s1.getSeriesName().compareTo(s2.getSeriesName());
-                })
-                .collect(java.util.stream.Collectors.toList());
+
+        // Tạo map: category parent ID -> category parent name
+        java.util.Map<Long, String> categoryIdToBrand = new java.util.HashMap<>();
+        for (java.util.Map.Entry<String, Long> entry : brandToCategoryId.entrySet()) {
+            categoryIdToBrand.put(entry.getValue(), entry.getKey());
+        }
+
+        // Lấy tất cả category con của các brands đã chọn
+        for (com.proj.webprojrct.category.dto.CategoryDto subCat : allCategories) {
+            if (subCat.getParentId() != null && brandToCategoryId.containsValue(subCat.getParentId())) {
+                // Đếm số lượng sản phẩm thuộc category con này
+                long productCount = products.stream()
+                        .filter(p -> p.getCategory() != null
+                        && p.getCategory().getId().equals(subCat.getId()))
+                        .count();
+
+                // Lấy tên brand (category cha)
+                String brandName = categoryIdToBrand.getOrDefault(subCat.getParentId(), "Unknown");
+
+                // Tạo ProductSeriesDto
+                com.proj.webprojrct.product.dto.ProductSeriesDto seriesDto
+                        = new com.proj.webprojrct.product.dto.ProductSeriesDto(
+                                subCat.getName(), // seriesName = tên category con
+                                brandName, // brand = tên category cha
+                                Long.valueOf(productCount) // số lượng sản phẩm
+                        );
+
+                result.add(seriesDto);
+            }
+        }
+
+        return result;
     }
 }

@@ -405,7 +405,7 @@
                             
                             <div class="product-body">
                                 <p class="product-category">
-                                    ${product.category.name}
+                                    ${product.brand}
                                 </p>
                                 <h3 class="product-name">
                                     <a href="${pageContext.request.contextPath}/product/${product.id}">

@@ -38,7 +38,7 @@ public class Oauth2RegistrationController {
         String picture = (String) session.getAttribute("oauth2_picture");
 
         if (email == null) {
-            return "redirect:/login"; // session hết → quay lại login
+            return "redirect:/login";
         }
         System.out.println("OAuth2 email: " + email);
         // Kiểm tra user đã tồn tại chưa
@@ -72,11 +72,15 @@ public class Oauth2RegistrationController {
     @PostMapping("/complete")
     public String completeRegistration(HttpSession session,
             HttpServletResponse response,
+            Model model,
             @RequestParam String fullName,
             @RequestParam String phone,
             @RequestParam(required = false) String address) {
 
         String email = (String) session.getAttribute("oauth2_email");
+        String name = (String) session.getAttribute("oauth2_name");
+        String picture = (String) session.getAttribute("oauth2_picture");
+
         if (email == null) {
             return "redirect:/login";
         }
@@ -87,29 +91,44 @@ public class Oauth2RegistrationController {
         request.setPhone(phone);
         request.setAddress(address);
 
-        // Service sẽ tạo random password và lưu user
-        User user = registrationService.registerNewUser(request);
+        try {
+            // Service sẽ tạo random password và lưu user
+            User user = registrationService.registerNewUser(request);
 
-        // Generate JWT ngay sau khi tạo user
-        String accessToken = jwtUtil.generateAccessToken(user);
-        String refreshToken = jwtUtil.generateRefreshToken(user);
+            // Generate JWT ngay sau khi tạo user
+            String accessToken = jwtUtil.generateAccessToken(user);
+            String refreshToken = jwtUtil.generateRefreshToken(user);
 
-        Cookie accessCookie = new Cookie("access_token", accessToken);
-        accessCookie.setHttpOnly(true);
-        accessCookie.setPath("/");
-        response.addCookie(accessCookie);
+            Cookie accessCookie = new Cookie("access_token", accessToken);
+            accessCookie.setHttpOnly(true);
+            accessCookie.setPath("/");
+            response.addCookie(accessCookie);
 
-        Cookie refreshCookie = new Cookie("refresh_token", refreshToken);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setPath("/");
-        response.addCookie(refreshCookie);
+            Cookie refreshCookie = new Cookie("refresh_token", refreshToken);
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setPath("/");
+            response.addCookie(refreshCookie);
 
-        // Xóa session tạm
-        session.removeAttribute("oauth2_email");
-        session.removeAttribute("oauth2_name");
-        session.removeAttribute("oauth2_picture");
+            // Xóa session tạm
+            session.removeAttribute("oauth2_email");
+            session.removeAttribute("oauth2_name");
+            session.removeAttribute("oauth2_picture");
 
-        return "redirect:/"; // redirect về trang chính, user đã được đăng nhập bằng JWT
+            return "redirect:/"; // redirect về trang chính, user đã được đăng nhập bằng JWT
+        } catch (RuntimeException e) {
+            // Xử lý lỗi (email hoặc phone đã tồn tại)
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("email", email);
+            model.addAttribute("name", name);
+            model.addAttribute("picture", picture);
+
+            // Giữ lại dữ liệu người dùng đã nhập
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("phone", phone);
+            model.addAttribute("address", address);
+
+            return "oauth2_complete_form";
+        }
     }
 
 }

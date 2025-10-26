@@ -64,8 +64,9 @@
                             <label class="form-label">
                                 <i class="fa fa-user"></i> Họ và tên
                             </label>
-                            <input type="text" name="fullName" class="form-control" value="${name}"
-                                placeholder="Nhập họ và tên đầy đủ" required />
+                            <input type="text" name="fullName" class="form-control"
+                                value="${not empty fullName ? fullName : name}" placeholder="Nhập họ và tên đầy đủ"
+                                required />
                         </div>
 
                         <div class="row">
@@ -73,8 +74,8 @@
                                 <label class="form-label">
                                     <i class="fa fa-phone"></i> Số điện thoại
                                 </label>
-                                <input type="text" name="phone" class="form-control" placeholder="Nhập số điện thoại"
-                                    required />
+                                <input type="text" name="phone" class="form-control"
+                                    value="${not empty phone ? phone : ''}" placeholder="Nhập số điện thoại" required />
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -83,7 +84,8 @@
                                     <span style="color:#8D99AE; font-size:12px; font-weight:400;">(không bắt
                                         buộc)</span>
                                 </label>
-                                <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ" />
+                                <input type="text" name="address" class="form-control"
+                                    value="${not empty address ? address : ''}" placeholder="Nhập địa chỉ" />
                             </div>
                         </div>
 

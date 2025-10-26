@@ -93,42 +93,26 @@ isAuthenticated); %>
         <!-- SEARCH BAR -->
         <!-- <div class="col-md-6">
           <div class="header-search">
-            <form
-              action="${pageContext.request.contextPath}/search"
-              method="get"
-            >
-              <select class="input-select" name="category">
-                <option value="">Tất cả danh mục</option>
-                <c:forEach items="${categories}" var="cat">
-                  <option value="${cat.id}">${cat.name}</option>
-                </c:forEach>
-              </select>
-              <input
-                class="input"
-                name="q"
-                placeholder="Tìm kiếm sản phẩm..."
-              />
-              <button class="search-btn" type="submit">Tìm kiếm</button>
-            </form>
+           
           </div>
         </div> -->
         <!-- /SEARCH BAR -->
 
         <!-- ACCOUNT -->
-        <div class="col-md-3 clearfix">
-          <div class="header-ctn">
-            <!-- Wishlist -->
-            <!-- <div>
+        <!-- <div class="col-md-3 clearfix">
+          <div class="header-ctn"> -->
+        <!-- Wishlist -->
+        <!-- <div>
               <a href="${pageContext.request.contextPath}/wishlist">
                 <i class="fa fa-heart-o"></i>
                 <span>Yêu thích</span>
                 <div class="qty" id="wishlist-qty">0</div>
               </a>
             </div> -->
-            <!-- /Wishlist -->
+        <!-- /Wishlist -->
 
-            <!-- Cart -->
-            <!-- <div>
+        <!-- Cart -->
+        <!-- <div>
               <% org.springframework.security.core.Authentication cartAuth =
               org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
               boolean isCartAuthenticated = cartAuth != null &&
@@ -142,18 +126,18 @@ isAuthenticated); %>
                 <div class="qty" id="cart-qty">0</div>
               </a>
             </div> -->
-            <!-- /Cart -->
+        <!-- /Cart -->
 
-            <!-- Menu Toggle -->
-            <div class="menu-toggle">
+        <!-- Menu Toggle -->
+        <!-- <div class="menu-toggle">
               <a href="#">
                 <i class="fa fa-bars"></i>
                 <span>Menu</span>
               </a>
-            </div>
-            <!-- /Menu Toggle -->
-          </div>
-        </div>
+            </div> -->
+        <!-- /Menu Toggle -->
+        <!-- </div>
+        </div> -->
         <!-- /ACCOUNT -->
       </div>
     </div>

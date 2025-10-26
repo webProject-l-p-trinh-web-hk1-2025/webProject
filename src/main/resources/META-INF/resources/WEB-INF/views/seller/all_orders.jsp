@@ -134,7 +134,7 @@
                 <div class="seller-orders-container">
                     <h1>Tất cả đơn hàng trong hệ thống</h1>
                     <p style="color: #666; margin-bottom: 20px;">
-                        <i class="fa fa-info-circle"></i> Trang này hiển thị tất cả đơn hàng từ tất cả seller trong hệ thống. Chỉ dành cho Admin.
+                        <i class="fa fa-info-circle"></i> Trang này hiển thị tất cả đơn hàng từ tất cả seller trong hệ thống.
                     </p>
                     <a href="${pageContext.request.contextPath}/" class="btn-back">
                         <i class="fa fa-arrow-left"></i> Quay về trang chính
@@ -143,7 +143,7 @@
                     <!-- Filter Status -->
                     <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
                         <label style="font-weight: bold; margin-right: 10px;">
-                            <i class="fa fa-filter"></i> Lọc theo trạng thái:
+                            <i class="fa fa-filter"></i> Lọc:
                         </label>
                         <select id="statusFilter" onchange="filterByStatus()" 
                                 style="padding: 8px 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
@@ -168,23 +168,23 @@
                         <div class="order-card">
                             <div class="order-header">
                                 <div>
-                                    <strong>Order ID:</strong> ${order.orderId} &nbsp;|&nbsp;
-                                    <strong>Status:</strong> 
+                                    <strong>Mã Đơn Hàng:</strong> ${order.orderId} &nbsp;|&nbsp;
+                                    <strong>Trạng Thái:</strong> 
                                     <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
                                     &nbsp;|&nbsp;
-                                    <strong>Payment:</strong> ${order.paymentMethod} - ${order.paymentStatus}
+                                    <strong>Thanh Toán:</strong> ${order.paymentMethod} - ${order.paymentStatus}
                                     &nbsp;|&nbsp;
-                                    <strong>Total:</strong>
+                                    <strong>Tổng:</strong>
                                     <fmt:formatNumber value="${order.totalAmount}" type="currency" currencySymbol="₫" />
                                 </div>
                                 <!-- Admin view: NO ACTION BUTTONS -->
                             </div>
 
                             <div class="order-info">
-                                <div><strong>Shipping Address:</strong> ${order.shippingAddress}</div>
-                                <div><strong>Created At:</strong> ${order.createdAt}</div>
+                                <div><strong>Địa chỉ giao hàng:</strong> ${order.shippingAddress}</div>
+                                <div><strong>Ngày Tạo:</strong> ${order.createdAt}</div>
                                 <div style="margin-top: 10px; padding: 8px; background: #e8f4f8; border-left: 4px solid #17a2b8;">
-                                    <strong><i class="fa fa-user"></i> Customer Info:</strong> 
+                                    <strong><i class="fa fa-user"></i> Thông Tin Khách Hàng:</strong> 
                                     ${order.shippingAddress}
                                 </div>
                             </div>

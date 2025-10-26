@@ -280,7 +280,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="section-title">
-                        <h3 class="title">🎯 Danh mục khuyến mãi</h3>
+                        <h3 class="title">🔥 Danh mục khuyến mãi</h3>
                     </div>
                 </div>
             </div>

@@ -139,7 +139,6 @@
 
                             <div class="add-to-cart">
                               <div class="qty-label">
-                                Qty
                                 <div class="input-number">
                                   <input type="number" id="quantity" value="1" min="1" />
                                   <span class="qty-up">+</span>
@@ -147,26 +146,24 @@
                                 </div>
                               </div>
                               <button class="add-to-cart-btn" id="addToCartBtn">
-                                <i class="fa fa-shopping-cart"></i> add to cart
+                                <i class="fa fa-shopping-cart"></i> Thêm Vào Giỏ
                               </button>
                             </div>
 
                             <ul class="product-btns">
                               <li>
-                                <a href="#" id="addToWishlistBtn"><i class="fa fa-heart-o"></i> add to wishlist</a>
+                                <a href="#" id="addToWishlistBtn"><i class="fa fa-heart-o"></i> Yêu Thích</a>
                               </li>
-                              <li>
-                                <a href="#"><i class="fa fa-exchange"></i> add to compare</a>
-                              </li>
+                              
                             </ul>
 
                             <ul class="product-links">
-                              <li>Category:</li>
+                              <li>Thương Hiệu:</li>
                               <li><a href="#" id="productCategory">Category</a></li>
                             </ul>
 
                             <ul class="product-links">
-                              <li>Share:</li>
+                              <li>Chia Sẻ:</li>
                               <li>
                                 <a href="#" id="shareFacebook" onclick="shareOnFacebook(); return false;"><i class="fa fa-facebook"></i></a>
                               </li>

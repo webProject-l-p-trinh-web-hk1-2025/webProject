@@ -144,7 +144,7 @@ function renderWishlist() {
                         '</h3>' +
                         '<h4 class="product-price">' + formatPrice(item.productPrice) + '</h4>' +
                         '<div class="product-btns">' +
-                            '<button class="add-to-wishlist" onclick="removeFromWishlist(' + item.productId + ')" style="background: #D10024;">' +
+                            '<button class="add-to-wishlist" onclick="removeFromWishlist(' + item.productId + ')" style="color: #D10024;">' +
                                 '<i class="fa fa-heart"></i>' +
                                 '<span class="tooltipp">Xóa khỏi yêu thích</span>' +
                             '</button>' +

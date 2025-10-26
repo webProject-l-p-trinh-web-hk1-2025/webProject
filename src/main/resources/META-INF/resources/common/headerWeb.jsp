@@ -233,13 +233,13 @@ isAuthenticated); %>
               </a>
               <ul class="dropdown-menu">
                 <li>
-                  <a href="${pageContext.request.contextPath}/seller/orders"
-                    >Đơn hàng của tôi</a
+                  <a href="${pageContext.request.contextPath}/seller/all-orders"
+                    >Tất cả đơn hàng</a
                   >
                 </li>
                 <li>
-                  <a href="${pageContext.request.contextPath}/seller/all-orders"
-                    >Tất cả đơn hàng</a
+                  <a href="${pageContext.request.contextPath}/seller/orders"
+                    >Xác nhận đơn hàng</a
                   >
                 </li>
                 <li>

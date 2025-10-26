@@ -106,10 +106,10 @@ isAuthenticated); %>
               method="get"
               id="searchForm"
             >
-              <select class="input-select" name="category" id="searchCategory">
+              <select class="input-select" name="brand" id="searchBrand">
                 <option value="">Tất cả hãng điện thoại</option>
-                <c:forEach items="${categories}" var="cat">
-                  <option value="${cat.id}">${cat.name}</option>
+                <c:forEach items="${globalBrands}" var="brand">
+                  <option value="${brand}">${brand}</option>
                 </c:forEach>
               </select>
               <input

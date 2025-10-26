@@ -15,6 +15,43 @@
                 Chi tiết sản phẩm -
                 <c:out value="${product.name}" default="Sản phẩm" />
               </title>
+              
+              <style>
+                /* Hover animation cho product cards trong related/similar products */
+                .product {
+                  transition: all 0.3s ease;
+                  cursor: pointer;
+                }
+                
+                .product:hover {
+                  transform: translateY(-10px);
+                  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+                  z-index: 10;
+                }
+                
+                .product-img {
+                  overflow: hidden;
+                  position: relative;
+                }
+                
+                .product-img img {
+                  transition: transform 0.3s ease;
+                }
+                
+                .product:hover .product-img img {
+                  transform: scale(1.05);
+                }
+                
+                /* Smooth transition cho buttons */
+                .product-btns button,
+                .add-to-cart-btn {
+                  transition: all 0.3s ease;
+                }
+                
+                .product:hover .add-to-cart-btn {
+                  background-color: #D10024 !important;
+                }
+              </style>
             </head>
 
             <body>
@@ -131,16 +168,16 @@
                             <ul class="product-links">
                               <li>Share:</li>
                               <li>
-                                <a href="#"><i class="fa fa-facebook"></i></a>
+                                <a href="#" id="shareFacebook" onclick="shareOnFacebook(); return false;"><i class="fa fa-facebook"></i></a>
                               </li>
                               <li>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
+                                <a href="#" id="shareTwitter" onclick="shareOnTwitter(); return false;"><i class="fa fa-twitter"></i></a>
                               </li>
                               <li>
-                                <a href="#"><i class="fa fa-google-plus"></i></a>
+                                <a href="#" id="shareGooglePlus" onclick="shareOnGooglePlus(); return false;"><i class="fa fa-google-plus"></i></a>
                               </li>
                               <li>
-                                <a href="#"><i class="fa fa-envelope"></i></a>
+                                <a href="#" id="shareEmail" onclick="shareViaEmail(); return false;"><i class="fa fa-envelope"></i></a>
                               </li>
                             </ul>
                           </div>
@@ -180,9 +217,29 @@
                           <div id="tab1" class="tab-pane fade in active">
                             <div class="row">
                               <div class="col-md-12">
-                                <div id="tabDescription" style="line-height: 1.8; font-size: 14px">
-                                  <p>Đang tải thông tin sản phẩm...</p>
-                                </div>
+                                <div
+                        id="tabDescription"
+                        class="description-content collapsed"
+                        style="
+                          line-height: 1.8;
+                          font-size: 14px;
+                          max-height: 0;
+                          overflow: hidden;
+                          position: relative;
+                          transition: max-height 0.5s ease;
+                        "
+                      >
+                        <p>Đang tải thông tin sản phẩm...</p>
+                      </div>
+                      <div style="text-align: center; margin-top: 15px">
+                        <button
+                          id="toggleDescriptionBtn"
+                          class="primary-btn"
+                          style="padding: 10px 30px; display: none"
+                        >
+                          <i class="fa fa-angle-down"></i> Xem mô tả chi tiết
+                        </button>
+                      </div>
                               </div>
                             </div>
                           </div>
@@ -399,6 +456,9 @@
       if (productData.category && productData.category.id) {
         loadAndParseVariants(productData.category.id, productData.id, productData.storage, productData.name);
       }
+      // Load rating statistics and reviews
+      loadRatingStatistics(productData.id);
+      loadReviews(productData.id, 0);
       </c:if>
 
             <c:if test="${empty product}">
@@ -438,15 +498,10 @@
                   document.getElementById('productStock').textContent = p.stock > 0 ? 'Còn hàng' : 'Hết hàng';
 
                   // Tạo short description từ specs cho phần product details
-                  var shortDesc = 'Điện thoại ' + p.name;
-                  if (p.brand) shortDesc += ' thương hiệu ' + p.brand;
-                  if (p.screenSize) shortDesc += ', màn hình ' + p.screenSize;
-                  if (p.ram && p.storage) shortDesc += ', ' + p.ram + ' / ' + p.storage;
-                  if (p.chipset) shortDesc += ', chip ' + p.chipset;
-                  shortDesc += '. Sản phẩm chính hãng, bảo hành toàn quốc.';
+                  var shortDesc = '';
 
                   document.getElementById('productDescription').textContent = shortDesc;
-
+                  
                   // Load document description cho tab "Mô tả"
                   loadProductDocument(p.id);
 
@@ -1313,6 +1368,7 @@
                       console.warn('No document found - Status:', response.status);
                       document.getElementById('tabDescription').innerHTML =
                         '<p style="color: #999;">Chưa có mô tả chi tiết cho sản phẩm này. <br><small>Vui lòng tạo document cho sản phẩm này trong trang admin.</small></p>';
+                      hideToggleButton();
                       return;
                     }
 
@@ -1334,17 +1390,67 @@
                       console.log('=== HTML INJECTED ===');
                       console.log('Tab innerHTML length:', tabDescElement.innerHTML.length);
                       console.log('Tab visible:', tabDescElement.offsetHeight > 0);
+
+                      // Setup toggle button if content is long
+                      setupDescriptionToggle();
                     } else {
                       console.warn('Document exists but description is empty');
                       tabDescElement.innerHTML =
                         '<p style="color: #999;">Document tồn tại nhưng chưa có nội dung mô tả.</p>';
+                      hideToggleButton();
                     }
                   } catch (error) {
                     console.error('=== ERROR ===');
-                    console.error('Error:', error.message);
+console.error('Error:', error.message);
                     console.error('Stack:', error.stack);
                     document.getElementById('tabDescription').innerHTML =
                       '<p style="color: #999;">Lỗi khi tải mô tả: ' + error.message + '</p>';
+                    hideToggleButton();
+                  }
+                }
+
+                // Setup toggle button for description
+                function setupDescriptionToggle() {
+                  const descElement = document.getElementById('tabDescription');
+                  const toggleBtn = document.getElementById('toggleDescriptionBtn');
+
+                  if (!descElement || !toggleBtn) return;
+
+                  // Get full height of content
+                  const fullHeight = descElement.scrollHeight;
+
+                  // Always show toggle button if there's content
+                  if (fullHeight > 0) {
+                    toggleBtn.style.display = 'inline-block';
+
+                    // Add click event
+                    toggleBtn.onclick = function() {
+                      if (descElement.classList.contains('collapsed')) {
+                        // Expand - show full content
+                        descElement.classList.remove('collapsed');
+                        descElement.style.maxHeight = fullHeight + 'px';
+                        toggleBtn.innerHTML = '<i class="fa fa-angle-up"></i> Thu gọn mô tả';
+                      } else {
+                        // Collapse - hide all content
+                        descElement.classList.add('collapsed');
+                        descElement.style.maxHeight = '0';
+                        toggleBtn.innerHTML = '<i class="fa fa-angle-down"></i> Xem mô tả chi tiết';
+
+                        // Scroll to toggle button
+                        toggleBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    };
+                  } else {
+                    // No content, hide button
+                    hideToggleButton();
+                  }
+                }
+
+                // Hide toggle button
+                function hideToggleButton() {
+                  const toggleBtn = document.getElementById('toggleDescriptionBtn');
+                  if (toggleBtn) {
+                    toggleBtn.style.display = 'none';
                   }
                 }
 
@@ -1368,11 +1474,20 @@
                     // Update average rating
                     document.getElementById('avgRating').textContent = stats.averageRating.toFixed(1);
 
-                    // Update rating stars
+                    // Update rating stars in tab3
                     displayStars('avgRatingStars', stats.averageRating);
+
+                    // Update rating stars in product details (top section)
+                    displayStars('productRating', stats.averageRating);
 
                     // Update total reviews text
                     document.getElementById('totalReviewsText').textContent = stats.totalReviews + ' đánh giá';
+
+                    // Update review link in product details
+                    const reviewLink = document.getElementById('reviewLink');
+                    if (reviewLink) {
+                      reviewLink.textContent = stats.totalReviews + ' đánh giá | Viết đánh giá';
+                    }
 
                     // Update tab title with review count
                     const tab3Link = document.querySelector('a[href="#tab3"]');
@@ -1405,8 +1520,7 @@
                       html += '<i class="fa fa-star-o"></i>';
                     }
                   }
-
-                  starsContainer.innerHTML = html;
+starsContainer.innerHTML = html;
                 }
 
                 // Display rating distribution
@@ -1469,7 +1583,7 @@
                           const container = document.getElementById('childReviews-' + reviewId);
                           const button = document.getElementById('toggleBtn-' + reviewId);
                           if (container && button) {
-                            container.style.display = 'block';
+container.style.display = 'block';
                             const childCount = (container.innerHTML.match(/<div style="margin-bottom: 15px;">/g) || []).length;
                             button.innerHTML = '<i class="fa fa-angle-up"></i> Thu gọn phản hồi';
                           }
@@ -1525,7 +1639,7 @@
 
                     // Display child reviews (replies) with collapse/expand functionality
                     if (review.childReviews && review.childReviews.length > 0) {
-                      // Button to toggle child reviews visibility
+// Button to toggle child reviews visibility
                       html += '<button class="btn btn-sm btn-link" onclick="toggleChildReviews(' + review.reviewId + ')" ';
                       html += 'id="toggleBtn-' + review.reviewId + '" ';
                       html += 'style="padding: 2px 8px; font-size: 11px; color: #2874f0; margin-top: 5px;">';
@@ -1563,7 +1677,7 @@
                       html += '<textarea id="replyComment-' + review.reviewId + '" class="form-control" placeholder="Nhập phản hồi của bạn..." rows="3" style="margin-bottom: 10px;"></textarea>';
                       html += '<button class="btn btn-primary btn-sm" onclick="submitReply(' + review.reviewId + ')">Gửi phản hồi</button> ';
                       html += '<button class="btn btn-default btn-sm" onclick="hideReplyForm(' + review.reviewId + ')">Hủy</button>';
-                      html += '</div>';
+html += '</div>';
 
                       html += '</div>'; // Close childReviews container
                     } else {
@@ -1623,8 +1737,7 @@
                   try {
                     const date = new Date(dateString);
                     if (isNaN(date.getTime())) return '';
-
-                    const day = date.getDate().toString().padStart(2, '0');
+const day = date.getDate().toString().padStart(2, '0');
                     const month = (date.getMonth() + 1).toString().padStart(2, '0');
                     const year = date.getFullYear();
                     const hours = date.getHours().toString().padStart(2, '0');
@@ -1688,7 +1801,7 @@
                           loadRatingStatistics(productData.id);
                           loadReviews(productData.id, 0);
                         } else if (response.status === 401 || response.status === 403) {
-                          alert('Vui lòng đăng nhập để đánh giá sản phẩm');
+alert('Vui lòng đăng nhập để đánh giá sản phẩm');
                           window.location.href = ctx + '/login';
                         } else {
                           const error = await response.json();
@@ -1866,6 +1979,33 @@
                     console.error('Error deleting review:', error);
                     alert('Có lỗi xảy ra. Vui lòng thử lại.');
                   }
+                }
+
+                // Share functions
+                function shareOnFacebook() {
+                  const url = encodeURIComponent(window.location.href);
+                  const facebookUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + url;
+                  window.open(facebookUrl, 'facebook-share', 'width=600,height=400');
+                }
+
+                function shareOnTwitter() {
+                  const url = encodeURIComponent(window.location.href);
+                  const text = encodeURIComponent(productData.name + ' - CellPhoneStore');
+                  const twitterUrl = 'https://twitter.com/intent/tweet?url=' + url + '&text=' + text;
+                  window.open(twitterUrl, 'twitter-share', 'width=600,height=400');
+                }
+
+                function shareOnGooglePlus() {
+                  const url = encodeURIComponent(window.location.href);
+                  // Google+ đã đóng cửa, có thể dùng LinkedIn thay thế
+                  const linkedinUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + url;
+                  window.open(linkedinUrl, 'linkedin-share', 'width=600,height=400');
+                }
+
+                function shareViaEmail() {
+                  const subject = encodeURIComponent(productData.name + ' - CellPhoneStore');
+                  const body = encodeURIComponent('Xem sản phẩm này: ' + productData.name + '\n\n' + window.location.href);
+                  window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
                 }
               </script>
             </body>

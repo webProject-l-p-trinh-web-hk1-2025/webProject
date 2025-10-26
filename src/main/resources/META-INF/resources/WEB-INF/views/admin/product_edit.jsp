@@ -121,12 +121,15 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label>Hãng*</label>
-                      <input
-                        name="brand"
-                        class="form-control"
-                        value="${product.brand}"
+                      <select
+                        name="brandCategoryId"
+                        id="brandCategorySelect"
+                        class="form-select"
                         required
-                      />
+                      >
+                        <option value="">-- Chọn hãng --</option>
+                      </select>
+                      <input type="hidden" name="brand" id="brandHidden" value="${product.brand}" />
                     </div>
                   </div>
 
@@ -159,12 +162,16 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 
                   <div class="col-md-4">
                     <div class="form-group">
-                      <label>Danh mục*</label>
+                      <label>Dòng sản phẩm*</label>
                       <select
                         name="categoryId"
+                        id="productSeriesSelect"
                         class="form-select"
                         required
-                      ></select>
+                        disabled
+                      >
+                        <option value="">-- Chọn hãng trước --</option>
+                      </select>
                     </div>
                   </div>
 
@@ -395,26 +402,90 @@ uri="http://java.sun.com/jsp/jstl/core" %>
       const ctx = "${pageContext.request.contextPath}";
       const id = document.getElementById("productId").value;
 
-      // Load danh mục
+      // Load danh mục cha (Hãng: Apple, Samsung, Xiaomi...)
+      let currentProductCategoryParentId = null;
       (async () => {
-        const sel = document.querySelector('select[name="categoryId"]');
-        const res = await fetch(ctx + "/api/categories");
-        const cats = await res.json();
-        cats.forEach((c) => {
+        const brandSelect = document.getElementById('brandCategorySelect');
+        const seriesSelect = document.getElementById('productSeriesSelect');
+        
+        // Load parent categories (Hãng)
+        const res = await fetch(ctx + "/api/categories/parents");
+        const parentCategories = await res.json();
+        
+        parentCategories.forEach((c) => {
           const opt = document.createElement("option");
           opt.value = c.id;
           opt.textContent = c.name;
-          if (c.id == "${product.category.id}") opt.selected = true;
-          sel.append(opt);
+          brandSelect.append(opt);
         });
-        // after categories, load existing product images to display and allow delete
+        
+        // Load sản phẩm hiện tại để set giá trị
         try {
           const p = await (await fetch(ctx + "/api/products/" + id)).json();
+          
+          // Nếu có category, tìm parent của nó
+          if (p.category && p.category.id) {
+            const allCats = await (await fetch(ctx + "/api/categories")).json();
+            const currentCat = allCats.find(cat => cat.id === p.category.id);
+            
+            if (currentCat && currentCat.parentId) {
+              // Set hãng (parent category)
+              brandSelect.value = currentCat.parentId;
+              currentProductCategoryParentId = currentCat.parentId;
+              
+              // Load dòng sản phẩm của hãng này
+              await loadProductSeries(currentCat.parentId, p.category.id);
+            }
+          }
+          
+          // Load existing images
           renderExistingImages(p);
         } catch (e) {
-          /* ignore */
+          console.error('Error loading product:', e);
         }
       })();
+      
+      // Function để load dòng sản phẩm khi chọn hãng
+      async function loadProductSeries(parentId, selectedCategoryId = null) {
+        const seriesSelect = document.getElementById('productSeriesSelect');
+        const brandSelect = document.getElementById('brandCategorySelect');
+        const brandHidden = document.getElementById('brandHidden');
+        
+        // Clear old options
+        seriesSelect.innerHTML = '<option value="">-- Chọn dòng sản phẩm --</option>';
+        
+        if (!parentId) {
+          seriesSelect.disabled = true;
+          return;
+        }
+        
+        // Load child categories (Dòng sản phẩm)
+        const res = await fetch(ctx + "/api/categories/children/" + parentId);
+        const childCategories = await res.json();
+        
+        childCategories.forEach((c) => {
+          const opt = document.createElement("option");
+          opt.value = c.id;
+          opt.textContent = c.name;
+          if (selectedCategoryId && c.id === selectedCategoryId) {
+            opt.selected = true;
+          }
+          seriesSelect.append(opt);
+        });
+        
+        seriesSelect.disabled = false;
+        
+        // Update hidden brand field với tên hãng đã chọn
+        const selectedBrandOption = brandSelect.options[brandSelect.selectedIndex];
+        if (selectedBrandOption && selectedBrandOption.value) {
+          brandHidden.value = selectedBrandOption.textContent;
+        }
+      }
+      
+      // Event listener cho khi chọn hãng
+      document.getElementById('brandCategorySelect').addEventListener('change', function() {
+        loadProductSeries(this.value);
+      });
 
       // Submit update
       document

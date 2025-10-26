@@ -9,6 +9,43 @@
 				<meta http-equiv="X-UA-Compatible" content="IE=edge">
 				<meta name="viewport" content="width=device-width, initial-scale=1">
 				<title>Sản phẩm - CellPhoneStore</title>
+				
+				<style>
+					/* Hover animation cho product cards */
+					.product {
+						transition: all 0.3s ease;
+						cursor: pointer;
+					}
+					
+					.product:hover {
+						transform: translateY(-10px);
+						box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+						z-index: 10;
+					}
+					
+					.product-img {
+						overflow: hidden;
+						position: relative;
+					}
+					
+					.product-img img {
+						transition: transform 0.3s ease;
+					}
+					
+					.product:hover .product-img img {
+						transform: scale(1.05);
+					}
+					
+					/* Smooth transition cho buttons */
+					.product-btns button,
+					.add-to-cart-btn {
+						transition: all 0.3s ease;
+					}
+					
+					.product:hover .add-to-cart-btn {
+						background-color: #D10024 !important;
+					}
+				</style>
 			</head>
 
 			<body>
@@ -34,24 +71,35 @@
 						<div class="row">
 							<!-- ASIDE -->
 							<div id="aside" class="col-md-3">
-								<!-- Categories Widget -->
+								<!-- Series Widget (thay thế Categories) -->
 								<div class="aside">
 									<h3 class="aside-title">Danh mục</h3>
 									<div class="checkbox-filter">
-										<c:forEach items="${categories}" var="cat">
-											<div class="input-checkbox">
-												<input type="checkbox" id="category-${cat.id}" class="category-filter"
-													value="${cat.id}" ${selectedCategories.contains(cat.id) ? 'checked'
-													: '' }>
-												<label for="category-${cat.id}">
-													<span></span>
-													${cat.name}
-												</label>
-											</div>
-										</c:forEach>
+										<c:choose>
+											<c:when test="${empty series}">
+												<!-- Chưa chọn thương hiệu -->
+												<p style="color: #999; font-style: italic; padding: 10px 0;">
+													<i class="fa fa-info-circle"></i> 
+													Vui lòng chọn thương hiệu bên dưới để xem danh mục sản phẩm
+												</p>
+											</c:when>
+											<c:otherwise>
+												<!-- Đã chọn thương hiệu - hiển thị series -->
+												<c:forEach items="${series}" var="s">
+													<div class="input-checkbox">
+														<input type="checkbox" id="series-${s.seriesName}" class="series-filter"
+															value="${s.seriesName}" ${selectedSeries.contains(s.seriesName) ? 'checked' : '' }>
+														<label for="series-${s.seriesName}">
+															<span></span>
+															${s.seriesName} <small style="color: #999;">(${s.productCount})</small>
+														</label>
+													</div>
+												</c:forEach>
+											</c:otherwise>
+										</c:choose>
 									</div>
 								</div>
-								<!-- /Categories Widget -->
+								<!-- /Series Widget -->
 
 								<!-- Brand Widget -->
 								<div class="aside">
@@ -98,7 +146,7 @@
 											Sắp xếp theo:
 											<select class="input-select" id="sort-select">
 												<option value="popular" ${selectedSort=='popular' ? 'selected' : '' }>
-													Phổ biến</option>
+													Tất cả</option>
 												<option value="price-asc" ${selectedSort=='price-asc' ? 'selected' : ''
 													}>Giá thấp đến cao</option>
 												<option value="price-desc" ${selectedSort=='price-desc' ? 'selected'
@@ -117,7 +165,6 @@
 									</div>
 									<ul class="store-grid">
 										<li class="active"><i class="fa fa-th"></i></li>
-										<li><a href="#"><i class="fa fa-th-list"></i></a></li>
 									</ul>
 								</div>
 								<!-- /store top filter -->
@@ -193,11 +240,11 @@
 															</c:otherwise>
 														</c:choose>
 													</h4>
-													<div class="product-rating">
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
+													<div class="product-rating" id="rating-${product.id}">
+														<i class="fa fa-star-o"></i>
+														<i class="fa fa-star-o"></i>
+														<i class="fa fa-star-o"></i>
+														<i class="fa fa-star-o"></i>
 														<i class="fa fa-star-o"></i>
 													</div>
 													<div class="product-btns">
@@ -328,16 +375,16 @@ var IS_LOGGED_IN = <%= isAuthenticated %>;
 							params.push('name=' + encodeURIComponent(searchName));
 						}
 
-						// Thêm categories được chọn
-						var categoryCheckboxes = document.querySelectorAll('.category-filter:checked');
-						categoryCheckboxes.forEach(function (checkbox) {
-							params.push('category=' + checkbox.value);
-						});
-
 						// Thêm brands được chọn
 						var brandCheckboxes = document.querySelectorAll('.brand-filter:checked');
 						brandCheckboxes.forEach(function (checkbox) {
 							params.push('brand=' + encodeURIComponent(checkbox.value));
+						});
+
+						// Thêm series được chọn (thay vì categories)
+						var seriesCheckboxes = document.querySelectorAll('.series-filter:checked');
+						seriesCheckboxes.forEach(function (checkbox) {
+							params.push('series=' + encodeURIComponent(checkbox.value));
 						});
 
 						// Thêm sort
@@ -374,15 +421,22 @@ var IS_LOGGED_IN = <%= isAuthenticated %>;
 
 					// Gắn event listeners khi DOM loaded
 					document.addEventListener('DOMContentLoaded', function () {
-						// Event listeners cho checkboxes
-						var categoryCheckboxes = document.querySelectorAll('.category-filter');
-						categoryCheckboxes.forEach(function (checkbox) {
+						// Event listeners cho series checkboxes (thay vì category)
+						var seriesCheckboxes = document.querySelectorAll('.series-filter');
+						seriesCheckboxes.forEach(function (checkbox) {
 							checkbox.addEventListener('change', applyFilters);
 						});
 
 						var brandCheckboxes = document.querySelectorAll('.brand-filter');
 						brandCheckboxes.forEach(function (checkbox) {
-							checkbox.addEventListener('change', applyFilters);
+							checkbox.addEventListener('change', function() {
+								// Khi thay đổi brand, xóa tất cả series selections (vì series sẽ thay đổi)
+								var seriesCheckboxes = document.querySelectorAll('.series-filter:checked');
+								seriesCheckboxes.forEach(function(cb) {
+									cb.checked = false;
+								});
+								applyFilters();
+							});
 						});
 
 						// Event listeners cho dropdowns
@@ -478,6 +532,65 @@ var IS_LOGGED_IN = <%= isAuthenticated %>;
 							loadFavoriteStates(); // Load trạng thái yêu thích
 						});
 					}
+					// ========== RATING FUNCTIONS ==========
+
+					// Load rating cho tất cả sản phẩm hiển thị trên trang
+					function loadAllProductRatings() {
+						// Lấy tất cả product IDs từ các thẻ rating
+						const ratingElements = document.querySelectorAll('[id^="rating-"]');
+						
+						ratingElements.forEach(element => {
+							const productId = element.id.replace('rating-', '');
+							loadProductRating(productId);
+						});
+					}
+
+					// Load rating cho một sản phẩm cụ thể
+					async function loadProductRating(productId) {
+						try {
+							const response = await fetch('${pageContext.request.contextPath}/api/reviews/product/' + productId + '/stats');
+							
+							if (!response.ok) {
+								console.error('Failed to load rating for product ' + productId);
+								return;
+							}
+
+							const stats = await response.json();
+							
+							// Update rating stars cho sản phẩm này
+							displayProductStars('rating-' + productId, stats.averageRating);
+						} catch (error) {
+							console.error('Error loading rating for product ' + productId + ':', error);
+						}
+					}
+
+					// Hiển thị stars dựa trên rating value
+					function displayProductStars(elementId, rating) {
+						const starsContainer = document.getElementById(elementId);
+						if (!starsContainer) return;
+
+						const fullStars = Math.floor(rating);
+						const hasHalfStar = rating % 1 >= 0.5;
+						let html = '';
+
+						for (let i = 0; i < 5; i++) {
+							if (i < fullStars) {
+								html += '<i class="fa fa-star"></i>';
+							} else if (i === fullStars && hasHalfStar) {
+								html += '<i class="fa fa-star-half-o"></i>';
+							} else {
+								html += '<i class="fa fa-star-o"></i>';
+							}
+						}
+
+						starsContainer.innerHTML = html;
+					}
+
+					// Load ratings khi trang được tải
+					window.addEventListener('DOMContentLoaded', function () {
+						loadAllProductRatings();
+					});
+
 
 					// Toggle favorite (thêm/xóa yêu thích)
 					function toggleFavorite(productId, button) {

@@ -61,4 +61,16 @@ public class CategoryController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return service.getAll();
     }
+    
+    // Lấy danh mục cha (Hãng) - dùng cho dropdown "Hãng" trong form sản phẩm
+    @GetMapping("/parents")
+    public List<CategoryDto> getParentCategories() {
+        return service.getParentCategories();
+    }
+    
+    // Lấy danh mục con (Dòng sản phẩm) theo parentId - AJAX từ form khi chọn hãng
+    @GetMapping("/children/{parentId}")
+    public List<CategoryDto> getChildCategories(@PathVariable Long parentId) {
+        return service.getChildCategories(parentId);
+    }
 }

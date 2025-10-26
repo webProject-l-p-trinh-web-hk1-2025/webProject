@@ -70,13 +70,15 @@ public class ProductPageController {
     @GetMapping("/shop")
     public String shop(@RequestParam(required = false) List<Long> category,
             @RequestParam(required = false) List<String> brand,
+            @RequestParam(required = false) List<String> series, // Thêm param series
             @RequestParam(required = false) String name,
             @RequestParam(required = false, defaultValue = "popular") String sort,
             @RequestParam(required = false, defaultValue = "12") int limit,
             @RequestParam(required = false, defaultValue = "1") int page,
             Model model) {
         try {
-            List<ProductResponse> products = productService.getAll();
+            List<ProductResponse> allProducts = productService.getAll();
+            List<ProductResponse> products = allProducts;
 
             // Lọc theo tên sản phẩm (search) với fuzzy matching
             if (name != null && !name.trim().isEmpty()) {
@@ -119,6 +121,17 @@ public class ProductPageController {
             if (brand != null && !brand.isEmpty()) {
                 products = products.stream()
                         .filter(p -> p.getBrand() != null && brand.contains(p.getBrand()))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+            
+            // Lọc theo series (có thể chọn nhiều)
+            if (series != null && !series.isEmpty()) {
+                products = products.stream()
+                        .filter(p -> {
+                            if (p.getName() == null) return false;
+                            String productSeries = extractSeriesName(p.getName());
+                            return series.contains(productSeries);
+                        })
                         .collect(java.util.stream.Collectors.toList());
             }
 
@@ -168,10 +181,23 @@ public class ProductPageController {
             }
 
             model.addAttribute("products", paginatedProducts);
-            model.addAttribute("categories", categoryService.getAll());
+            
+            // Lấy series động dựa theo brand đã chọn (thay vì categories từ DB)
+            List<com.proj.webprojrct.product.dto.ProductSeriesDto> availableSeries;
+            
+            if (brand != null && !brand.isEmpty()) {
+                // Có chọn brand → Tự động generate series từ products của các brand đã chọn
+                availableSeries = generateSeriesByBrands(allProducts, brand);
+            } else {
+                // Chưa chọn brand → Không hiện series (để user chọn brand trước)
+                availableSeries = java.util.Collections.emptyList();
+            }
+            
+            model.addAttribute("series", availableSeries);
             model.addAttribute("brands", productService.getAllBrands());
             model.addAttribute("selectedCategories", category != null ? category : java.util.Collections.emptyList());
             model.addAttribute("selectedBrands", brand != null ? brand : java.util.Collections.emptyList());
+            model.addAttribute("selectedSeries", series != null ? series : java.util.Collections.emptyList()); // Thêm selected series
             model.addAttribute("searchName", name != null ? name : "");
             model.addAttribute("selectedSort", sort);
             model.addAttribute("selectedLimit", limit);
@@ -344,5 +370,58 @@ public class ProductPageController {
         }
 
         return words.length > 0 ? words[0] : "";
+    }
+
+    /**
+     * Tự động generate danh sách series từ products của các brand đã chọn
+     * @param products Danh sách tất cả sản phẩm
+     * @param brands Danh sách brand đã chọn
+     * @return Danh sách series được tạo tự động
+     */
+    private List<com.proj.webprojrct.product.dto.ProductSeriesDto> generateSeriesByBrands(
+            List<ProductResponse> products, 
+            List<String> brands) {
+        
+        // Map để đếm số lượng sản phẩm cho mỗi series
+        java.util.Map<String, com.proj.webprojrct.product.dto.ProductSeriesDto> seriesMap = 
+            new java.util.LinkedHashMap<>();
+        
+        // Duyệt qua products và group theo series
+        for (ProductResponse product : products) {
+            // Chỉ xử lý products của brands đã chọn
+            if (product.getBrand() == null || !brands.contains(product.getBrand())) {
+                continue;
+            }
+            
+            if (product.getName() == null) {
+                continue;
+            }
+            
+            // Extract series name từ product name
+            String seriesName = extractSeriesName(product.getName());
+            
+            // Tạo hoặc update series trong map
+            if (!seriesMap.containsKey(seriesName)) {
+                seriesMap.put(seriesName, new com.proj.webprojrct.product.dto.ProductSeriesDto(
+                    seriesName, 
+                    product.getBrand()
+                ));
+            }
+            
+            // Tăng product count
+            com.proj.webprojrct.product.dto.ProductSeriesDto seriesDto = seriesMap.get(seriesName);
+            seriesDto.setProductCount(seriesDto.getProductCount() + 1);
+        }
+        
+        // Convert map to list và sort theo brand, sau đó theo series name
+        return seriesMap.values().stream()
+                .sorted((s1, s2) -> {
+                    // Sort theo brand trước
+                    int brandCompare = s1.getBrand().compareTo(s2.getBrand());
+                    if (brandCompare != 0) return brandCompare;
+                    // Sau đó sort theo series name
+                    return s1.getSeriesName().compareTo(s2.getSeriesName());
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 }

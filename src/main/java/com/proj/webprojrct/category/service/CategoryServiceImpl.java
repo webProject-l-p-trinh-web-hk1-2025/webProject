@@ -74,6 +74,20 @@ public class CategoryServiceImpl implements CategoryService {
         }
         return categoryPage.map(this::map);
     }
+    
+    @Override
+    public List<CategoryDto> getParentCategories() {
+        return repo.findByParentIdIsNull().stream()
+                .map(this::map)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<CategoryDto> getChildCategories(Long parentId) {
+        return repo.findByParentId(parentId).stream()
+                .map(this::map)
+                .collect(Collectors.toList());
+    }
 
     private CategoryDto map(Category c) {
         return new CategoryDto(c.getId(), c.getName(), c.getDescription(), c.getParentId());

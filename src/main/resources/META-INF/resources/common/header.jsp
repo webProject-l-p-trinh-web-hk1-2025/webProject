@@ -6,8 +6,7 @@
 <header class="site-header">
   <div class="site-header-inner">
     <a href="${pageContext.request.contextPath}/" class="brand">
-      <img src="${pageContext.request.contextPath}/image/cellphone-store-logo.svg" alt="Logo" class="brand-logo">
-      <span class="brand-text">CellPhone Store</span>
+      <span class="brand-text" style="color: #d10024; margin: 15px 0">CellPhone Store</span>
     </a>
   </div>
 </header>

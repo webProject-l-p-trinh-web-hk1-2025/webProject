@@ -1,4 +1,5 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
             <!DOCTYPE html>
@@ -467,9 +468,9 @@
                                     <h3 class="title">Sản phẩm mới</h3>
                                     <div class="section-nav">
                                         <ul class="section-tab-nav tab-nav">
-                                            <c:forEach items="${categories}" var="cat" varStatus="status">
+                                            <c:forEach items="${brands}" var="brand" varStatus="status">
                                                 <li <c:if test="${status.first}">class="active"</c:if>>
-                                                    <a data-toggle="tab" href="#tab-${cat.id}">${cat.name}</a>
+                                                    <a data-toggle="tab" href="#tab-brand-${status.index}">${brand}</a>
                                                 </li>
                                             </c:forEach>
                                         </ul>
@@ -482,13 +483,13 @@
                             <div class="col-md-12">
                                 <div class="row">
                                     <div class="products-tabs">
-                                        <c:forEach items="${categories}" var="cat" varStatus="status">
+                                        <c:forEach items="${brands}" var="brand" varStatus="status">
                                             <!-- tab -->
-                                            <div id="tab-${cat.id}"
+                                            <div id="tab-brand-${status.index}"
                                                 class="tab-pane <c:if test='${status.first}'>active</c:if>">
-                                                <div class="products-slick" data-nav="#slick-nav-${cat.id}">
+                                                <div class="products-slick" data-nav="#slick-nav-brand-${status.index}">
                                                     <c:forEach items="${products}" var="product">
-                                                        <c:if test="${product.category.id == cat.id}">
+                                                        <c:if test="${product.brand == brand}">
                                                             <!-- product -->
                                                             <div class="product">
                                                                 <div class="product-img">
@@ -565,11 +566,11 @@
                                                                             </c:otherwise>
                                                                         </c:choose>
                                                                     </h4>
-                                                                    <div class="product-rating">
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
+                                                                    <div class="product-rating" id="rating-new-${product.id}">
+                                                                        <i class="fa fa-star-o"></i>
+                                                                        <i class="fa fa-star-o"></i>
+                                                                        <i class="fa fa-star-o"></i>
+                                                                        <i class="fa fa-star-o"></i>
                                                                         <i class="fa fa-star-o"></i>
                                                                     </div>
                                                                     <div class="product-btns">
@@ -608,7 +609,7 @@
                                                         </c:if>
                                                     </c:forEach>
                                                 </div>
-                                                <div id="slick-nav-${cat.id}" class="products-slick-nav"></div>
+                                                <div id="slick-nav-brand-${status.index}" class="products-slick-nav"></div>
                                             </div>
                                             <!-- /tab -->
                                         </c:forEach>
@@ -631,32 +632,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="hot-deal">
-                                    <ul class="hot-deal-countdown">
-                                        <li>
-                                            <div>
-                                                <h3 id="home-days">00</h3>
-
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div>
-                                                <h3 id="home-hours">00</h3>
-
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div>
-                                                <h3 id="home-minutes">00</h3>
-
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div>
-                                                <h3 id="home-seconds">00</h3>
-
-                                            </div>
-                                        </li>
-                                    </ul>
+                                    
                                     <h2 class="text-uppercase">Flash Sale hôm nay</h2>
                                     <p>Giảm giá lên đến 50%</p>
                                     <a class="primary-btn cta-btn" href="${pageContext.request.contextPath}/deals">Mua
@@ -750,13 +726,13 @@
                                                     </c:otherwise>
                                                 </c:choose>
                                             </h4>
-                                            <div class="product-rating">
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star-o"></i>
-                                            </div>
+                                            <div class="product-rating" id="rating-hot-${product.id}">
+                                                                        <i class="fa fa-star-o"></i>
+                                                                        <i class="fa fa-star-o"></i>
+                                                                        <i class="fa fa-star-o"></i>
+                                                                        <i class="fa fa-star-o"></i>
+                                                                        <i class="fa fa-star-o"></i>
+                                                                    </div>
                                             <div class="product-btns">
                                                 <button class="add-to-wishlist" data-product-id="${product.id}"
                                                     onclick="toggleFavorite(${product.id}, this)">
@@ -932,6 +908,60 @@
                             loadFavoriteStates();
                         });
                     }
+                    // ========== RATING FUNCTIONS ==========
+
+                    // Load rating cho tất cả sản phẩm hiển thị trên trang
+                    function loadAllProductRatings() {
+                        // Lấy tất cả product IDs từ các thẻ rating (cả new và hot products)
+                        const ratingElements = document.querySelectorAll('[id^="rating-"]');
+                        
+                        ratingElements.forEach(element => {
+                            const productId = element.id.replace('rating-new-', '').replace('rating-hot-', '');
+                            loadProductRating(productId, element.id);
+                        });
+                    }
+
+                    // Load rating cho một sản phẩm cụ thể
+                    async function loadProductRating(productId, elementId) {
+                        try {
+                            const response = await fetch('${pageContext.request.contextPath}/api/reviews/product/' + productId + '/stats');
+                            
+                            if (!response.ok) {
+                                console.error('Failed to load rating for product ' + productId);
+                                return;
+                            }
+
+                            const stats = await response.json();
+                            
+                            // Update rating stars cho sản phẩm này
+                            displayProductStars(elementId, stats.averageRating);
+                        } catch (error) {
+                            console.error('Error loading rating for product ' + productId + ':', error);
+                        }
+                    }
+
+                    // Hiển thị stars dựa trên rating value
+                    function displayProductStars(elementId, rating) {
+                        const starsContainer = document.getElementById(elementId);
+                        if (!starsContainer) return;
+
+                        const fullStars = Math.floor(rating);
+                        const hasHalfStar = rating % 1 >= 0.5;
+                        let html = '';
+
+                        for (let i = 0; i < 5; i++) {
+                            if (i < fullStars) {
+                                html += '<i class="fa fa-star"></i>';
+                            } else if (i === fullStars && hasHalfStar) {
+                                html += '<i class="fa fa-star-half-o"></i>';
+                            } else {
+                                html += '<i class="fa fa-star-o"></i>';
+                            }
+                        }
+
+                        starsContainer.innerHTML = html;
+                    }
+                    // ========== RATING FUNCTIONS ==========
 
                     // Synchronized 24-hour countdown for home page (same as deals page)
                     function updateHomeCountdown() {
@@ -983,6 +1013,7 @@
                     window.addEventListener('DOMContentLoaded', function () {
                         updateHomeCountdown();
                         initProductTabsAutoRotate();
+                        loadAllProductRatings(); // Load ratings for all products
                     });
 
                     // Auto-rotate product tabs with smooth animation

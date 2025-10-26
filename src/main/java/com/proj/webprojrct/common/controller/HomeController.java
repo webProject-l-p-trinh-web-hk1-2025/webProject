@@ -34,10 +34,10 @@ public class HomeController {
             // Lấy tất cả sản phẩm
             model.addAttribute("products", productService.getAll());
             
-            // Lấy tất cả categories
+            // Lấy tất cả categories (nếu cần cho phần khác)
             model.addAttribute("categories", categoryService.getAll());
             
-            // Lấy danh sách các thương hiệu
+            // Lấy danh sách các thương hiệu (dùng cho phần Sản phẩm mới)
             model.addAttribute("brands", productService.getAllBrands());
             
         } catch (Exception e) {

@@ -64,7 +64,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/oauth2/**", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/about", "/product/**", "/products", "/shop", "/deals", "/cart", "/wishlist", "/css/**", "/js/**", "/fonts/**", "/img/**", "/image/**", "/uploads/**", "/favicon.ico", "/error", "/error/**", "/webjars/**", "/WEB-INF/views/**", "/WEB-INF/decorators/**", "/common/**").permitAll()
-                .requestMatchers("/api/products/**", "/api/categories/**", "/api/media/**", "/api/cart/**", "/api/favorite/**").permitAll()
+                .requestMatchers("/api/products/**", "/api/categories/**", "/api/media/**", "/api/cart/**", "/api/favorite/**", "/api/documents/**", "/api/reviews/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN", "SELLER")

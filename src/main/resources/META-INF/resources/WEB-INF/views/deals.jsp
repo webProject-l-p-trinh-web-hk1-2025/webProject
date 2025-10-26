@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
-<html lang="vi">
+< lang="vi">
 
 <head>
     <meta charset="utf-8">
@@ -264,34 +264,9 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="hot-deal">
-                        <ul class="hot-deal-countdown">
-                            <li>
-                                <div>
-                                    <h3 id="days">02</h3>
-                                    <span>Ngày</span>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <h3 id="hours">10</h3>
-                                    <span>Giờ</span>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <h3 id="minutes">34</h3>
-                                    <span>Phút</span>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <h3 id="seconds">60</h3>
-                                    <span>Giây</span>
-                                </div>
-                            </li>
-                        </ul>
+                
                         <h2 class="text-uppercase">🔥 FLASH SALE 🔥</h2>
-                        <p>Giảm giá khủng lên đến 50% - Chỉ trong hôm nay!</p>
+                        <p>Giảm giá khủng cho các khách hàng!</p>
                     </div>
                 </div>
             </div>
@@ -299,7 +274,7 @@
     </div>
     <!-- /HOT DEAL HERO SECTION -->
 
-    <!-- DEALS CATEGORIES -->
+    <!-- DEALS CATEGORIES (render by brand) -->
     <div class="section">
         <div class="container">
             <div class="row">
@@ -310,37 +285,56 @@
                 </div>
             </div>
             <div class="row">
-                <c:forEach items="${categories}" var="cat" varStatus="status">
+                <%-- Build a list of unique brands (group by first token) from the products model so we render one card per brand --%>
+                <%
+                    java.util.List productsList = (java.util.List) request.getAttribute("products");
+                    java.util.Map<String, String> brandMap = new java.util.LinkedHashMap<>(); // key: canonical (lower first token), value: display
+                    if (productsList != null) {
+                        for (Object obj : productsList) {
+                            try {
+                                // Try to call getBrand() method
+                                java.lang.reflect.Method m = obj.getClass().getMethod("getBrand");
+                                Object b = m.invoke(obj);
+                                if (b != null) {
+                                    String brand = b.toString().trim();
+                                    if (brand.length() == 0) continue;
+                                    String firstToken = brand.split("\\s+")[0];
+                                    String key = firstToken.toLowerCase(java.util.Locale.ROOT);
+                                    if (!brandMap.containsKey(key)) {
+                                        brandMap.put(key, firstToken);
+                                    }
+                                }
+                            } catch (Exception e) {
+                                // ignore reflection errors for safety
+                            }
+                        }
+                    }
+                    java.util.List dealBrands = new java.util.ArrayList<>(brandMap.values());
+                    request.setAttribute("dealBrands", dealBrands);
+                %>
+
+                <c:forEach items="${dealBrands}" var="brand" varStatus="status">
                     <div class="col-md-4 col-xs-6" style="margin-bottom: 30px;">
                         <div class="shop" style="position: relative; overflow: hidden; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
                             <div class="shop-img" style="position: relative;">
                                 <c:choose>
                                     <c:when test="${status.index == 0}">
                                         <img src="${pageContext.request.contextPath}/uploads/products/banersamsung.jpg"
-                                            alt="${cat.name}" style="width: 100%; height: 250px; object-fit: cover;">
-                                        <div style="position: absolute; top: 10px; right: 10px; background: #ff4757; color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold;">
-                                            -50%
-                                        </div>
+                                            alt="${brand}" style="width: 100%; height: 250px; object-fit: cover;">
                                     </c:when>
                                     <c:when test="${status.index == 1}">
                                         <img src="${pageContext.request.contextPath}/uploads/products/bannerapple.jpg"
-                                            alt="${cat.name}" style="width: 100%; height: 250px; object-fit: cover;">
-                                        <div style="position: absolute; top: 10px; right: 10px; background: #ff4757; color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold;">
-                                            -40%
-                                        </div>
+                                            alt="${brand}" style="width: 100%; height: 250px; object-fit: cover;">
                                     </c:when>
                                     <c:otherwise>
                                         <img src="${pageContext.request.contextPath}/uploads/products/banerxiaomi.jpg"
-                                            alt="${cat.name}" style="width: 100%; height: 250px; object-fit: cover;">
-                                        <div style="position: absolute; top: 10px; right: 10px; background: #ff4757; color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold;">
-                                            -60%
-                                        </div>
+                                            alt="${brand}" style="width: 100%; height: 250px; object-fit: cover;">
                                     </c:otherwise>
                                 </c:choose>
                             </div>
                             <div class="shop-body" style="text-align: center; padding: 20px;">
-                                <h3 style="color: #333; margin-bottom: 15px;">${cat.name}<br><span style="color: #d70018;">Hot Deals</span></h3>
-                                <a href="javascript:void(0)" onclick="filterDealsByCategory('${cat.name}')"
+                                <h3 style="color: #333; margin-bottom: 15px;">${brand}<br><span style="color: #d70018;">Hot Deals</span></h3>
+                                <a href="javascript:void(0)" onclick="filterDealsByCategory('${brand}')"
                                    class="cta-btn" style="background: linear-gradient(45deg, #d70018, #ff6b6b); border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer;">
                                    Xem ngay <i class="fa fa-arrow-circle-right"></i>
                                 </a>
@@ -365,9 +359,9 @@
                             <button class="btn btn-outline-secondary btn-sm" onclick="showAllDeals()" style="margin-right: 10px;">
                                 <i class="fa fa-th"></i> Tất cả
                             </button>
-                            <c:forEach items="${categories}" var="cat">
-                                <button class="btn btn-outline-secondary btn-sm category-filter-btn" onclick="filterDealsByCategory('${cat.name}')" style="margin-right: 10px;">
-                                    ${cat.name}
+                            <c:forEach items="${dealBrands}" var="brand">
+                                <button class="btn btn-outline-secondary btn-sm category-filter-btn" onclick="filterDealsByCategory('${brand}')" style="margin-right: 10px;">
+                                    ${brand}
                                 </button>
                             </c:forEach>
                         </div>
@@ -400,17 +394,13 @@
                                 <!-- Deal labels -->
                                 <div class="product-label">
                                     <c:if test="${product.dealPercentage != null && product.dealPercentage > 0}">
-                                        <span class="sale" style="background: #ff4757;">-${product.dealPercentage}%</span>
-                                        <span class="new" style="background: #ff6b6b;">HOT</span>
+                                        <span class="sale" style="background:#c50b12;color:#fff;padding:4px 6px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);">-${product.dealPercentage}%</span>
+                                        <span class="new" style="background:#ff3b5c;color:#fff;padding:4px 6px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);margin-left:6px;">HOT</span>
                                     </c:if>
                                 </div>
                                 
                                 <!-- Flash sale countdown for first few products -->
-                                <c:if test="${status.index < 6}">
-                                    <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px;">
-                                        <i class="fa fa-clock-o"></i> <span class="flash-countdown">02:15:30</span>
-                                    </div>
-                                </c:if>
+                                
                             </div>
                             
                             <div class="product-body">
@@ -445,13 +435,13 @@
                                     </c:if>
                                 </h4>
                                 
-                                <div class="product-rating">
-                                    <i class="fa fa-star"></i>
-                                    <i class="fa fa-star"></i>
-                                    <i class="fa fa-star"></i>
-                                    <i class="fa fa-star"></i>
-                                    <i class="fa fa-star-o"></i>
-                                </div>
+                                <div class="product-rating" id="rating-deal-${status.index}-${product.id}">
+														<i class="fa fa-star-o"></i>
+														<i class="fa fa-star-o"></i>
+														<i class="fa fa-star-o"></i>
+														<i class="fa fa-star-o"></i>
+														<i class="fa fa-star-o"></i>
+													</div>
                                 
                                 <div class="product-btns">
                                     <button class="add-to-wishlist" data-product-id="${product.id}"
@@ -571,15 +561,7 @@
         }
 
         // Flash sale countdown for individual products (synchronized)
-        function updateFlashCountdown(hours, minutes, seconds) {
-            const flashElements = document.querySelectorAll('.flash-countdown');
-            flashElements.forEach((element, index) => {
-                // Show synchronized time for all products
-                element.innerHTML = hours.toString().padStart(2, '0') + ':' + 
-                                  minutes.toString().padStart(2, '0') + ':' + 
-                                  seconds.toString().padStart(2, '0');
-            });
-        }
+        
 
         // Cart and favorite functions (same as in shop.jsp)
         function addToCart(productId) {
@@ -701,40 +683,42 @@
 
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            updateCountdown();
-            updateFlashCountdown();
+            updateCountdown(); // Countdown sẽ tự động gọi updateFlashCountdown với tham số đúng
             addHoverEffects();
             if (IS_LOGGED_IN) loadFavoriteStates();
+            loadAllProductRatings(); // Load ratings cho tất cả sản phẩm
         });
 
-        // Filter products by category/brand
+        // Filter products by category/brand (brand matching uses startsWith on normalized first token)
         function filterDealsByCategory(categoryName) {
+            const target = (categoryName || '').trim().toLowerCase();
             const products = document.querySelectorAll('.product-item');
             let visibleCount = 0;
-            
+
             products.forEach(product => {
-                const productCategory = product.getAttribute('data-category');
-                const productBrand = product.getAttribute('data-brand');
-                
-                // Match by category name or brand name
-                if (productCategory === categoryName || productBrand === categoryName) {
+                const productCategory = (product.getAttribute('data-category') || '').trim().toLowerCase();
+                const productBrand = (product.getAttribute('data-brand') || '').trim().toLowerCase();
+
+                // Normalize productBrand by taking its first token so "Nokia 2" -> "nokia"
+                const productBrandFirst = productBrand.split(/\s+/)[0];
+
+                // Show if category matches exactly OR brand first token startsWith target
+                if (productCategory === target || productBrandFirst.startsWith(target)) {
                     product.style.display = 'block';
                     visibleCount++;
                 } else {
                     product.style.display = 'none';
                 }
             });
-            
+
             // Update section title
             const title = document.getElementById('deals-section-title');
             if (title) {
                 title.innerHTML = '🎯 ' + categoryName + ' Hot Deals';
             }
-            
+
             // Scroll to products section
             document.getElementById('deals-products').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
-            // No message needed - just show empty state
         }
         
         function showAllDeals() {
@@ -748,6 +732,63 @@
             if (title) {
                 title.innerHTML = '⚡ Flash Sale - Giá sốc mỗi giờ';
             }
+        }
+
+        // ========== RATING FUNCTIONS ==========
+
+        // Load rating cho tất cả sản phẩm hiển thị trên trang
+        function loadAllProductRatings() {
+            // Lấy tất cả product IDs từ các thẻ rating
+            const ratingElements = document.querySelectorAll('[id^="rating-deal-"]');
+            
+            ratingElements.forEach(element => {
+                // Extract productId from pattern: rating-deal-{index}-{productId}
+                const parts = element.id.split('-');
+                const productId = parts[parts.length - 1]; // Lấy phần cuối cùng là productId
+                loadProductRating(productId, element.id);
+            });
+        }
+
+        // Load rating cho một sản phẩm cụ thể
+        async function loadProductRating(productId, elementId) {
+            try {
+                const response = await fetch('${pageContext.request.contextPath}/api/reviews/product/' + productId + '/stats');
+                
+                if (!response.ok) {
+                    return; // Không có rating, giữ nguyên 5 sao rỗng
+                }
+
+                const stats = await response.json();
+                
+                // Update rating stars cho sản phẩm này
+                displayProductStars(elementId, stats.averageRating);
+            } catch (error) {
+                // Không có rating, giữ nguyên 5 sao rỗng
+            }
+        }
+
+        // Hiển thị stars dựa trên rating value
+        function displayProductStars(elementId, rating) {
+            const starsContainer = document.getElementById(elementId);
+            if (!starsContainer) {
+                return;
+            }
+
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let html = '';
+
+            for (let i = 0; i < 5; i++) {
+                if (i < fullStars) {
+                    html += '<i class="fa fa-star"></i>';
+                } else if (i === fullStars && hasHalfStar) {
+                    html += '<i class="fa fa-star-half-o"></i>';
+                } else {
+                    html += '<i class="fa fa-star-o"></i>';
+                }
+            }
+
+            starsContainer.innerHTML = html;
         }
     </script>
 
@@ -766,13 +807,16 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
-        .flash-countdown {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
+        
         
         .product-label span {
             animation: pulse 2s infinite;
+            color: #fff !important;
+            font-weight: 700;
+            padding: 4px 6px;
+            border-radius: 4px;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+            border: none;
         }
         
         @keyframes pulse {
@@ -810,5 +854,3 @@
     </style>
 
 </body>
-
-</html>

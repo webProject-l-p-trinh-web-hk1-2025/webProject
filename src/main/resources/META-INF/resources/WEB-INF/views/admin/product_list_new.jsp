@@ -56,6 +56,16 @@
       background-color: #28a745;
       color: white;
     }
+    
+    .btn-warning {
+      background-color: #ffc107;
+      color: #000;
+    }
+    
+    .btn-info {
+      background-color: #17a2b8;
+      color: white;
+    }
 
     /* Deal Modal Styles */
     .deal-modal {
@@ -352,8 +362,9 @@
                   <th>Hãng</th>
                   <th>Giá</th>
                   <th>Tồn</th>
+                  <th style="width:100px;">Trạng thái</th>
                   <th style="width:120px;">Khuyến mãi</th>
-                  <th style="width:250px;">Thao tác</th>
+                  <th style="width:280px;">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -366,6 +377,20 @@
                     <td>${product.brand}</td>
                     <td class="text-end">${product.price} ₫</td>
                     <td class="text-center">${product.stock}</td>
+                    <td class="text-center">
+                      <c:choose>
+                        <c:when test="${not empty product.isActive and product.isActive == false}">
+                          <span class="badge" style="background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 4px;">
+                            Ngừng bán
+                          </span>
+                        </c:when>
+                        <c:otherwise>
+                          <span class="badge" style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">
+                            Đang bán
+                          </span>
+                        </c:otherwise>
+                      </c:choose>
+                    </td>
                     <td class="text-center">
                       <c:choose>
                         <c:when test="${product.onDeal}">
@@ -382,6 +407,18 @@
                       <a href="${pageContext.request.contextPath}/product/${product.id}" class="btn btn-view" title="Xem"><i class="fas fa-eye"></i></a>
                       <a href="${pageContext.request.contextPath}/admin/products/edit/${product.id}" class="btn btn-edit" title="Sửa"><i class="fas fa-edit"></i></a>
                       <button type="button" class="btn btn-success" onclick="openDealModal('${product.id}')" title="Khuyến mãi"><i class="fas fa-percent"></i></button>
+                      <c:choose>
+                        <c:when test="${not empty product.isActive and product.isActive == false}">
+                          <button type="button" class="btn btn-info" onclick="toggleActiveStatus('${product.id}', false)" title="Mở lại kinh doanh">
+                            <i class="fas fa-play"></i>
+                          </button>
+                        </c:when>
+                        <c:otherwise>
+                          <button type="button" class="btn btn-warning" onclick="toggleActiveStatus('${product.id}', true)" title="Ngừng kinh doanh">
+                            <i class="fas fa-pause"></i>
+                          </button>
+                        </c:otherwise>
+                      </c:choose>
                       <form action="${pageContext.request.contextPath}/admin/products/${product.id}/delete" method="post" style="display:inline;" >
                         <button type="submit" class="btn btn-delete" title="Xóa"><i class="fas fa-trash"></i></button>
                       </form>
@@ -500,6 +537,35 @@
       .catch(error => {
         console.error('Error:', error);
         alert('Lỗi khi thiết lập khuyến mãi!');
+      });
+    }
+
+    // Toggle Active Status
+    function toggleActiveStatus(productId, currentStatus) {
+      const action = currentStatus ? 'ngừng kinh doanh' : 'mở lại kinh doanh';
+      const newStatus = !currentStatus;
+      
+      if (!confirm(`Bạn có chắc muốn ${action} sản phẩm này?`)) {
+        return;
+      }
+
+      fetch('${pageContext.request.contextPath}/admin/products/' + productId + '/active-toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          alert(`Đã ${action} sản phẩm thành công!`);
+          window.location.reload();
+        } else {
+          alert('Lỗi khi cập nhật trạng thái sản phẩm!');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Lỗi khi cập nhật trạng thái sản phẩm!');
       });
     }
 

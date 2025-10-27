@@ -44,6 +44,10 @@ public class Product {
     @Column(name = "deal_percentage")
     private Integer dealPercentage;
 
+    @Column(name = "is_active")
+    @Builder.Default
+    private Boolean isActive = true;
+
     // --- Specs ---
     private String screenSize;
     private String displayTech;

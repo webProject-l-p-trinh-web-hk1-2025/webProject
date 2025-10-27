@@ -36,15 +36,7 @@
 						transform: scale(1.08);
 					}
 
-					/* Smooth transition cho buttons */
-					.product-btns button,
-					.add-to-cart-btn {
-						transition: all 0.3s ease;
-					}
-
-					.product:hover .add-to-cart-btn {
-						background-color: #D10024 !important;
-					}
+					
 				</style>
 			</head>
 

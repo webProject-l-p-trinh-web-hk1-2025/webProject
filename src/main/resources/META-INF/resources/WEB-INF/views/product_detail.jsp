@@ -1,99 +1,96 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-  <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-    <%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
-      <%@ page import="org.springframework.security.core.Authentication" %>
-        <%@ page import="org.springframework.security.authentication.AnonymousAuthenticationToken" %>
-          <% Authentication auth=SecurityContextHolder.getContext().getAuthentication(); boolean isAuthenticated=auth
-            !=null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken);
-            request.setAttribute("isUserAuthenticated", isAuthenticated); %>
-            <!DOCTYPE html>
-            <html>
+<%@ page contentType="text/html; charset=UTF-8" %> <%@ taglib prefix="c"
+uri="http://java.sun.com/jsp/jstl/core" %> <%@ page
+import="org.springframework.security.core.context.SecurityContextHolder" %> <%@
+page import="org.springframework.security.core.Authentication" %> <%@ page
+import="org.springframework.security.authentication.AnonymousAuthenticationToken"
+%> <% Authentication
+auth=SecurityContextHolder.getContext().getAuthentication(); boolean
+isAuthenticated=auth !=null && auth.isAuthenticated() && !(auth instanceof
+AnonymousAuthenticationToken); request.setAttribute("isUserAuthenticated",
+isAuthenticated); %>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>
+      Chi tiết sản phẩm - <c:out value="${product.name}" default="Sản phẩm" />
+    </title>
 
-            <head>
-              <meta charset="UTF-8" />
-              <title>
-                Chi tiết sản phẩm -
-                <c:out value="${product.name}" default="Sản phẩm" />
-              </title>
+    <style>
+      /* Hover animation cho product cards trong related/similar products */
+      .product {
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
 
-              <style>
-                /* Hover animation cho product cards trong related/similar products */
-                .product {
-                  transition: all 0.3s ease;
-                  cursor: pointer;
-                }
+      .product:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+      }
 
-                .product:hover {
-                  transform: translateY(-10px);
-                  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-                  z-index: 10;
-                }
+      .product-img {
+        overflow: hidden;
+        position: relative;
+      }
 
-                .product-img {
-                  overflow: hidden;
-                  position: relative;
-                }
+      .product-img img {
+        transition: transform 0.3s ease;
+      }
 
-                .product-img img {
-                  transition: transform 0.3s ease;
-                }
+      .product:hover .product-img img {
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
 
-                .product:hover .product-img img {
-                  transform: scale(1.05);
-                }
+  <body>
+    <!-- BREADCRUMB -->
+    <div id="breadcrumb" class="section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <ul class="breadcrumb-tree">
+              <li>
+                <a href="${pageContext.request.contextPath}/">Trang chủ</a>
+              </li>
+              <li>
+                <a href="${pageContext.request.contextPath}/shop">Sản phẩm</a>
+              </li>
+              <li class="active" id="breadcrumbName">Chi tiết sản phẩm</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /BREADCRUMB -->
 
-                /* Smooth transition cho buttons */
-                .product-btns button,
-                .add-to-cart-btn {
-                  transition: all 0.3s ease;
-                }
-
-                .product:hover .add-to-cart-btn {
-                  background-color: #d10024 !important;
-                }
-              </style>
-            </head>
-
-            <body>
-              <!-- BREADCRUMB -->
-              <div id="breadcrumb" class="section">
-                <div class="container">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <ul class="breadcrumb-tree">
-                        <li>
-                          <a href="${pageContext.request.contextPath}/">Trang chủ</a>
-                        </li>
-                        <li>
-                          <a href="${pageContext.request.contextPath}/shop">Sản phẩm</a>
-                        </li>
-                        <li class="active" id="breadcrumbName">Chi tiết sản phẩm</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- /BREADCRUMB -->
-
-              <!-- SECTION -->
-              <div class="section">
-                <div class="container">
-                  <div class="row">
-                    <!-- Main Content (col-md-9) -->
-                    <div class="col-md-9">
-                      <div class="row">
-                        <!-- Product main img -->
-                        <div class="col-md-5 col-md-push-2">
-                          <div id="product-main-img">
-                            <!-- Main images will be inserted here -->
-                            <c:if test="${product.dealPercentage != null && product.dealPercentage > 0}">
-                              <div class="product-label" style="
+    <!-- SECTION -->
+    <div class="section">
+      <div class="container">
+        <div class="row">
+          <!-- Main Content (col-md-9) -->
+          <div class="col-md-9">
+            <div class="row">
+              <!-- Product main img -->
+              <div class="col-md-5 col-md-push-2">
+                <div id="product-main-img">
+                  <!-- Main images will be inserted here -->
+                  <c:if
+                    test="${product.dealPercentage != null && product.dealPercentage > 0}"
+                  >
+                    <div
+                      class="product-label"
+                      style="
                         position: absolute;
                         top: 10px;
                         right: 10px;
                         z-index: 2;
-                      ">
-                                <span class="sale" style="
+                      "
+                    >
+                      <span
+                        class="sale"
+                        style="
                           background: #c50b12;
                           color: #fff;
                           padding: 4px 6px;
@@ -102,8 +99,12 @@
                           box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
                           border: none;
                           animation: pulse 2s infinite;
-                        ">-${product.dealPercentage}%</span>
-                                <span class="new" style="
+                        "
+                        >-${product.dealPercentage}%</span
+                      >
+                      <span
+                        class="new"
+                        style="
                           background: #ff3b5c;
                           color: #fff;
                           padding: 4px 6px;
@@ -113,288 +114,373 @@
                           border: none;
                           animation: pulse 2s infinite;
                           margin-left: 6px;
-                        ">HOT</span>
-                              </div>
-                            </c:if>
-                          </div>
-                        </div>
-                        <!-- /Product main img -->
+                        "
+                        >HOT</span
+                      >
+                    </div>
+                  </c:if>
+                </div>
+              </div>
+              <!-- /Product main img -->
 
-                        <!-- Product thumb imgs -->
-                        <div class="col-md-2 col-md-pull-5">
-                          <div id="product-imgs">
-                            <!-- Thumbnails will be inserted here -->
-                          </div>
-                        </div>
-                        <!-- /Product thumb imgs -->
+              <!-- Product thumb imgs -->
+              <div class="col-md-2 col-md-pull-5">
+                <div id="product-imgs">
+                  <!-- Thumbnails will be inserted here -->
+                </div>
+              </div>
+              <!-- /Product thumb imgs -->
 
-                        <!-- Product details -->
-                        <div class="col-md-5">
-                          <div class="product-details">
-                            <h2 class="product-name" id="productName">Loading...</h2>
-                            <div>
-                              <div class="product-rating" id="productRating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star-o"></i>
-                              </div>
-                              <a class="review-link" href="#tab3">10 Review(s) | Add your review</a>
-                            </div>
-                            <div>
-                              <h3 class="product-price" id="productPrice">$0.00</h3>
-                              <span class="product-available" id="productStock">In Stock</span>
-                            </div>
-                            <p id="productDescription">Loading product description...</p>
+              <!-- Product details -->
+              <div class="col-md-5">
+                <div class="product-details">
+                  <h2 class="product-name" id="productName">Loading...</h2>
+                  <div>
+                    <div class="product-rating" id="productRating">
+                      <i class="fa fa-star-o"></i>
+                      <i class="fa fa-star-o"></i>
+                      <i class="fa fa-star-o"></i>
+                      <i class="fa fa-star-o"></i>
+                      <i class="fa fa-star-o"></i>
+                    </div>
+                    <a class="review-link" id="reviewLink" href="#tab3"
+                      >Đang tải...</a
+                    >
+                  </div>
+                  <div>
+                    <h3 class="product-price" id="productPrice">$0.00</h3>
+                    <span class="product-available" id="productStock"
+                      >In Stock</span
+                    >
+                  </div>
+                  <p id="productDescription">Loading product description...</p>
 
-                            <!-- Product Variants Section -->
-                            <div class="product-variants" style="margin: 20px 0">
-                              <!-- Storage Options -->
-                              <div class="variant-group" id="storageVariants" style="margin-bottom: 15px">
-                                <h4 style="
+                  <!-- Product Variants Section -->
+                  <div class="product-variants" style="margin: 20px 0">
+                    <!-- Storage Options -->
+                    <div
+                      class="variant-group"
+                      id="storageVariants"
+                      style="margin-bottom: 15px"
+                    >
+                      <h4
+                        style="
                           font-size: 16px;
                           font-weight: 600;
                           margin-bottom: 10px;
-                        ">
-                                  Phiên bản
-                                </h4>
-                                <div class="variant-options" style="display: flex; gap: 10px; flex-wrap: wrap">
-                                  <!-- Storage buttons will be inserted here by JavaScript -->
-                                </div>
-                              </div>
+                        "
+                      >
+                        Phiên bản
+                      </h4>
+                      <div
+                        class="variant-options"
+                        style="display: flex; gap: 10px; flex-wrap: wrap"
+                      >
+                        <!-- Storage buttons will be inserted here by JavaScript -->
+                      </div>
+                    </div>
 
-                              <!-- Color Options -->
-                              <div class="variant-group" id="colorVariants" style="margin-bottom: 15px">
-                                <h4 style="
+                    <!-- Color Options -->
+                    <div
+                      class="variant-group"
+                      id="colorVariants"
+                      style="margin-bottom: 15px"
+                    >
+                      <h4
+                        style="
                           font-size: 16px;
                           font-weight: 600;
                           margin-bottom: 10px;
-                        ">
-                                  Màu sắc
-                                </h4>
-                                <div class="variant-options" style="display: flex; gap: 10px; flex-wrap: wrap">
-                                  <!-- Color buttons will be inserted here by JavaScript -->
-                                </div>
-                              </div>
-                            </div>
-
-                            <div class="add-to-cart">
-                              <div class="qty-label">
-                                <div class="input-number">
-                                  <input type="number" id="quantity" value="1" min="1" />
-                                  <span class="qty-up">+</span>
-                                  <span class="qty-down">-</span>
-                                </div>
-                              </div>
-                              <button class="add-to-cart-btn" id="addToCartBtn">
-                                <i class="fa fa-shopping-cart"></i> Thêm Vào Giỏ
-                              </button>
-                            </div>
-
-                            <ul class="product-btns">
-                              <li>
-                                <a href="#" id="addToWishlistBtn"><i class="fa fa-heart-o"></i> Yêu Thích</a>
-                              </li>
-                            </ul>
-
-                            <ul class="product-links">
-                              <li>Thương Hiệu:</li>
-                              <li><a href="#" id="productCategory">Category</a></li>
-                            </ul>
-
-                            <ul class="product-links">
-                              <li>Chia Sẻ:</li>
-                              <li>
-                                <a href="#" id="shareFacebook" onclick="shareOnFacebook(); return false;"><i
-                                    class="fa fa-facebook"></i></a>
-                              </li>
-                              <li>
-                                <a href="#" id="shareTwitter" onclick="shareOnTwitter(); return false;"><i
-                                    class="fa fa-twitter"></i></a>
-                              </li>
-                              <li>
-                                <a href="#" id="shareGooglePlus" onclick="shareOnGooglePlus(); return false;"><i
-                                    class="fa fa-google-plus"></i></a>
-                              </li>
-                              <li>
-                                <a href="#" id="shareEmail" onclick="shareViaEmail(); return false;"><i
-                                    class="fa fa-envelope"></i></a>
-                              </li>
-                            </ul>
-                          </div>
-                        </div>
-                        <!-- /Product details -->
+                        "
+                      >
+                        Màu sắc
+                      </h4>
+                      <div
+                        class="variant-options"
+                        style="display: flex; gap: 10px; flex-wrap: wrap"
+                      >
+                        <!-- Color buttons will be inserted here by JavaScript -->
                       </div>
                     </div>
-                    <!-- /Main Content -->
+                  </div>
 
-                    <!-- Sidebar (col-md-3) - Version Products -->
-                    <div class="col-md-3">
-                      <div class="aside">
-                        <h3 class="aside-title">Sản phẩm tương tự</h3>
-                        <div id="versionProducts" class="product-widget">
-                          <!-- Version products will be inserted here -->
-                        </div>
+                  <div class="add-to-cart">
+                    <div class="qty-label">
+                      <div class="input-number">
+                        <input type="number" id="quantity" value="1" min="1" />
+                        <span class="qty-up">+</span>
+                        <span class="qty-down">-</span>
                       </div>
                     </div>
-                    <!-- /Sidebar -->
+                    <button class="add-to-cart-btn" id="addToCartBtn">
+                      <i class="fa fa-shopping-cart"></i> Thêm Vào Giỏ
+                    </button>
+                  </div>
 
-                    <!-- Product tab -->
+                  <ul class="product-btns">
+                    <li>
+                      <a href="#" id="addToWishlistBtn"
+                        ><i class="fa fa-heart-o"></i> Yêu Thích</a
+                      >
+                    </li>
+                  </ul>
+
+                  <ul class="product-links">
+                    <li>Thương Hiệu:</li>
+                    <li><a href="#" id="productCategory">Category</a></li>
+                  </ul>
+
+                  <ul class="product-links">
+                    <li>Chia Sẻ:</li>
+                    <li>
+                      <a
+                        href="#"
+                        id="shareFacebook"
+                        onclick="shareOnFacebook(); return false;"
+                        ><i class="fa fa-facebook"></i
+                      ></a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        id="shareTwitter"
+                        onclick="shareOnTwitter(); return false;"
+                        ><i class="fa fa-twitter"></i
+                      ></a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        id="shareGooglePlus"
+                        onclick="shareOnGooglePlus(); return false;"
+                        ><i class="fa fa-google-plus"></i
+                      ></a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        id="shareEmail"
+                        onclick="shareViaEmail(); return false;"
+                        ><i class="fa fa-envelope"></i
+                      ></a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <!-- /Product details -->
+            </div>
+          </div>
+          <!-- /Main Content -->
+
+          <!-- Sidebar (col-md-3) - Version Products -->
+          <div class="col-md-3">
+            <div class="aside">
+              <h3 class="aside-title">Sản phẩm tương tự</h3>
+              <div id="versionProducts" class="product-widget">
+                <!-- Version products will be inserted here -->
+              </div>
+            </div>
+          </div>
+          <!-- /Sidebar -->
+
+          <!-- Product tab -->
+          <div class="col-md-12">
+            <div id="product-tab">
+              <!-- product tab nav -->
+              <ul class="tab-nav">
+                <li class="active">
+                  <a data-toggle="tab" href="#tab1">Mô tả</a>
+                </li>
+                <li><a data-toggle="tab" href="#tab2">Thông số kỹ thuật</a></li>
+                <li><a data-toggle="tab" href="#tab3">Đánh giá </a></li>
+              </ul>
+              <!-- /product tab nav -->
+
+              <!-- product tab content -->
+              <div class="tab-content">
+                <!-- tab1 -->
+                <div id="tab1" class="tab-pane fade in active">
+                  <div class="row">
                     <div class="col-md-12">
-                      <div id="product-tab">
-                        <!-- product tab nav -->
-                        <ul class="tab-nav">
-                          <li class="active">
-                            <a data-toggle="tab" href="#tab1">Mô tả</a>
-                          </li>
-                          <li><a data-toggle="tab" href="#tab2">Thông số kỹ thuật</a></li>
-                          <li><a data-toggle="tab" href="#tab3">Đánh giá </a></li>
-                        </ul>
-                        <!-- /product tab nav -->
-
-                        <!-- product tab content -->
-                        <div class="tab-content">
-                          <!-- tab1 -->
-                          <div id="tab1" class="tab-pane fade in active">
-                            <div class="row">
-                              <div class="col-md-12">
-                                <div id="tabDescription" class="description-content collapsed" style="
+                      <div
+                        id="tabDescription"
+                        class="description-content collapsed"
+                        style="
                           line-height: 1.8;
                           font-size: 14px;
                           max-height: 0;
                           overflow: hidden;
                           position: relative;
                           transition: max-height 0.5s ease;
-                        ">
-                                  <p>Đang tải thông tin sản phẩm...</p>
-                                </div>
-                                <div style="text-align: center; margin-top: 15px">
-                                  <button id="toggleDescriptionBtn" class="primary-btn"
-                                    style="padding: 10px 30px; display: none">
-                                    <i class="fa fa-angle-down"></i> Xem mô tả chi tiết
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <!-- /tab1 -->
-
-                          <!-- tab2 -->
-                          <div id="tab2" class="tab-pane fade in">
-                            <div class="row">
-                              <div class="col-md-12">
-                                <div id="specsContent">
-                                  <p>Đang tải thông số kỹ thuật...</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <!-- /tab2 -->
-
-                          <!-- tab3 -->
-                          <div id="tab3" class="tab-pane fade in">
-                            <div class="row">
-                              <!-- Rating Summary -->
-                              <div class="col-md-3">
-                                <div id="rating">
-                                  <div class="rating-avg">
-                                    <span id="avgRating">0.0</span>
-                                    <div class="rating-stars" id="avgRatingStars">
-                                      <i class="fa fa-star-o"></i>
-                                      <i class="fa fa-star-o"></i>
-                                      <i class="fa fa-star-o"></i>
-                                      <i class="fa fa-star-o"></i>
-                                      <i class="fa fa-star-o"></i>
-                                    </div>
-                                    <span id="totalReviewsText" style="font-size: 14px; color: #666">0 đánh giá</span>
-                                  </div>
-                                  <ul class="rating" id="ratingDistribution">
-                                    <!-- Rating distribution will be loaded here -->
-                                  </ul>
-                                </div>
-                              </div>
-                              <!-- /Rating Summary -->
-
-                              <!-- Reviews List -->
-                              <div class="col-md-6">
-                                <div id="reviews">
-                                  <ul class="reviews" id="reviewsList">
-                                    <li style="text-align: center; color: #999">
-                                      <p>Đang tải đánh giá...</p>
-                                    </li>
-                                  </ul>
-                                  <!-- Pagination -->
-                                  <div id="reviewsPagination" style="text-align: center; margin-top: 20px">
-                                    <!-- Pagination buttons will be loaded here -->
-                                  </div>
-                                </div>
-                              </div>
-                              <!-- /Reviews List -->
-
-                              <!-- Review Form -->
-                              <div class="col-md-3">
-                                <div id="review-form">
-                                  <h4 style="margin-bottom: 15px">Viết đánh giá</h4>
-                                  <form id="reviewForm" class="review-form">
-                                    <div class="input-rating" style="margin-bottom: 15px">
-                                      <span>Xếp hạng: </span>
-                                      <div class="stars">
-                                        <input id="star5" name="rating" value="5" type="radio" /><label
-                                          for="star5"></label>
-                                        <input id="star4" name="rating" value="4" type="radio" /><label
-                                          for="star4"></label>
-                                        <input id="star3" name="rating" value="3" type="radio" /><label
-                                          for="star3"></label>
-                                        <input id="star2" name="rating" value="2" type="radio" /><label
-                                          for="star2"></label>
-                                        <input id="star1" name="rating" value="1" type="radio" /><label
-                                          for="star1"></label>
-                                      </div>
-                                    </div>
-                                    <textarea id="reviewComment" class="input"
-                                      placeholder="Nhận xét của bạn về sản phẩm" rows="5" required></textarea>
-                                    <button type="submit" class="primary-btn" style="width: 100%; margin-top: 10px">
-                                      Gửi đánh giá
-                                    </button>
-                                  </form>
-                                </div>
-                              </div>
-                              <!-- /Review Form -->
-                            </div>
-                          </div>
-                          <!-- /tab3 -->
-                        </div>
-                        <!-- /product tab content -->
+                        "
+                      >
+                        <p>Đang tải thông tin sản phẩm...</p>
+                      </div>
+                      <div style="text-align: center; margin-top: 15px">
+                        <button
+                          id="toggleDescriptionBtn"
+                          class="primary-btn"
+                          style="padding: 10px 30px; display: none"
+                        >
+                          <i class="fa fa-angle-down"></i> Xem mô tả chi tiết
+                        </button>
                       </div>
                     </div>
-                    <!-- /product tab -->
                   </div>
                 </div>
-              </div>
-              <!-- /SECTION -->
+                <!-- /tab1 -->
 
-              <!-- Section -->
-              <div class="section">
-                <div class="container">
+                <!-- tab2 -->
+                <div id="tab2" class="tab-pane fade in">
                   <div class="row">
                     <div class="col-md-12">
-                      <div class="section-title text-center">
-                        <h3 class="title">Sản phẩm cùng hãng</h3>
-                      </div>
-                    </div>
-                    <!-- Same brand products carousel -->
-                    <div class="col-md-12">
-                      <div id="sameProducts" class="product-slick-carousel">
-                        <!-- Same brand products will be inserted here -->
+                      <div id="specsContent">
+                        <p>Đang tải thông số kỹ thuật...</p>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <!-- /Section -->
+                <!-- /tab2 -->
 
-              <script>
+                <!-- tab3 -->
+                <div id="tab3" class="tab-pane fade in">
+                  <div class="row">
+                    <!-- Rating Summary -->
+                    <div class="col-md-3">
+                      <div id="rating">
+                        <div class="rating-avg">
+                          <span id="avgRating">0.0</span>
+                          <div class="rating-stars" id="avgRatingStars">
+                            <i class="fa fa-star-o"></i>
+                            <i class="fa fa-star-o"></i>
+                            <i class="fa fa-star-o"></i>
+                            <i class="fa fa-star-o"></i>
+                            <i class="fa fa-star-o"></i>
+                          </div>
+                          <span
+                            id="totalReviewsText"
+                            style="font-size: 14px; color: #666"
+                            >0 đánh giá</span
+                          >
+                        </div>
+                        <ul class="rating" id="ratingDistribution">
+                          <!-- Rating distribution will be loaded here -->
+                        </ul>
+                      </div>
+                    </div>
+                    <!-- /Rating Summary -->
+
+                    <!-- Reviews List -->
+                    <div class="col-md-6">
+                      <div id="reviews">
+                        <ul class="reviews" id="reviewsList">
+                          <li style="text-align: center; color: #999">
+                            <p>Đang tải đánh giá...</p>
+                          </li>
+                        </ul>
+                        <!-- Pagination -->
+                        <div
+                          id="reviewsPagination"
+                          style="text-align: center; margin-top: 20px"
+                        >
+                          <!-- Pagination buttons will be loaded here -->
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /Reviews List -->
+
+                    <!-- Review Form -->
+                    <div class="col-md-3">
+                      <div id="review-form">
+                        <h4 style="margin-bottom: 15px">Viết đánh giá</h4>
+                        <form id="reviewForm" class="review-form">
+                          <div class="input-rating" style="margin-bottom: 15px">
+                            <span>Xếp hạng: </span>
+                            <div class="stars">
+                              <input
+                                id="star5"
+                                name="rating"
+                                value="5"
+                                type="radio"
+                              /><label for="star5"></label>
+                              <input
+                                id="star4"
+                                name="rating"
+                                value="4"
+                                type="radio"
+                              /><label for="star4"></label>
+                              <input
+                                id="star3"
+                                name="rating"
+                                value="3"
+                                type="radio"
+                              /><label for="star3"></label>
+                              <input
+                                id="star2"
+                                name="rating"
+                                value="2"
+                                type="radio"
+                              /><label for="star2"></label>
+                              <input
+                                id="star1"
+                                name="rating"
+                                value="1"
+                                type="radio"
+                              /><label for="star1"></label>
+                            </div>
+                          </div>
+                          <textarea
+                            id="reviewComment"
+                            class="input"
+                            placeholder="Nhận xét của bạn về sản phẩm"
+                            rows="5"
+                            required
+                          ></textarea>
+                          <button
+                            type="submit"
+                            class="primary-btn"
+                            style="width: 100%; margin-top: 10px"
+                          >
+                            Gửi đánh giá
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                    <!-- /Review Form -->
+                  </div>
+                </div>
+                <!-- /tab3 -->
+              </div>
+              <!-- /product tab content -->
+            </div>
+          </div>
+          <!-- /product tab -->
+        </div>
+      </div>
+    </div>
+    <!-- /SECTION -->
+
+    <!-- Section -->
+    <div class="section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="section-title text-center">
+              <h3 class="title">Sản phẩm cùng hãng</h3>
+            </div>
+          </div>
+          <!-- Same brand products carousel -->
+          <div class="col-md-12">
+            <div id="sameProducts" class="product-slick-carousel">
+              <!-- Same brand products will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /Section -->
+
+    <script>
                 const ctx = "${pageContext.request.contextPath}";
                 const isUserLoggedIn = ${ isUserAuthenticated };
                 const isAdmin = <c:out value="${pageContext.request.isUserInRole('ADMIN')}" default="false" />;
@@ -859,13 +945,13 @@
                         '<p class="product-category">' + categoryName + '</p>' +
                         '<h3 class="product-name"><a href="' + ctx + '/product/' + product.id + '">' + product.name + '</a></h3>' +
                         '<h4 class="product-price">' + formatPrice(product.price) + '</h4>' +
-                        '<div class="product-rating">' +
-                        '<i class="fa fa-star"></i>' +
-                        '<i class="fa fa-star"></i>' +
-                        '<i class="fa fa-star"></i>' +
-                        '<i class="fa fa-star"></i>' +
-                        '<i class="fa fa-star-o"></i>' +
-                        '</div>' +
+                      '<div class="product-rating" id="rating-same-' + product.id + '">' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '</div>' +
                         '<div class="product-btns">' +
                         '<button class="add-to-wishlist" data-product-id="' + product.id + '" onclick="toggleRelatedWishlist(' + product.id + ', this)"><i class="fa fa-heart-o"></i><span class="tooltipp">Yêu thích</span></button>' +
                         '<button class="quick-view" onclick="window.location.href=\'' + ctx + '/product/' + product.id + '\'"><i class="fa fa-eye"></i><span class="tooltipp">Xem chi tiết</span></button>' +
@@ -986,13 +1072,13 @@
                       '<p class="product-category">' + categoryName + '</p>' +
                       '<h3 class="product-name"><a href="' + ctx + '/product/' + product.id + '">' + product.name + '</a></h3>' +
                       priceHtml +
-                      '<div class="product-rating">' +
-                      '<i class="fa fa-star"></i>' +
-                      '<i class="fa fa-star"></i>' +
-                      '<i class="fa fa-star"></i>' +
-                      '<i class="fa fa-star"></i>' +
-                      '<i class="fa fa-star-o"></i>' +
-                      '</div>' +
+                      '<div class="product-rating" id="rating-same-' + product.id + '">' +
+                            '<i class="fa fa-star-o"></i>' +
+                            '<i class="fa fa-star-o"></i>' +
+                            '<i class="fa fa-star-o"></i>' +
+                            '<i class="fa fa-star-o"></i>' +
+                            '<i class="fa fa-star-o"></i>' +
+                            '</div>' +
                       '<div class="product-btns">' +
                       '<button class="add-to-wishlist" data-product-id="' + product.id + '" onclick="toggleRelatedWishlist(' + product.id + ', this)"><i class="fa fa-heart-o"></i><span class="tooltipp">Yêu thích</span></button>' +
                       '<button class="quick-view" onclick="window.location.href=\'' + ctx + '/product/' + product.id + '\'"><i class="fa fa-eye"></i><span class="tooltipp">Xem chi tiết</span></button>' +
@@ -1054,6 +1140,59 @@
                   if (isUserLoggedIn) {
                     loadRelatedWishlistStatus();
                   }
+
+      // Load rating cho các sản phẩm cùng hãng
+                        loadSameProductsRatings(products);
+                }
+
+                // Load rating cho tất cả sản phẩm cùng hãng
+                function loadSameProductsRatings(products) {
+                  if (!products || products.length === 0) return;
+
+                  products.forEach(product => {
+                    loadProductRatingForSameProducts(product.id);
+                  });
+                }
+
+                // Load rating cho một sản phẩm cụ thể trong phần sản phẩm cùng hãng
+                async function loadProductRatingForSameProducts(productId) {
+                  try {
+                    const response = await fetch(ctx + '/api/reviews/product/' + productId + '/stats');
+
+                    if (!response.ok) {
+                      console.error('Failed to load rating for product ' + productId);
+                      return;
+                    }
+
+                    const stats = await response.json();
+
+                    // Update rating stars cho sản phẩm này
+                    displayStarsForSameProduct('rating-same-' + productId, stats.averageRating);
+                  } catch (error) {
+                    console.error('Error loading rating for product ' + productId + ':', error);
+                  }
+                }
+
+                // Hiển thị stars dựa trên rating value cho sản phẩm cùng hãng
+                function displayStarsForSameProduct(elementId, rating) {
+                  const starsContainer = document.getElementById(elementId);
+                  if (!starsContainer) return;
+
+                  const fullStars = Math.floor(rating);
+                  const hasHalfStar = rating % 1 >= 0.5;
+                  let html = '';
+
+                  for (let i = 0; i < 5; i++) {
+                    if (i < fullStars) {
+                      html += '<i class="fa fa-star"></i>';
+                    } else if (i === fullStars && hasHalfStar) {
+                      html += '<i class="fa fa-star-half-o"></i>';
+                    } else {
+                      html += '<i class="fa fa-star-o"></i>';
+                    }
+                  }
+
+                  starsContainer.innerHTML = html;
                 }
 
                 // Toggle wishlist for related products
@@ -1540,7 +1679,7 @@
                   }
                 }
 
-                // ==================== REVIEW AND RATING FUNCTIONS ====================
+               // ==================== REVIEW AND RATING FUNCTIONS ====================
 
                 let currentReviewPage = 0;
                 const reviewsPerPage = 10;
@@ -1555,6 +1694,7 @@
                     }
 
                     const stats = await response.json();
+
                     console.log('Rating statistics:', stats);
 
                     // Update average rating
@@ -1606,6 +1746,7 @@
                       html += '<i class="fa fa-star-o"></i>';
                     }
                   }
+
                   starsContainer.innerHTML = html;
                 }
 
@@ -1823,6 +1964,7 @@
                   try {
                     const date = new Date(dateString);
                     if (isNaN(date.getTime())) return '';
+
                     const day = date.getDate().toString().padStart(2, '0');
                     const month = (date.getMonth() + 1).toString().padStart(2, '0');
                     const year = date.getFullYear();
@@ -2093,7 +2235,6 @@
                   const body = encodeURIComponent('Xem sản phẩm này: ' + productData.name + '\n\n' + window.location.href);
                   window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
                 }
-              </script>
-            </body>
-
-            </html>
+    </script>
+  </body>
+</html>

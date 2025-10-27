@@ -149,13 +149,13 @@ isAuthenticated); %>
         <div class="col-md-3 clearfix">
           <div class="header-ctn">
             <!-- Wishlist -->
-            <div>
+            <!-- <div>
               <a href="${pageContext.request.contextPath}/wishlist">
                 <i class="fa fa-heart-o"></i>
                 <span>Yêu thích</span>
                 <div class="qty" id="wishlist-qty">0</div>
               </a>
-            </div>
+            </div> -->
             <!-- /Wishlist -->
 
             <!-- Cart -->
@@ -167,11 +167,11 @@ isAuthenticated); %>
               org.springframework.security.authentication.AnonymousAuthenticationToken);
               String cartUrl=isCartAuthenticated ? request.getContextPath() +
               "/cart" : request.getContextPath() + "/login" ; %>
-              <a href="<%= cartUrl %>">
+              <!-- <a href="<%= cartUrl %>">
                 <i class="fa fa-shopping-cart"></i>
                 <span>Giỏ hàng</span>
                 <div class="qty" id="cart-qty">0</div>
-              </a>
+              </a> -->
             </div>
             <!-- /Cart -->
 

@@ -8,14 +8,15 @@
   </head>
   <body>
     <div class="chat-container hidden" id="chat-page">
-      <div class="users-list">
+      <div class="users-list" style="display: none">
+        <!--///////////-->
         <div class="users-list-container">
           <h2>Admin</h2>
           <ul id="connectedUsers"></ul>
         </div>
         <div>
           <p id="connected-user-fullname"></p>
-          <a class="logout" href="javascript:void(0)" id="logout">Logout</a>
+          <a class="logout" href="javascript:void(0)" id="logout"></a>
         </div>
       </div>
 

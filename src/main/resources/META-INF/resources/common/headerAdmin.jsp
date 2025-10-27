@@ -9,12 +9,6 @@ isAuthenticated=auth !=null && auth.isAuthenticated() && !(auth instanceof
 AnonymousAuthenticationToken); request.setAttribute("isUserAuthenticated",
 isAuthenticated); %>
 
-<!-- Font Awesome CDN for admin header icons -->
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-/>
-
 <!-- HEADER -->
 <header>
   <!-- TOP HEADER -->
@@ -23,32 +17,32 @@ isAuthenticated); %>
       <ul class="header-links pull-left">
         <li>
           <a href="https://zalo.me/0889251007" target="_blank"
-            ><i class="fa fa-phone"></i> +84 889-251-007</a
+            ></i> +84 889-251-007</a
           >
         </li>
         <li>
           <a href="mailto:kietccc21@gmail.com"
-            ><i class="fa fa-envelope-o"></i> kietccc21@gmail.com</a
+            ></i> kietccc21@gmail.com</a
           >
         </li>
         <li>
           <a
             href="https://www.google.com/maps/place/Tr%C6%B0%E1%BB%9Dng+%C4%90%E1%BA%A1i+h%E1%BB%8Dc+S%C6%B0+ph%E1%BA%A1m+K%E1%BB%B9+thu%E1%BA%ADt+Th%C3%A0nh+ph%E1%BB%91+H%E1%BB%93+Ch%C3%AD+Minh/@10.8505683,106.7717721,17z/data=!4m6!3m5!1s0x31752763f23816ab:0x282f711441b6916f!8m2!3d10.8506324!4d106.7719131!16s%2Fm%2F02pz17z?entry=ttu&g_ep=EgoyMDI1MTAxNC4wIKXMDSoASAFQAw%3D%3D"
             target="_blank"
-            ><i class="fa fa-map-marker"></i> 1 Võ Văn Ngân, Linh Chiểu, Thủ
+            ></i> 1 Võ Văn Ngân, Linh Chiểu, Thủ
             Đức, TP.HCM</a
           >
         </li>
       </ul>
       <ul class="header-links pull-right">
         <li>
-          <a href="#"><i class="fa fa-dollar"></i> VNĐ</a>
+          <a href="#"></i> VNĐ</a>
         </li>
         <c:choose>
           <c:when test="${isUserAuthenticated}">
             <li>
               <a href="${pageContext.request.contextPath}/profile">
-                <i class="fa fa-user-o"></i> Tài khoản của tôi
+                </i> Tài khoản của tôi
               </a>
             </li>
             <li>
@@ -66,7 +60,7 @@ isAuthenticated); %>
                     cursor: pointer;
                   "
                 >
-                  <i class="fa fa-sign-out"></i> Đăng xuất
+                 </i> Đăng xuất
                 </button>
               </form>
             </li>
@@ -74,12 +68,12 @@ isAuthenticated); %>
           <c:otherwise>
             <li>
               <a href="${pageContext.request.contextPath}/login">
-                <i class="fa fa-user-o"></i> Đăng nhập
+                </i> Đăng nhập
               </a>
             </li>
             <li>
               <a href="${pageContext.request.contextPath}/register">
-                <i class="fa fa-user-plus"></i> Đăng ký
+               </i> Đăng ký
               </a>
             </li>
           </c:otherwise>
@@ -98,6 +92,7 @@ isAuthenticated); %>
           <div class="header-logo">
             <a href="${pageContext.request.contextPath}/" class="logo">
               <h2 style="color: #d10024; margin: 15px 0">CellPhoneStore</h2>
+              <h2 style="color: #ffffff; margin: 15px 0">Welcome, Admin</h2>
             </a>
           </div>
         </div>
@@ -211,9 +206,9 @@ isAuthenticated); %>
           <a href="${pageContext.request.contextPath}/deals">Khuyến mãi</a>
         </li>
         <c:if test="${isUserAuthenticated}">
-          <% Authentication navAuth =
-          SecurityContextHolder.getContext().getAuthentication(); boolean
-          isAdmin = navAuth.getAuthorities().stream() .anyMatch(a ->
+          <% Authentication
+          navAuth=SecurityContextHolder.getContext().getAuthentication();
+          boolean isAdmin=navAuth.getAuthorities().stream() .anyMatch(a ->
           a.getAuthority().equals("ROLE_ADMIN")); boolean isSeller =
           navAuth.getAuthorities().stream() .anyMatch(a ->
           a.getAuthority().equals("ROLE_SELLER"));
@@ -239,20 +234,45 @@ isAuthenticated); %>
               </a>
               <ul class="dropdown-menu">
                 <li>
-                  <a href="${pageContext.request.contextPath}/seller/all-orders"
-                    >Tất cả đơn hàng</a
+                  <a
+                    href="${pageContext.request.contextPath}/seller/all-orders"
                   >
+                    <i class="fa fa-list"></i> Tất cả đơn hàng
+                  </a>
                 </li>
                 <li>
-                  <a href="${pageContext.request.contextPath}/seller/orders"
-                    >Xác nhận đơn hàng</a
-                  >
+                  <a href="${pageContext.request.contextPath}/seller/orders">
+                    <i class="fa fa-clock-o"></i> Xác nhận đơn hàng
+                  </a>
                 </li>
                 <li>
                   <a
-                    href="${pageContext.request.contextPath}/seller/orders-refund"
-                    >Yêu cầu hoàn tiền</a
+                    href="${pageContext.request.contextPath}/seller/orders-accepted"
                   >
+                    <i class="fa fa-check-circle"></i> Đơn đã chấp nhận
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="${pageContext.request.contextPath}/seller/orders-shipping"
+                  >
+                    <i class="fa fa-truck"></i> Đang vận chuyển
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="${pageContext.request.contextPath}/seller/orders-delivered"
+                  >
+                    <i class="fa fa-check-square"></i> Đã giao hàng
+                  </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                  <a
+                    href="${pageContext.request.contextPath}/seller/orders-refund"
+                  >
+                    <i class="fa fa-undo"></i> Yêu cầu hoàn tiền
+                  </a>
                 </li>
               </ul>
             </li>
@@ -265,266 +285,266 @@ isAuthenticated); %>
 <!-- /NAVIGATION -->
 
 <script>
-          // Function to update cart count (global function)
-          function updateGlobalCartCount() {
+              // Function to update cart count (global function)
+              function updateGlobalCartCount() {
   <%
-              org.springframework.security.core.Authentication scriptAuth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                  org.springframework.security.core.Authentication scriptAuth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
       boolean isScriptAuthenticated = scriptAuth != null && scriptAuth.isAuthenticated() && !(scriptAuth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
   %>
   var isLoggedIn = <%= isScriptAuthenticated %>;
 
-            if (!isLoggedIn) return;
+                if (!isLoggedIn) return;
 
-            fetch('${pageContext.request.contextPath}/api/cart', {
-              method: 'GET',
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            })
-              .then(function (response) {
-                if (response.ok) {
-                  return response.json();
-                }
-                return null;
-              })
-              .then(function (data) {
-                if (data && data.items) {
-                  var totalItems = data.items.reduce(function (sum, item) { return sum + item.quantity; }, 0);
-                  var qtyElement = document.getElementById('cart-qty');
-                  if (qtyElement) {
-                    qtyElement.textContent = totalItems;
+                fetch('${pageContext.request.contextPath}/api/cart', {
+                  method: 'GET',
+                  credentials: 'include',
+                  headers: {
+                    'Content-Type': 'application/json'
                   }
-                }
-              })
-              .catch(function (error) {
-                console.error('Error updating cart count:', error);
-              });
-          }
+                })
+                  .then(function (response) {
+                    if (response.ok) {
+                      return response.json();
+                    }
+                    return null;
+                  })
+                  .then(function (data) {
+                    if (data && data.items) {
+                      var totalItems = data.items.reduce(function (sum, item) { return sum + item.quantity; }, 0);
+                      var qtyElement = document.getElementById('cart-qty');
+                      if (qtyElement) {
+                        qtyElement.textContent = totalItems;
+                      }
+                    }
+                  })
+                  .catch(function (error) {
+                    console.error('Error updating cart count:', error);
+                  });
+              }
 
-          // Function to update wishlist count (global function)
-          function updateGlobalWishlistCount() {
+              // Function to update wishlist count (global function)
+              function updateGlobalWishlistCount() {
   <%
-              org.springframework.security.core.Authentication wishlistAuth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                  org.springframework.security.core.Authentication wishlistAuth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
       boolean isWishlistAuthenticated = wishlistAuth != null && wishlistAuth.isAuthenticated() && !(wishlistAuth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
   %>
   var isLoggedIn = <%= isWishlistAuthenticated %>;
 
-            if (!isLoggedIn) return;
+                if (!isLoggedIn) return;
 
-            fetch('${pageContext.request.contextPath}/api/favorite', {
-              method: 'GET',
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            })
-              .then(function (response) {
-                if (response.ok) {
-                  return response.json();
-                }
-                return null;
-              })
-              .then(function (data) {
-                if (data) {
-                  var qtyElement = document.getElementById('wishlist-qty');
-                  if (qtyElement) {
-                    qtyElement.textContent = data.length;
+                fetch('${pageContext.request.contextPath}/api/favorite', {
+                  method: 'GET',
+                  credentials: 'include',
+                  headers: {
+                    'Content-Type': 'application/json'
                   }
-                }
-              })
-              .catch(function (error) {
-                console.error('Error updating wishlist count:', error);
+                })
+                  .then(function (response) {
+                    if (response.ok) {
+                      return response.json();
+                    }
+                    return null;
+                  })
+                  .then(function (data) {
+                    if (data) {
+                      var qtyElement = document.getElementById('wishlist-qty');
+                      if (qtyElement) {
+                        qtyElement.textContent = data.length;
+                      }
+                    }
+                  })
+                  .catch(function (error) {
+                    console.error('Error updating wishlist count:', error);
+                  });
+              }
+
+              // Update counts on page load
+              window.addEventListener('DOMContentLoaded', function () {
+                updateGlobalCartCount();
+                updateGlobalWishlistCount();
+                initSearchAutocomplete();
               });
-          }
 
-          // Update counts on page load
-          window.addEventListener('DOMContentLoaded', function () {
-            updateGlobalCartCount();
-            updateGlobalWishlistCount();
-            initSearchAutocomplete();
-          });
+              // ========== SEARCH AUTOCOMPLETE ==========
+              function initSearchAutocomplete() {
+                var searchInput = document.getElementById('searchInput');
+                var suggestionsBox = document.getElementById('searchSuggestions');
+                var searchForm = document.getElementById('searchForm');
+                var debounceTimer;
 
-          // ========== SEARCH AUTOCOMPLETE ==========
-          function initSearchAutocomplete() {
-            var searchInput = document.getElementById('searchInput');
-            var suggestionsBox = document.getElementById('searchSuggestions');
-            var searchForm = document.getElementById('searchForm');
-            var debounceTimer;
+                if (!searchInput || !suggestionsBox) return;
 
-            if (!searchInput || !suggestionsBox) return;
+                // Debounce search to avoid too many API calls
+                searchInput.addEventListener('input', function () {
+                  clearTimeout(debounceTimer);
+                  var query = searchInput.value.trim();
 
-            // Debounce search to avoid too many API calls
-            searchInput.addEventListener('input', function () {
-              clearTimeout(debounceTimer);
-              var query = searchInput.value.trim();
+                  if (query.length < 2) {
+                    suggestionsBox.style.display = 'none';
+                    return;
+                  }
 
-              if (query.length < 2) {
-                suggestionsBox.style.display = 'none';
-                return;
+                  debounceTimer = setTimeout(function () {
+                    fetchSuggestions(query);
+                  }, 300); // Wait 300ms after user stops typing
+                });
+
+                // Close suggestions when clicking outside
+                document.addEventListener('click', function (e) {
+                  if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                    suggestionsBox.style.display = 'none';
+                  }
+                });
+
+                // Show suggestions when input is focused and has value
+                searchInput.addEventListener('focus', function () {
+                  if (searchInput.value.trim().length >= 2) {
+                    fetchSuggestions(searchInput.value.trim());
+                  }
+                });
               }
 
-              debounceTimer = setTimeout(function () {
-                fetchSuggestions(query);
-              }, 300); // Wait 300ms after user stops typing
-            });
+              function fetchSuggestions(query) {
+                var suggestionsBox = document.getElementById('searchSuggestions');
 
-            // Close suggestions when clicking outside
-            document.addEventListener('click', function (e) {
-              if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                suggestionsBox.style.display = 'none';
+                fetch('${pageContext.request.contextPath}/api/products/search-suggestions?q=' + encodeURIComponent(query) + '&limit=5')
+                  .then(function (response) {
+                    if (!response.ok) throw new Error('Failed to fetch');
+                    return response.json();
+                  })
+                  .then(function (products) {
+                    displaySuggestions(products);
+                  })
+                  .catch(function (error) {
+                    console.error('Error fetching suggestions:', error);
+                    suggestionsBox.style.display = 'none';
+                  });
               }
-            });
 
-            // Show suggestions when input is focused and has value
-            searchInput.addEventListener('focus', function () {
-              if (searchInput.value.trim().length >= 2) {
-                fetchSuggestions(searchInput.value.trim());
+              function displaySuggestions(products) {
+                var suggestionsBox = document.getElementById('searchSuggestions');
+
+                if (!products || products.length === 0) {
+                  suggestionsBox.innerHTML = '<div style="padding: 15px; text-align: center; color: #999;">Không tìm thấy sản phẩm</div>';
+                  suggestionsBox.style.display = 'block';
+                  return;
+                }
+
+                var html = '';
+                products.forEach(function (product) {
+                  var imgSrc = product.imageUrl && product.imageUrl.trim() !== ''
+                    ? '${pageContext.request.contextPath}' + product.imageUrl
+                    : '${pageContext.request.contextPath}/images/no-image.png';
+
+                  var price = formatPrice(product.price);
+
+                  html += '<a href="${pageContext.request.contextPath}/product/' + product.id + '" style="display: block; padding: 10px; border-bottom: 1px solid #eee; text-decoration: none; color: inherit; transition: background 0.2s;" onmouseover="this.style.background=\'#f8f8f8\'" onmouseout="this.style.background=\'white\'">' +
+                    '<div style="display: flex; align-items: center; gap: 12px;">' +
+                    '<img src="' + imgSrc + '" alt="' + product.name + '" style="width: 50px; height: 50px; object-fit: contain; border: 1px solid #eee; border-radius: 4px;">' +
+                    '<div style="flex: 1; min-width: 0;">' +
+                    '<div style="font-weight: 500; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + product.name + '</div>' +
+                    '<div style="color: #d70018; font-weight: bold; font-size: 14px; margin-top: 4px;">' + price + '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</a>';
+                });
+
+                // Add "View all results" link
+                var searchQuery = document.getElementById('searchInput').value;
+                html += '<a href="${pageContext.request.contextPath}/shop?name=' + encodeURIComponent(searchQuery) + '" style="display: block; padding: 12px; text-align: center; background: #f5f5f5; color: #d70018; font-weight: 500; text-decoration: none; border-top: 2px solid #eee;">' +
+                  'Xem tất cả kết quả <i class="fa fa-arrow-right"></i>' +
+                  '</a>';
+
+                suggestionsBox.innerHTML = html;
+                suggestionsBox.style.display = 'block';
               }
-            });
-          }
 
-          function fetchSuggestions(query) {
-            var suggestionsBox = document.getElementById('searchSuggestions');
+              function formatPrice(price) {
+                if (!price) return '0đ';
+                return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+              }
 
-            fetch('${pageContext.request.contextPath}/api/products/search-suggestions?q=' + encodeURIComponent(query) + '&limit=5')
-              .then(function (response) {
-                if (!response.ok) throw new Error('Failed to fetch');
-                return response.json();
-              })
-              .then(function (products) {
-                displaySuggestions(products);
-              })
-              .catch(function (error) {
-                console.error('Error fetching suggestions:', error);
-                suggestionsBox.style.display = 'none';
-              });
-          }
-
-          function displaySuggestions(products) {
-            var suggestionsBox = document.getElementById('searchSuggestions');
-
-            if (!products || products.length === 0) {
-              suggestionsBox.innerHTML = '<div style="padding: 15px; text-align: center; color: #999;">Không tìm thấy sản phẩm</div>';
-              suggestionsBox.style.display = 'block';
-              return;
-            }
-
-            var html = '';
-            products.forEach(function (product) {
-              var imgSrc = product.imageUrl && product.imageUrl.trim() !== ''
-                ? '${pageContext.request.contextPath}' + product.imageUrl
-                : '${pageContext.request.contextPath}/images/no-image.png';
-
-              var price = formatPrice(product.price);
-
-              html += '<a href="${pageContext.request.contextPath}/product/' + product.id + '" style="display: block; padding: 10px; border-bottom: 1px solid #eee; text-decoration: none; color: inherit; transition: background 0.2s;" onmouseover="this.style.background=\'#f8f8f8\'" onmouseout="this.style.background=\'white\'">' +
-                '<div style="display: flex; align-items: center; gap: 12px;">' +
-                '<img src="' + imgSrc + '" alt="' + product.name + '" style="width: 50px; height: 50px; object-fit: contain; border: 1px solid #eee; border-radius: 4px;">' +
-                '<div style="flex: 1; min-width: 0;">' +
-                '<div style="font-weight: 500; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + product.name + '</div>' +
-                '<div style="color: #d70018; font-weight: bold; font-size: 14px; margin-top: 4px;">' + price + '</div>' +
-                '</div>' +
-                '</div>' +
-                '</a>';
-            });
-
-            // Add "View all results" link
-            var searchQuery = document.getElementById('searchInput').value;
-            html += '<a href="${pageContext.request.contextPath}/shop?name=' + encodeURIComponent(searchQuery) + '" style="display: block; padding: 12px; text-align: center; background: #f5f5f5; color: #d70018; font-weight: 500; text-decoration: none; border-top: 2px solid #eee;">' +
-              'Xem tất cả kết quả <i class="fa fa-arrow-right"></i>' +
-              '</a>';
-
-            suggestionsBox.innerHTML = html;
-            suggestionsBox.style.display = 'block';
-          }
-
-          function formatPrice(price) {
-            if (!price) return '0đ';
-            return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
-          }
-
-          // ========== STICKY HEADER ON SCROLL ==========
-          window.addEventListener('DOMContentLoaded', function () {
-            // Skip sticky header on order and cart pages
-            var currentPath = window.location.pathname;
-            if (currentPath.includes('/order/') || currentPath.includes('/cart')) {
-              return; // Don't apply sticky header on order and cart pages
-            }
-
-            var header = document.querySelector('header');
-            var navigation = document.getElementById('navigation');
-
-            // Create a wrapper for both header and nav
-            var wrapper = document.createElement('div');
-            wrapper.id = 'header-nav-wrapper';
-            wrapper.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-
-            if (header && navigation && header.parentNode) {
-              // Insert wrapper before header
-              header.parentNode.insertBefore(wrapper, header);
-              // Move header and nav into wrapper
-              wrapper.appendChild(header);
-              wrapper.appendChild(navigation);
-            }
-
-            var wrapperHeight = wrapper ? wrapper.offsetHeight : 0;
-            var stickyOffset = 50; // Trigger earlier for smoother effect
-
-            // Add placeholder to prevent content jump
-            var placeholder = document.createElement('div');
-            placeholder.id = 'header-placeholder';
-            placeholder.style.display = 'none';
-            placeholder.style.transition = 'height 0.3s ease';
-
-            if (wrapper && wrapper.parentNode) {
-              wrapper.parentNode.insertBefore(placeholder, wrapper);
-            }
-
-            window.addEventListener('scroll', function () {
-              var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-              if (scrollTop > stickyOffset) {
-                // Make wrapper sticky (header + nav together)
-                if (wrapper) {
-                  wrapper.style.position = 'fixed';
-                  wrapper.style.top = '0';
-                  wrapper.style.left = '0';
-                  wrapper.style.right = '0';
-                  wrapper.style.zIndex = '9999';
-                  wrapper.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+              // ========== STICKY HEADER ON SCROLL ==========
+              window.addEventListener('DOMContentLoaded', function () {
+                // Skip sticky header on order and cart pages
+                var currentPath = window.location.pathname;
+                if (currentPath.includes('/order/') || currentPath.includes('/cart')) {
+                  return; // Don't apply sticky header on order and cart pages
                 }
 
-                if (header) {
-                  header.classList.add('sticky');
+                var header = document.querySelector('header');
+                var navigation = document.getElementById('navigation');
+
+                // Create a wrapper for both header and nav
+                var wrapper = document.createElement('div');
+                wrapper.id = 'header-nav-wrapper';
+                wrapper.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+                if (header && navigation && header.parentNode) {
+                  // Insert wrapper before header
+                  header.parentNode.insertBefore(wrapper, header);
+                  // Move header and nav into wrapper
+                  wrapper.appendChild(header);
+                  wrapper.appendChild(navigation);
                 }
 
-                if (navigation) {
-                  navigation.classList.add('sticky');
-                }
+                var wrapperHeight = wrapper ? wrapper.offsetHeight : 0;
+                var stickyOffset = 50; // Trigger earlier for smoother effect
 
-                // Show placeholder to prevent content jump
-                placeholder.style.display = 'block';
-                placeholder.style.height = wrapperHeight + 'px';
-              } else {
-                // Reset to normal
-                if (wrapper) {
-                  wrapper.style.position = 'relative';
-                  wrapper.style.boxShadow = 'none';
-                }
-
-                if (header) {
-                  header.classList.remove('sticky');
-                }
-
-                if (navigation) {
-                  navigation.classList.remove('sticky');
-                }
-
+                // Add placeholder to prevent content jump
+                var placeholder = document.createElement('div');
+                placeholder.id = 'header-placeholder';
                 placeholder.style.display = 'none';
-              }
-            });
-          });
+                placeholder.style.transition = 'height 0.3s ease';
+
+                if (wrapper && wrapper.parentNode) {
+                  wrapper.parentNode.insertBefore(placeholder, wrapper);
+                }
+
+                window.addEventListener('scroll', function () {
+                  var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                  if (scrollTop > stickyOffset) {
+                    // Make wrapper sticky (header + nav together)
+                    if (wrapper) {
+                      wrapper.style.position = 'fixed';
+                      wrapper.style.top = '0';
+                      wrapper.style.left = '0';
+                      wrapper.style.right = '0';
+                      wrapper.style.zIndex = '9999';
+                      wrapper.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+                    }
+
+                    if (header) {
+                      header.classList.add('sticky');
+                    }
+
+                    if (navigation) {
+                      navigation.classList.add('sticky');
+                    }
+
+                    // Show placeholder to prevent content jump
+                    placeholder.style.display = 'block';
+                    placeholder.style.height = wrapperHeight + 'px';
+                  } else {
+                    // Reset to normal
+                    if (wrapper) {
+                      wrapper.style.position = 'relative';
+                      wrapper.style.boxShadow = 'none';
+                    }
+
+                    if (header) {
+                      header.classList.remove('sticky');
+                    }
+
+                    if (navigation) {
+                      navigation.classList.remove('sticky');
+                    }
+
+                    placeholder.style.display = 'none';
+                  }
+                });
+              });
 </script>
 
 <style>
@@ -562,5 +582,17 @@ isAuthenticated); %>
   /* Adjust search suggestions z-index when header is sticky */
   #searchSuggestions {
     z-index: 10000 !important;
+  }
+</style>
+<style>
+  @media (max-width: 350px) {
+    .header-search {
+      display: none !important;
+    }
+  }
+  @media (max-width: 270px) {
+    .header-logo h2 {
+      display: none !important;
+    }
   }
 </style>

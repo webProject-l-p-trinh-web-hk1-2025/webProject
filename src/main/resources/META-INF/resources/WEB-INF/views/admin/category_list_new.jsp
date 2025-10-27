@@ -90,9 +90,7 @@
             <a href="${pageContext.request.contextPath}/admin/categories/new" class="btn btn-primary">
               <i class="fas fa-plus"></i> Thêm danh mục
             </a>
-            <button class="btn btn-outline" onclick="window.location.href='${pageContext.request.contextPath}/admin/categories?page=0&size=10&sort=id,asc'">
-              <i class="fas fa-list"></i> Hiển thị tất cả
-            </button>
+           
           </div>
         </div>
 
@@ -179,7 +177,7 @@
                           </a>
                           <form action="${pageContext.request.contextPath}/admin/categories/${category.id}/delete" 
                                 method="post" style="display:inline;" 
-                                onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?');">
+                              >
                             <button type="submit" class="btn btn-delete" title="Xóa">
                               <i class="fas fa-trash"></i>
                             </button>

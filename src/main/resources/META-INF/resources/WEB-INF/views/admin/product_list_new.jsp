@@ -375,7 +375,7 @@
                     </td>
                     <td>${product.name}</td>
                     <td>${product.brand}</td>
-                    <td class="text-end">${product.price} ₫</td>
+                    <td class="text-end"><span class="product-price" data-price="${product.price}"></span><span class="product-price">₫</span></td>
                     <td class="text-center">${product.stock}</td>
                     <td class="text-center">
                       <c:choose>
@@ -419,9 +419,9 @@
                           </button>
                         </c:otherwise>
                       </c:choose>
-                      <form action="${pageContext.request.contextPath}/admin/products/${product.id}/delete" method="post" style="display:inline;" >
+                      <!-- <form action="${pageContext.request.contextPath}/admin/products/${product.id}/delete" method="post" style="display:inline;" >
                         <button type="submit" class="btn btn-delete" title="Xóa"><i class="fas fa-trash"></i></button>
-                      </form>
+                      </form> -->
                     </td>
                   </tr>
                 </c:forEach>
@@ -527,7 +527,7 @@
       })
       .then(response => {
         if (response.ok) {
-          alert('Đã thiết lập khuyến mãi ' + percentage + '% cho sản phẩm!');
+         
           closeDealModal();
           window.location.reload();
         } else {
@@ -545,9 +545,6 @@
       const action = currentStatus ? 'ngừng kinh doanh' : 'mở lại kinh doanh';
       const newStatus = !currentStatus;
       
-      if (!confirm(`Bạn có chắc muốn ${action} sản phẩm này?`)) {
-        return;
-      }
 
       fetch('${pageContext.request.contextPath}/admin/products/' + productId + '/active-toggle', {
         method: 'POST',
@@ -557,7 +554,7 @@
       })
       .then(response => {
         if (response.ok) {
-          alert(`Đã ${action} sản phẩm thành công!`);
+         
           window.location.reload();
         } else {
           alert('Lỗi khi cập nhật trạng thái sản phẩm!');
@@ -627,6 +624,15 @@
         });
       }
     });
+  // Format all product prices to 6.437.700 style
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.product-price').forEach(function(el) {
+      var price = el.getAttribute('data-price');
+      if (price) {
+        el.textContent = new Intl.NumberFormat('vi-VN').format(price);
+      }
+    });
+  });
   </script>
 </body>
 </html>

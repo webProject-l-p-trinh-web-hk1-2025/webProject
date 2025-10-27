@@ -130,7 +130,7 @@ public class AdminProductController {
         }
 
         productRepository.save(p);
-        return "redirect:/admin/product_list";
+        return "redirect:/admin/product_list_new";
     }
 
     // Xử lý xóa sản phẩm

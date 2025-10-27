@@ -60,8 +60,8 @@
             </c:choose>
             
             <!-- Page numbers -->
-            <c:forEach begin="${page.number - 2 < 0 ? 0 : page.number - 2}" 
-                      end="${page.number + 2 >= page.totalPages ? page.totalPages - 1 : page.number + 2}" 
+            <c:forEach begin="${page.number - 2 < 0 ? 0 : page.number - 2}"
+                      end="${page.totalPages == 0 ? 0 : (page.number + 2 >= page.totalPages ? (page.totalPages - 1 < 0 ? 0 : page.totalPages - 1) : page.number + 2)}"
                       var="i">
                 <c:choose>
                     <c:when test="${i == page.number}">

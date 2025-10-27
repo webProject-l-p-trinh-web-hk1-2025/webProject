@@ -93,9 +93,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
               >
                 <i class="fas fa-plus"></i> Thêm tài liệu
               </a>
-              <button class="btn btn-outline" id="showAllBtn">
-                <i class="fas fa-list"></i> Hiển thị tất cả
-              </button>
+             
             </div>
           </div>
 
@@ -135,6 +133,9 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
             <div class="alert alert-danger">${error}</div>
           </c:if>
 
+          <!-- Debug: Kiểm tra biến null -->
+          <c:if test="${empty documents}"><div style="color:red">documents is null</div></c:if>
+          <c:if test="${empty products}"><div style="color:red">products is null</div></c:if>
           <div class="card">
             <div class="card-header">
               <div class="card-title">Danh sách tài liệu</div>
@@ -172,7 +173,7 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                         <a
                           href="${pageContext.request.contextPath}/admin/document/delete/${doc.id}"
                           class="btn btn-delete"
-                          onclick="return confirm('Bạn có chắc chắn muốn xóa tài liệu này?')"
+                         
                           title="Xóa"
                         >
                           <i class="fas fa-trash"></i>

@@ -196,12 +196,12 @@
                                     <button type="button" onclick="showEditForm('${user.id}')" class="btn action-btn btn-edit">
                                         <i class="fas fa-edit"></i> Sửa
                                     </button>
-                                    <form action="${pageContext.request.contextPath}/admin/deleteUser/${user.id}" method="post"
-                                        style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa người dùng này?');">
+                                    <!-- <form action="${pageContext.request.contextPath}/admin/deleteUser/${user.id}" method="post"
+                                        style="display:inline;">
                                         <button type="submit" class="btn action-btn btn-delete">
                                             <i class="fas fa-trash"></i> Xóa
                                         </button>
-                                    </form>
+                                    </form> -->
                                 </div>
                             </td>
                         </tr>

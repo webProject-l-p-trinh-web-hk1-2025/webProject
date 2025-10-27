@@ -390,7 +390,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                       <i class="fas fa-save"></i> Lưu thay đổi
                     </button>
                     <a
-                      href="${pageContext.request.contextPath}/admin/products/edit/${product.id}"
+                      href="${pageContext.request.contextPath}/admin/products"
                       class="btn btn-outline-secondary"
                       ><i class="fas fa-times"></i> Hủy</a
                     >

@@ -274,7 +274,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                       <i class="fas fa-save"></i> Lưu sản phẩm
                     </button>
                     <a
-                      href="${pageContext.request.contextPath}/product_list"
+                      href="${pageContext.request.contextPath}/admin/products"
                       class="btn btn-outline-secondary"
                       ><i class="fas fa-times"></i> Hủy</a
                     >

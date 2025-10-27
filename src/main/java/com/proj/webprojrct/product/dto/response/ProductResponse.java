@@ -39,4 +39,5 @@ public class ProductResponse {
     private String nfcSupport;
     private Boolean onDeal;
     private Integer dealPercentage;
+    private Boolean isActive;
 }

@@ -5,6 +5,9 @@ import com.proj.webprojrct.product.entity.Product;
 import com.proj.webprojrct.product.repository.ProductRepository;
 import com.proj.webprojrct.product.service.ProductService;
 import com.proj.webprojrct.storage.service.ProductStorageService;
+import com.proj.webprojrct.reviewandrating.repository.ReviewRepository;
+import com.proj.webprojrct.cart.repository.CartItemRepository;
+import com.proj.webprojrct.favorite.repository.FavoriteRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -208,6 +212,24 @@ public class AdminProductController {
         }
 
         return productService.setDealStatus(id, onDeal, dealPercentage);
+    }
+
+    // Toggle isActive status
+    @Transactional
+    @PostMapping("/{id}/active-toggle")
+    @ResponseBody
+    public Product toggleActiveStatus(@PathVariable Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sản phẩm không tồn tại"));
+        
+        // Handle null case - default to true if null
+        Boolean currentStatus = product.getIsActive();
+        if (currentStatus == null) {
+            currentStatus = true; // Default value
+        }
+        
+        product.setIsActive(!currentStatus);
+        return productRepository.save(product);
     }
 
 

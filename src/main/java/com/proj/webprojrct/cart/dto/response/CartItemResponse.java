@@ -20,4 +20,14 @@ public class CartItemResponse {
     private Integer productStock; // Thêm field stock
     private Boolean productOnDeal; // Thêm field onDeal
     private Integer productDealPercentage; // Thêm field dealPercentage
+
+    private Boolean productIsActive; // Thêm trạng thái hoạt động
+
+    public Boolean getProductIsActive() {
+        return productIsActive;
+    }
+
+    public void setProductIsActive(Boolean productIsActive) {
+        this.productIsActive = productIsActive;
+    }
 }

@@ -10,7 +10,7 @@
 				<meta name="viewport" content="width=device-width, initial-scale=1">
 				<title>Sản phẩm - CellPhoneStore</title>
 
-				<style>
+				<!-- <style>
 					/* Hover animation cho product cards */
 					.product {
 						transition: all 0.3s ease;
@@ -45,7 +45,7 @@
 					.product:hover .add-to-cart-btn {
 						background-color: #D10024 !important;
 					}
-				</style>
+				</style> -->
 			</head>
 
 			<body>
@@ -178,6 +178,13 @@
 										<div class="col-md-4 col-xs-6">
 											<div class="product">
 												<div class="product-img">
+				<!-- Deal labels styled like deals.jsp -->
+				<div class="product-label" style="position:absolute;top:10px;right:10px;z-index:2;">
+					<c:if test="${product.dealPercentage != null && product.dealPercentage > 0}">
+						<span class="sale" style="background:#c50b12;color:#fff;padding:4px 6px;border-radius:4px;font-weight:700;box-shadow:0 1px 0 rgba(0,0,0,0.08);border:none;animation:pulse 2s infinite;">-${product.dealPercentage}%</span>
+						<span class="new" style="background:#ff3b5c;color:#fff;padding:4px 6px;border-radius:4px;font-weight:700;box-shadow:0 1px 0 rgba(0,0,0,0.08);border:none;animation:pulse 2s infinite;margin-left:6px;">HOT</span>
+					</c:if>
+				</div>
 													<c:choose>
 														<c:when test="${not empty product.imageUrl}">
 															<img src="${pageContext.request.contextPath}${product.imageUrl}"
@@ -190,11 +197,18 @@
 																style="max-height: 250px; object-fit: contain;">
 														</c:otherwise>
 													</c:choose>
-													<c:if test="${product.stock == 0}">
-														<div class="product-label">
-															<span class="sale">HẾT HÀNG</span>
-														</div>
-													</c:if>
+													<c:choose>
+														<c:when test="${not empty product.isActive and product.isActive == false}">
+															<div class="product-label">
+																<span class="sale" style="background:#ff3b5c;color:#fff;padding:4px 6px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);margin-left:6px;">NGỪNG KINH DOANH</span>
+															</div>
+														</c:when>
+														<c:when test="${product.stock == 0}">
+															<div class="product-label">
+																<span class="sale">HẾT HÀNG</span>
+															</div>
+														</c:when>
+													</c:choose>
 												</div>
 												<div class="product-body">
 													<p class="product-category">${product.brand}</p>
@@ -263,21 +277,23 @@
 													</div>
 												</div>
 												<div class="add-to-cart">
-													<c:choose>
-														<c:when test="${product.stock > 0}">
-															<button class="add-to-cart-btn"
-																data-product-id="${product.id}"
-																onclick="addToCart(${product.id})">
-																<i class="fa fa-shopping-cart"></i> Thêm vào giỏ
-															</button>
-														</c:when>
-														<c:otherwise>
-															<button class="add-to-cart-btn" disabled
-																style="background: #999;">
-																<i class="fa fa-ban"></i> Hết hàng
-															</button>
-														</c:otherwise>
-													</c:choose>
+													 <c:choose>
+                                                <c:when test="${not empty product.isActive and product.isActive == false}">
+                                                    <button class="add-to-cart-btn" disabled style="background: #999;">
+                                                        <i class="fa fa-ban"></i> Ngừng kinh doanh
+                                                    </button>
+                                                </c:when>
+                                                <c:when test="${product.stock > 0}">
+                                                    <button class="add-to-cart-btn" onclick="addToCart(${product.id})">
+                                                        <i class="fa fa-shopping-cart"></i> Thêm vào giỏ
+                                                    </button>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <button class="add-to-cart-btn" disabled style="background: #999;">
+                                                        <i class="fa fa-ban"></i> Hết hàng
+                                                    </button>
+                                                </c:otherwise>
+                                            </c:choose>
 												</div>
 											</div>
 										</div>

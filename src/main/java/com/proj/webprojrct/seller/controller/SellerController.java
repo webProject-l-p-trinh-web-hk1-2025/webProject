@@ -36,6 +36,7 @@ public class SellerController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long orderId,
             Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -43,33 +44,45 @@ public class SellerController {
         }
         try {
             List<OrderSellerResponse> allOrders = sellerService.getAllOrders(authentication);
-            
+
+            // Filter by orderId if provided
+            if (orderId != null) {
+                final Long searchId = orderId;
+                allOrders = allOrders.stream()
+                        .filter(order -> searchId.equals(order.getOrderId()))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+
             // Filter by status if provided
             if (status != null && !status.isEmpty() && !status.equals("ALL")) {
                 allOrders = allOrders.stream()
-                    .filter(order -> status.equals(order.getStatus()))
-                    .collect(java.util.stream.Collectors.toList());
+                        .filter(order -> status.equals(order.getStatus()))
+                        .collect(java.util.stream.Collectors.toList());
             }
-            
+
             // Calculate pagination
             int totalOrders = allOrders.size();
             int totalPages = (int) Math.ceil((double) totalOrders / size);
-            
+
             // Validate page number
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
-            
+            if (page < 1) {
+                page = 1;
+            }
+            if (page > totalPages && totalPages > 0) {
+                page = totalPages;
+            }
+
             // Get orders for current page
             int startIndex = (page - 1) * size;
             int endIndex = Math.min(startIndex + size, totalOrders);
-            
+
             List<OrderSellerResponse> paginatedOrders;
             if (startIndex < totalOrders) {
                 paginatedOrders = allOrders.subList(startIndex, endIndex);
             } else {
                 paginatedOrders = java.util.Collections.emptyList();
             }
-            
+
             model.addAttribute("orders", paginatedOrders);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", totalPages);
@@ -90,6 +103,7 @@ public class SellerController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long orderId,
             Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -97,34 +111,46 @@ public class SellerController {
         }
         try {
             // Get ALL orders in system (same as all-orders page)
-            List<OrderSellerResponse> allOrders = sellerService.getAllOrders(authentication);
-            
+            List<OrderSellerResponse> allOrders = sellerService.getOrdersPaid(authentication);
+
+            // Filter by orderId if provided
+            if (orderId != null) {
+                final Long searchId = orderId;
+                allOrders = allOrders.stream()
+                        .filter(order -> searchId.equals(order.getOrderId()))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+
             // Filter by status if provided
             if (status != null && !status.isEmpty() && !status.equals("ALL")) {
                 allOrders = allOrders.stream()
-                    .filter(order -> status.equals(order.getStatus()))
-                    .collect(java.util.stream.Collectors.toList());
+                        .filter(order -> status.equals(order.getStatus()))
+                        .collect(java.util.stream.Collectors.toList());
             }
-            
+
             // Calculate pagination
             int totalOrders = allOrders.size();
             int totalPages = (int) Math.ceil((double) totalOrders / size);
-            
+
             // Validate page number
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
-            
+            if (page < 1) {
+                page = 1;
+            }
+            if (page > totalPages && totalPages > 0) {
+                page = totalPages;
+            }
+
             // Get orders for current page
             int startIndex = (page - 1) * size;
             int endIndex = Math.min(startIndex + size, totalOrders);
-            
+
             List<OrderSellerResponse> paginatedOrders;
             if (startIndex < totalOrders) {
                 paginatedOrders = allOrders.subList(startIndex, endIndex);
             } else {
                 paginatedOrders = java.util.Collections.emptyList();
             }
-            
+
             model.addAttribute("orders", paginatedOrders);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", totalPages);
@@ -160,6 +186,44 @@ public class SellerController {
         return "redirect:/seller/orders";
     }
 
+    @PostMapping("/seller/ship-order/{orderId}")
+    public String shipOrder(@PathVariable("orderId") Long orderId, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        try {
+            if (sellerService.shipOrder(orderId, authentication)) {
+                model.addAttribute("success", "Order marked as shipping successfully.");
+            } else {
+                model.addAttribute("error", "Failed to mark the order as shipping.");
+            }
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/home";
+        }
+        return "redirect:/seller/orders-accepted";
+    }
+
+    @PostMapping("/seller/deliver-order/{orderId}")
+    public String deliverOrder(@PathVariable("orderId") Long orderId, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        try {
+            if (sellerService.deliverOrder(orderId, authentication)) {
+                model.addAttribute("success", "Order marked as delivered successfully.");
+            } else {
+                model.addAttribute("error", "Failed to mark the order as delivered.");
+            }
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/home";
+        }
+        return "redirect:/seller/orders-accepted";
+    }
+
     @GetMapping("/seller/orders-refund")
     public String getSellerOrdersRefund(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -175,6 +239,195 @@ public class SellerController {
             return "redirect:/home";
         }
         return "seller/orders_refund";
+    }
+
+    @GetMapping("/seller/orders-accepted")
+    public String getSellerOrdersAccepted(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long orderId,
+            Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        try {
+            List<OrderSellerResponse> allOrders = sellerService.getAllOrderAccepted(authentication);
+
+            // Filter by orderId if provided
+            if (orderId != null) {
+                allOrders = allOrders.stream()
+                        .filter(order -> order.getOrderId().equals(orderId))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+
+            // Calculate pagination
+            int totalOrders = allOrders.size();
+            int totalPages = (int) Math.ceil((double) totalOrders / size);
+
+            // Validate page number
+            if (page < 1) {
+                page = 1;
+            }
+            if (page > totalPages && totalPages > 0) {
+                page = totalPages;
+            }
+
+            // Get orders for current page
+            int startIndex = (page - 1) * size;
+            int endIndex = Math.min(startIndex + size, totalOrders);
+
+            List<OrderSellerResponse> paginatedOrders;
+            if (startIndex < totalOrders) {
+                paginatedOrders = allOrders.subList(startIndex, endIndex);
+            } else {
+                paginatedOrders = java.util.Collections.emptyList();
+            }
+
+            model.addAttribute("orders", paginatedOrders);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("totalOrders", totalOrders);
+            model.addAttribute("startIndex", startIndex + 1);
+            model.addAttribute("endIndex", endIndex);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/home";
+        }
+        return "seller/orders_accepted";
+    }
+
+    @GetMapping("/seller/orders-shipping")
+    public String getSellerOrdersShipping(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long orderId,
+            Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        try {
+            List<OrderSellerResponse> allOrders = sellerService.getAllOrdersShipping(authentication);
+
+            // Filter by orderId if provided
+            if (orderId != null) {
+                final Long searchId = orderId;
+                allOrders = allOrders.stream()
+                        .filter(order -> searchId.equals(order.getOrderId()))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+
+            // Calculate pagination
+            int totalOrders = allOrders.size();
+            int totalPages = (int) Math.ceil((double) totalOrders / size);
+
+            // Validate page number
+            if (page < 1) {
+                page = 1;
+            }
+            if (page > totalPages && totalPages > 0) {
+                page = totalPages;
+            }
+
+            // Get orders for current page
+            int startIndex = (page - 1) * size;
+            int endIndex = Math.min(startIndex + size, totalOrders);
+
+            List<OrderSellerResponse> paginatedOrders;
+            if (startIndex < totalOrders) {
+                paginatedOrders = allOrders.subList(startIndex, endIndex);
+            } else {
+                paginatedOrders = java.util.Collections.emptyList();
+            }
+
+            model.addAttribute("orders", paginatedOrders);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("totalOrders", totalOrders);
+            model.addAttribute("startIndex", startIndex + 1);
+            model.addAttribute("endIndex", endIndex);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/home";
+        }
+        return "seller/orders_shipping";
+    }
+
+    @GetMapping("/seller/orders-delivered")
+    public String getSellerOrdersDelivered(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long orderId,
+            Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        try {
+            List<OrderSellerResponse> allOrders = sellerService.getAllOrdersDelivered(authentication);
+
+            // Filter by orderId if provided
+            if (orderId != null) {
+                final Long searchId = orderId;
+                allOrders = allOrders.stream()
+                        .filter(order -> searchId.equals(order.getOrderId()))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+
+            // Calculate pagination
+            int totalOrders = allOrders.size();
+            int totalPages = (int) Math.ceil((double) totalOrders / size);
+
+            // Validate page number
+            if (page < 1) {
+                page = 1;
+            }
+            if (page > totalPages && totalPages > 0) {
+                page = totalPages;
+            }
+
+            // Get orders for current page
+            int startIndex = (page - 1) * size;
+            int endIndex = Math.min(startIndex + size, totalOrders);
+
+            List<OrderSellerResponse> paginatedOrders;
+            if (startIndex < totalOrders) {
+                paginatedOrders = allOrders.subList(startIndex, endIndex);
+            } else {
+                paginatedOrders = java.util.Collections.emptyList();
+            }
+
+            model.addAttribute("orders", paginatedOrders);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("totalOrders", totalOrders);
+            model.addAttribute("startIndex", startIndex + 1);
+            model.addAttribute("endIndex", endIndex);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/home";
+        }
+        return "seller/orders_delivered";
+    }
+
+    @GetMapping("/seller/order/{orderId}")
+    public String getOrderDetail(@PathVariable("orderId") Long orderId, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        try {
+            OrderSellerResponse order = sellerService.getOrderById(orderId, authentication);
+            model.addAttribute("order", order);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/seller/all-orders";
+        }
+        return "seller/order_detail";
     }
 
     @PostMapping("/seller/orders-refund/{orderId}/process")

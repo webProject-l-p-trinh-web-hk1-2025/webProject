@@ -2,7 +2,7 @@
     <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
         <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-            <title>Tất cả đơn hàng - CellPhoneStore</title>
+            <title>Đơn hàng đang vận chuyển - CellPhoneStore</title>
 
             <style>
                 .seller-orders-container {
@@ -67,20 +67,6 @@
                     border-radius: 4px;
                 }
 
-                .btn-accept {
-                    background: #28a745;
-                    color: #fff;
-                    padding: 8px 15px;
-                    border-radius: 5px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    border: none;
-                }
-
-                .btn-accept:hover {
-                    background: #218838;
-                }
-
                 .btn-back {
                     background: #d70018;
                     color: #fff;
@@ -101,6 +87,7 @@
                     border-radius: 4px;
                     font-size: 12px;
                     font-weight: bold;
+                    color: #fff;
                 }
 
                 .status-pending,
@@ -111,22 +98,73 @@
 
                 .status-accepted {
                     background: #17a2b8;
-                    color: #fff;
                 }
 
                 .status-shipping {
                     background: #007bff;
-                    color: #fff;
                 }
 
                 .status-delivered {
                     background: #28a745;
-                    color: #fff;
                 }
 
                 .status-cancelled {
                     background: #dc3545;
+                }
+
+                .payment-badge {
+                    padding: 4px 12px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: bold;
+                }
+
+                .payment-success {
+                    background: #28a745;
                     color: #fff;
+                }
+
+                .payment-pending {
+                    background: #ffc107;
+                    color: #000;
+                }
+
+                .payment-cod {
+                    background: #6c757d;
+                    color: #fff;
+                }
+
+                .info-section {
+                    background: #f9f9f9;
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                }
+
+                .info-section .fa {
+                    color: #d70018;
+                    margin-right: 8px;
+                }
+
+                .btn-deliver {
+                    background: #28a745;
+                    color: #fff;
+                    padding: 8px 15px;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    border: none;
+                }
+
+                .btn-deliver:hover {
+                    background: #218838;
+                }
+
+                .action-buttons {
+                    margin-top: 15px;
+                    padding-top: 15px;
+                    border-top: 1px solid #ddd;
+                    text-align: right;
                 }
             </style>
 
@@ -137,7 +175,8 @@
                         <div class="col-md-12">
                             <ul class="breadcrumb-tree">
                                 <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                                <li class="active">Tất cả đơn hàng</li>
+                                <li><a href="${pageContext.request.contextPath}/seller/orders">Quản lý đơn hàng</a></li>
+                                <li class="active">Đơn hàng đang vận chuyển</li>
                             </ul>
                         </div>
                     </div>
@@ -151,16 +190,20 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="seller-orders-container">
-                                <h1>Tất cả đơn hàng trong hệ thống</h1>
-                                <p style="color: #666; margin-bottom: 20px;">
-                                    <i class="fa fa-info-circle"></i> Trang này hiển thị tất cả đơn hàng từ tất cả
-                                    seller trong hệ thống.
-                                </p>
-                                <a href="${pageContext.request.contextPath}/" class="btn-back">
-                                    <i class="fa fa-arrow-left"></i> Quay về trang chính
+                                <h1><i class="fa fa-truck"></i> Đơn hàng đang vận chuyển</h1>
+
+                                <div class="info-section">
+                                    <p style="margin: 0; color: #666;">
+                                        <i class="fa fa-info-circle"></i> Danh sách các đơn hàng đang được vận chuyển
+                                        đến khách hàng.
+                                    </p>
+                                </div>
+
+                                <a href="${pageContext.request.contextPath}/seller/orders" class="btn-back">
+                                    <i class="fa fa-arrow-left"></i> Quay lại quản lý đơn hàng
                                 </a>
 
-                                <!-- Search and Filter Section -->
+                                <!-- Search Section -->
                                 <div
                                     style="margin-bottom: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
                                     <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
@@ -172,42 +215,6 @@
                                             <input type="text" id="searchOrderId" placeholder="Nhập mã đơn hàng..."
                                                 value="${param.orderId != null ? param.orderId : ''}"
                                                 style="width: 100%; padding: 8px 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                                        </div>
-
-                                        <!-- Filter by Status -->
-                                        <div style="flex: 0 0 200px;">
-                                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">
-                                                <i class="fa fa-filter"></i> Lọc theo trạng thái:
-                                            </label>
-                                            <select id="statusFilter"
-                                                style="width: 100%; padding: 8px 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                                                <option value="ALL" ${selectedStatus=='ALL' || selectedStatus==null
-                                                    ? 'selected' : '' }>
-                                                    Tất cả
-                                                </option>
-                                                <option value="PENDING" ${selectedStatus=='PENDING' ? 'selected' : '' }>
-                                                    Chờ xác nhận
-                                                </option>
-                                                <option value="PAID" ${selectedStatus=='PAID' ? 'selected' : '' }>
-                                                    Đã thanh toán
-                                                </option>
-                                                <option value="ACCEPTED" ${selectedStatus=='ACCEPTED' ? 'selected' : ''
-                                                    }>
-                                                    Đã chấp nhận
-                                                </option>
-                                                <option value="SHIPPING" ${selectedStatus=='SHIPPING' ? 'selected' : ''
-                                                    }>
-                                                    Đang vận chuyển
-                                                </option>
-                                                <option value="DELIVERED" ${selectedStatus=='DELIVERED' ? 'selected'
-                                                    : '' }>
-                                                    Đã giao hàng
-                                                </option>
-                                                <option value="CANCELLED" ${selectedStatus=='CANCELLED' ? 'selected'
-                                                    : '' }>
-                                                    Đã hủy
-                                                </option>
-                                            </select>
                                         </div>
 
                                         <!-- Action Buttons -->
@@ -227,19 +234,12 @@
                                 <script>
                                     function applyFilter() {
                                         const orderId = document.getElementById('searchOrderId').value.trim();
-                                        const status = document.getElementById('statusFilter').value;
                                         const url = new URL(window.location.href);
 
-                                        // Remove old params
                                         url.searchParams.delete('orderId');
-                                        url.searchParams.delete('status');
 
-                                        // Add new params
                                         if (orderId) {
                                             url.searchParams.set('orderId', orderId);
-                                        }
-                                        if (status && status !== 'ALL') {
-                                            url.searchParams.set('status', status);
                                         }
                                         url.searchParams.set('page', '1');
 
@@ -249,7 +249,6 @@
                                     function clearFilter() {
                                         const url = new URL(window.location.href);
                                         url.searchParams.delete('orderId');
-                                        url.searchParams.delete('status');
                                         url.searchParams.set('page', '1');
                                         window.location.href = url.toString();
                                     }
@@ -269,8 +268,7 @@
                                                 <strong>Mã Đơn Hàng:</strong> #${order.orderId}
                                                 &nbsp;|&nbsp;
                                                 <strong>Trạng Thái:</strong>
-                                                <span
-                                                    class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
+                                                <span class="status-badge status-shipping">SHIPPING</span>
                                                 &nbsp;|&nbsp;
                                                 <strong>Thanh Toán:</strong>
                                                 <span
@@ -297,7 +295,7 @@
                                             </div>
                                             <div>
                                                 <i class="fa fa-calendar"></i>
-                                                <strong>Ngày Tạo:</strong> ${order.createdAt}
+                                                <strong>Ngày Vận Chuyển:</strong> ${order.createdAt}
                                             </div>
                                             <c:if test="${order.userId != null}">
                                                 <div>
@@ -378,12 +376,19 @@
                                             </tfoot>
                                         </table>
 
-                                        <!-- Action Buttons -->
-                                        <div
-                                            style="text-align: right; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                                        <!-- Action Button -->
+                                        <div class="action-buttons">
+                                            <form
+                                                action="${pageContext.request.contextPath}/seller/deliver-order/${order.orderId}"
+                                                method="post" style="display:inline;">
+                                                <button type="submit" class="btn-deliver"
+                                                    onclick="return confirm('Xác nhận đơn hàng đã GIAO THÀNH CÔNG?');">
+                                                    <i class="fa fa-check-circle"></i> Xác Nhận Đã Giao Hàng
+                                                </button>
+                                            </form>
                                             <a href="${pageContext.request.contextPath}/seller/order/${order.orderId}"
-                                                class="btn"
-                                                style="padding: 10px 20px; background: #d70018; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                                                class="btn-view"
+                                                style="padding: 10px 20px; background: #6c757d; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-left: 10px;">
                                                 <i class="fa fa-eye"></i> Xem chi tiết
                                             </a>
                                         </div>
@@ -391,9 +396,18 @@
                                 </c:forEach>
 
                                 <c:if test="${empty orders}">
-                                    <div style="text-align: center; padding: 40px; color: #999;">
-                                        <i class="fa fa-inbox" style="font-size: 48px; margin-bottom: 10px;"></i>
-                                        <p style="font-size: 18px;">Không có đơn hàng nào.</p>
+                                    <div
+                                        style="text-align: center; padding: 60px; color: #999; background: #f9f9f9; border-radius: 8px;">
+                                        <i class="fa fa-truck"
+                                            style="font-size: 64px; margin-bottom: 20px; color: #ddd;"></i>
+                                        <h3 style="color: #666; margin-bottom: 10px;">Chưa có đơn hàng nào đang vận
+                                            chuyển</h3>
+                                        <p style="font-size: 16px;">Các đơn hàng đang được vận chuyển sẽ hiển thị tại
+                                            đây.</p>
+                                        <a href="${pageContext.request.contextPath}/seller/orders"
+                                            style="margin-top: 20px; display: inline-block; padding: 10px 30px; background: #d70018; color: #fff; text-decoration: none; border-radius: 5px;">
+                                            <i class="fa fa-arrow-left"></i> Về trang quản lý đơn hàng
+                                        </a>
                                     </div>
                                 </c:if>
 
@@ -403,7 +417,7 @@
                                         <div class="store-pagination">
                                             <!-- Previous Button -->
                                             <c:if test="${currentPage > 1}">
-                                                <a href="${pageContext.request.contextPath}/seller/all-orders?page=${currentPage - 1}&size=${pageSize}"
+                                                <a href="${pageContext.request.contextPath}/seller/orders-shipping?page=${currentPage - 1}&size=${pageSize}"
                                                     class="btn btn-default">
                                                     <i class="fa fa-angle-left"></i> Trước
                                                 </a>
@@ -418,7 +432,7 @@
                                                         <span class="btn btn-primary">${pageNum}</span>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <a href="${pageContext.request.contextPath}/seller/all-orders?page=${pageNum}&size=${pageSize}"
+                                                        <a href="${pageContext.request.contextPath}/seller/orders-shipping?page=${pageNum}&size=${pageSize}"
                                                             class="btn btn-default">${pageNum}</a>
                                                     </c:otherwise>
                                                 </c:choose>
@@ -426,7 +440,7 @@
 
                                             <!-- Next Button -->
                                             <c:if test="${currentPage < totalPages}">
-                                                <a href="${pageContext.request.contextPath}/seller/all-orders?page=${currentPage + 1}&size=${pageSize}"
+                                                <a href="${pageContext.request.contextPath}/seller/orders-shipping?page=${currentPage + 1}&size=${pageSize}"
                                                     class="btn btn-default">
                                                     Sau <i class="fa fa-angle-right"></i>
                                                 </a>
@@ -434,9 +448,30 @@
                                         </div>
 
                                         <!-- Page Info -->
-                                        <div style="margin-top: 15px; color: #666;">
-                                            Hiển thị ${startIndex} - ${endIndex} trong tổng số ${totalOrders} đơn hàng
+                                        <div style="margin-top: 15px; color: #666; font-size: 14px;">
+                                            <i class="fa fa-file-text-o"></i>
+                                            Hiển thị <strong>${startIndex}</strong> - <strong>${endIndex}</strong> trong
+                                            tổng số <strong>${totalOrders}</strong> đơn hàng
                                         </div>
+                                    </div>
+                                </c:if>
+
+                                <!-- Total Summary -->
+                                <c:if test="${not empty orders}">
+                                    <div
+                                        style="margin-top: 30px; padding: 20px; background: #e7f3ff; border-left: 4px solid #007bff; border-radius: 8px;">
+                                        <h4 style="margin: 0 0 10px 0; color: #333;">
+                                            <i class="fa fa-bar-chart"></i> Tổng quan
+                                        </h4>
+                                        <p style="margin: 5px 0; color: #666;">
+                                            <i class="fa fa-truck" style="color: #007bff;"></i>
+                                            Tổng số đơn hàng đang vận chuyển: <strong>${totalOrders}</strong>
+                                        </p>
+                                        <p style="margin: 5px 0; color: #666;">
+                                            <i class="fa fa-file-text-o" style="color: #17a2b8;"></i>
+                                            Đang hiển thị trang: <strong>${currentPage}</strong> /
+                                            <strong>${totalPages}</strong>
+                                        </p>
                                     </div>
                                 </c:if>
                             </div>

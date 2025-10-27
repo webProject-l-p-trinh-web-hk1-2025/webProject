@@ -91,15 +91,15 @@ public class SellerService {
         return orderResponses;
     }
 
-    public List<OrderSellerResponse> getOrdersBySellerId(Authentication authentication) {
+    public List<OrderSellerResponse> getOrdersPaid(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
         if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
             throw new IllegalArgumentException("User is not a seller or admin");
         }
         List<OrderSellerResponse> orderResponses = new ArrayList<>();
-        List<Order> orders = orderRepository.findAll();
-
+        List<String> allowedStatuses = Arrays.asList("PAID");
+        List<Order> orders = orderRepository.findByStatusIn(allowedStatuses);
         for (Order order : orders) {
             if (order == null || order.getId() == null) {
                 continue;
@@ -176,7 +176,7 @@ public class SellerService {
         if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
             throw new IllegalArgumentException("User is not a seller or admin");
         }
-        List<String> allowedStatuses = Arrays.asList("ACCEPTED", "SHIPPED");
+        List<String> allowedStatuses = Arrays.asList("REFUNDED_REQUESTED");
         List<Order> orders = orderRepository.findByStatusIn(allowedStatuses);
 
         List<OrderSellerResponse> orderResponses = new ArrayList<>();
@@ -247,6 +247,257 @@ public class SellerService {
         order.setStatus("REFUNDED_ACCEPTED");
         orderRepository.save(order);
         return true;
+    }
+
+    public List<OrderSellerResponse> getAllOrderAccepted(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
+        }
+
+        List<Order> orders = orderRepository.findByStatus("ACCEPTED");
+        List<OrderSellerResponse> responses = new ArrayList<>();
+
+        for (Order order : orders) {
+            if (order == null || order.getId() == null) {
+                continue;
+            }
+
+            String paymentStatus = getPaymentStatusByOrderId(order.getId());
+            String paymentMethod = getPaymentMethodByOrderId(order.getId());
+
+            List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+            if (order.getOrderItems() == null || order.getOrderItems().isEmpty()) {
+                continue;
+            }
+
+            for (OrderItem item : order.getOrderItems()) {
+                if (item == null) {
+                    continue;
+                }
+                Product product = productRepository.findById(item.getProductId()).orElse(null);
+                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
+
+                OrderItemResponse itemResponse = new OrderItemResponse();
+                itemResponse.setOrderItemId(item.getId());
+                itemResponse.setOrderId(order.getId());
+                itemResponse.setProductId(item.getProductId());
+                itemResponse.setQuantity(item.getQuantity());
+                itemResponse.setPrice(item.getPrice());
+                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
+                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                orderItemResponses.add(itemResponse);
+            }
+
+            OrderSellerResponse orderSellerResponse = new OrderSellerResponse(
+                    order.getId(),
+                    order.getUser() != null ? order.getUser().getId() : null,
+                    order.getStatus(),
+                    paymentStatus,
+                    paymentMethod,
+                    order.getTotalAmount(),
+                    order.getShippingAddress(),
+                    order.getCreatedAt() != null ? order.getCreatedAt().toString() : null,
+                    orderItemResponses
+            );
+
+            responses.add(orderSellerResponse);
+        }
+        return responses;
+    }
+
+    public boolean shipOrder(Long orderId, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
+        }
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found with id: " + orderId);
+        }
+        order.setStatus("SHIPPING");
+        orderRepository.save(order);
+        return true;
+    }
+
+    public List<OrderSellerResponse> getAllOrdersShipping(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
+        }
+        List<Order> orders = orderRepository.findByStatus("SHIPPING");
+        List<OrderSellerResponse> responses = new ArrayList<>();
+
+        for (Order order : orders) {
+            if (order == null || order.getId() == null) {
+                continue;
+            }
+
+            String paymentStatus = getPaymentStatusByOrderId(order.getId());
+            String paymentMethod = getPaymentMethodByOrderId(order.getId());
+
+            List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+            if (order.getOrderItems() == null || order.getOrderItems().isEmpty()) {
+                continue;
+            }
+
+            for (OrderItem item : order.getOrderItems()) {
+                if (item == null) {
+                    continue;
+                }
+                Product product = productRepository.findById(item.getProductId()).orElse(null);
+                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
+
+                OrderItemResponse itemResponse = new OrderItemResponse();
+                itemResponse.setOrderItemId(item.getId());
+                itemResponse.setOrderId(order.getId());
+                itemResponse.setProductId(item.getProductId());
+                itemResponse.setQuantity(item.getQuantity());
+                itemResponse.setPrice(item.getPrice());
+                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
+                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                orderItemResponses.add(itemResponse);
+            }
+
+            OrderSellerResponse orderSellerResponse = new OrderSellerResponse(
+                    order.getId(),
+                    order.getUser() != null ? order.getUser().getId() : null,
+                    order.getStatus(),
+                    paymentStatus,
+                    paymentMethod,
+                    order.getTotalAmount(),
+                    order.getShippingAddress(),
+                    order.getCreatedAt() != null ? order.getCreatedAt().toString() : null,
+                    orderItemResponses
+            );
+
+            responses.add(orderSellerResponse);
+        }
+        return responses;
+    }
+
+    public boolean deliverOrder(Long orderId, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
+        }
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found with id: " + orderId);
+        }
+        order.setStatus("DELIVERED");
+        orderRepository.save(order);
+        return true;
+    }
+
+    public List<OrderSellerResponse> getAllOrdersDelivered(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
+        }
+        List<Order> orders = orderRepository.findByStatus("DELIVERED");
+        List<OrderSellerResponse> responses = new ArrayList<>();
+
+        for (Order order : orders) {
+            if (order == null || order.getId() == null) {
+                continue;
+            }
+
+            String paymentStatus = getPaymentStatusByOrderId(order.getId());
+            String paymentMethod = getPaymentMethodByOrderId(order.getId());
+
+            List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+            if (order.getOrderItems() == null || order.getOrderItems().isEmpty()) {
+                continue;
+            }
+
+            for (OrderItem item : order.getOrderItems()) {
+                if (item == null) {
+                    continue;
+                }
+                Product product = productRepository.findById(item.getProductId()).orElse(null);
+                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
+
+                OrderItemResponse itemResponse = new OrderItemResponse();
+                itemResponse.setOrderItemId(item.getId());
+                itemResponse.setOrderId(order.getId());
+                itemResponse.setProductId(item.getProductId());
+                itemResponse.setQuantity(item.getQuantity());
+                itemResponse.setPrice(item.getPrice());
+                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
+                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                orderItemResponses.add(itemResponse);
+            }
+
+            OrderSellerResponse orderSellerResponse = new OrderSellerResponse(
+                    order.getId(),
+                    order.getUser() != null ? order.getUser().getId() : null,
+                    order.getStatus(),
+                    paymentStatus,
+                    paymentMethod,
+                    order.getTotalAmount(),
+                    order.getShippingAddress(),
+                    order.getCreatedAt() != null ? order.getCreatedAt().toString() : null,
+                    orderItemResponses
+            );
+
+            responses.add(orderSellerResponse);
+        }
+        return responses;
+    }
+
+    public OrderSellerResponse getOrderById(Long orderId, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
+        }
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + orderId));
+
+        String paymentStatus = getPaymentStatusByOrderId(order.getId());
+        String paymentMethod = getPaymentMethodByOrderId(order.getId());
+
+        List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+        if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
+            for (OrderItem item : order.getOrderItems()) {
+                if (item == null) {
+                    continue;
+                }
+                Product product = productRepository.findById(item.getProductId()).orElse(null);
+                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
+
+                OrderItemResponse itemResponse = new OrderItemResponse();
+                itemResponse.setOrderItemId(item.getId());
+                itemResponse.setOrderId(order.getId());
+                itemResponse.setProductId(item.getProductId());
+                itemResponse.setQuantity(item.getQuantity());
+                itemResponse.setPrice(item.getPrice());
+                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
+                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                orderItemResponses.add(itemResponse);
+            }
+        }
+
+        return new OrderSellerResponse(
+                order.getId(),
+                order.getUser() != null ? order.getUser().getId() : null,
+                order.getStatus(),
+                paymentStatus,
+                paymentMethod,
+                order.getTotalAmount(),
+                order.getShippingAddress(),
+                order.getCreatedAt() != null ? order.getCreatedAt().toString() : null,
+                orderItemResponses
+        );
     }
 
     public String getPaymentStatusByOrderId(Long orderId) {

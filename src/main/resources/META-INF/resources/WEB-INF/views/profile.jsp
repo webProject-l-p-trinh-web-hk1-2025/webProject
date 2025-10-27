@@ -790,6 +790,18 @@
                                                         style="padding:10px 20px; background:#D10024; color:white; border:none; border-radius:3px; font-weight:600; text-decoration:none; font-size:14px; display:inline-block;">
                                                         <i class="fa fa-eye"></i> Xem chi tiết
                                                     </a>
+                                                    <c:if test="${order.status == 'PENDING'}">
+                                                        <button onclick="cancelOrder(${order.orderId})"
+                                                            style="padding:10px 20px; background:#dc3545; color:white; border:none; border-radius:3px; font-weight:600; font-size:14px; display:inline-block; margin-left:10px; cursor:pointer;">
+                                                            <i class="fa fa-times-circle"></i> Hủy đơn hàng
+                                                        </button>
+                                                    </c:if>
+                                                    <c:if test="${order.status == 'DELIVERED'}">
+                                                        <button onclick="requestRefund(${order.orderId})"
+                                                            style="padding:10px 20px; background:#ffc107; color:#000; border:none; border-radius:3px; font-weight:600; font-size:14px; display:inline-block; margin-left:10px; cursor:pointer;">
+                                                            <i class="fa fa-undo"></i> Yêu cầu hoàn tiền
+                                                        </button>
+                                                    </c:if>
                                                 </div>
                                             </div>
                                         </c:forEach>
@@ -1370,6 +1382,63 @@
                                 })
                                 .catch(error => {
                                     alert('Lỗi khi xác thực: ' + error);
+                                });
+                        }
+
+                        // Cancel Order Function
+                        function cancelOrder(orderId) {
+                            if (!confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
+
+                            fetch('${pageContext.request.contextPath}/api/orders/' + orderId + '/cancel', {
+                                method: 'PUT',
+                                credentials: 'include',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                                .then(response => {
+                                    if (!response.ok) throw new Error('Không thể hủy đơn hàng');
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    alert(data.message || 'Đã hủy đơn hàng thành công!');
+                                    location.reload(); // Reload để cập nhật trạng thái
+                                    // Reload và giữ nguyên tab đơn hàng
+                                    window.location.href = '${pageContext.request.contextPath}/profile#orders';
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                    alert('Lỗi khi hủy đơn hàng: ' + error.message);
+                                });
+                        }
+
+                        // Request Refund Function
+                        function requestRefund(orderId) {
+                            if (!confirm('Bạn có chắc muốn yêu cầu hoàn tiền cho đơn hàng này?\n\nYêu cầu hoàn tiền sẽ được gửi đến người bán để xem xét và xử lý.')) return;
+
+                            fetch('${pageContext.request.contextPath}/api/orders/' + orderId + '/refund', {
+                                method: 'PUT',
+                                credentials: 'include',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        return response.json().then(err => {
+                                            throw new Error(err.message || 'Không thể gửi yêu cầu hoàn tiền');
+                                        });
+                                    }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    alert(data.message || 'Yêu cầu hoàn tiền đã được gửi thành công!\n\nNgười bán sẽ xem xét và xử lý yêu cầu của bạn.');
+                                    // Reload và giữ nguyên tab đơn hàng
+                                    window.location.href = '${pageContext.request.contextPath}/profile#orders';
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                    alert('Lỗi: ' + error.message);
                                 });
                         }
                     </script>

@@ -61,20 +61,19 @@ public class OrderServiceImpl implements OrderService {
         // if (!user.getVerifyPhone()) {
         //     throw new RuntimeException("Chưa xác thực số điện thoại.");
         // }
-        
         // lấy số lượng trước khi order
         if (request.getOrderItems() != null) {
             for (OrderRequest.OrderItemRequest itemReq : request.getOrderItems()) {
                 Product product = productRepository.findById(itemReq.getProductId())
                         .orElseThrow(() -> new RuntimeException("Product not found: " + itemReq.getProductId()));
-                
+
                 if (product.getStock() < itemReq.getQuantity()) {
-                    throw new RuntimeException("Không đủ số lượng sản phẩm " + product.getName() + 
-                            ". Còn lại: " + product.getStock() + ", yêu cầu: " + itemReq.getQuantity());
+                    throw new RuntimeException("Không đủ số lượng sản phẩm " + product.getName()
+                            + ". Còn lại: " + product.getStock() + ", yêu cầu: " + itemReq.getQuantity());
                 }
             }
         }
-        
+
         Order order = new Order();
         order.setUser(user);
         order.setStatus("PENDING");
@@ -284,30 +283,58 @@ public class OrderServiceImpl implements OrderService {
         // Get order and its items
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
-        
+
         List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
-        
+
         // cập nhật số lượng
         for (OrderItem item : orderItems) {
             Product product = productRepository.findById(item.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product not found: " + item.getProductId()));
-            
+
             int newStock = product.getStock() - item.getQuantity();
-            
+
             if (newStock < 0) {
                 throw new RuntimeException("Insufficient stock for product: " + product.getName());
             }
-            
+
             product.setStock(newStock);
             productRepository.save(product);
-            
-            System.out.println("Updated stock for product " + product.getName() + 
-                    ": " + (product.getStock() + item.getQuantity()) + " -> " + newStock);
+
+            System.out.println("Updated stock for product " + product.getName()
+                    + ": " + (product.getStock() + item.getQuantity()) + " -> " + newStock);
         }
-        
+
         // Update order status to PAID
         order.setStatus("PAID");
         orderRepository.save(order);
+    }
+
+    @Override
+    public void refundOrderRequest(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!order.getStatus().equals("DELIVERED")) {
+            throw new IllegalArgumentException("Only DELIVERED orders can be refunded.");
+        }
+
+        // Update order status to REFUNDED_REQUESTED
+        order.setStatus("REFUNDED_REQUESTED");
+        orderRepository.save(order);
+
+        // Restore product stock
+        List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
+        for (OrderItem item : orderItems) {
+            Product product = productRepository.findById(item.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + item.getProductId()));
+
+            int restoredStock = product.getStock() + item.getQuantity();
+            product.setStock(restoredStock);
+            productRepository.save(product);
+
+            System.out.println("Restored stock for product " + product.getName()
+                    + ": " + (restoredStock - item.getQuantity()) + " -> " + restoredStock);
+        }
     }
 
 }

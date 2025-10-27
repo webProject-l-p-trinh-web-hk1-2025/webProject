@@ -266,7 +266,6 @@
                             <div class="col-md-12">
                                 <ul class="breadcrumb-tree">
                                     <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                                    <li><a href="${pageContext.request.contextPath}/order">Đơn hàng</a></li>
                                     <li class="active">Chi tiết đơn hàng #${order.orderId}</li>
                                 </ul>
                             </div>

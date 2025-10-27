@@ -795,12 +795,26 @@
     <style>
         /* Additional styles for deals page */
         .product {
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
         
         .product:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(215,0,24,0.2) !important;
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .product-img {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-img img {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .product:hover .product-img img {
+            transform: scale(1.08);
         }
         
         .hot-deal h2 {

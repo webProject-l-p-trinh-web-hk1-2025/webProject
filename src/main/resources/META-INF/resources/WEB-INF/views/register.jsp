@@ -58,15 +58,21 @@
               <label class="form-label">
                 <i class="fa fa-phone"></i> Số điện thoại
               </label>
-              <input type="text" class="form-control" name="phone" placeholder="Nhập số điện thoại" required
-                value="${not empty phone ? phone : ''}" />
+              <input type="text" class="form-control" id="phone" name="phone" placeholder="Nhập số điện thoại (10 số)"
+                required pattern="[0-9]{10}" maxlength="10" value="${not empty phone ? phone : ''}" />
+              <small class="text-muted">
+                <i class="fa fa-info-circle"></i> Số điện thoại phải có đúng 10 chữ số
+              </small>
             </div>
             <div class="form-col">
               <label class="form-label">
                 <i class="fa fa-envelope"></i> Email
               </label>
-              <input type="email" class="form-control" name="email" placeholder="Nhập địa chỉ email" required
-                value="${not empty email ? email : ''}" />
+              <input type="email" class="form-control" id="email" name="email" placeholder="Nhập địa chỉ email" required
+                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" value="${not empty email ? email : ''}" />
+              <small class="text-muted">
+                <i class="fa fa-info-circle"></i> Ví dụ: example@gmail.com
+              </small>
             </div>
           </div>
 
@@ -105,6 +111,64 @@
           <i class="fa fa-user-plus"></i> Hoàn tất đăng ký
         </button>
       </div>
+
+      <script>
+        // Validation cho form đăng ký
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+          const phone = document.getElementById('phone').value;
+          const email = document.getElementById('email').value;
+          const password = document.querySelector('input[name="password"]').value;
+          const confirmPassword = document.querySelector('input[name="confirmPassword"]').value;
+
+          // Kiểm tra số điện thoại (đúng 10 số)
+          const phoneRegex = /^[0-9]{10}$/;
+          if (!phoneRegex.test(phone)) {
+            e.preventDefault();
+            alert('Số điện thoại phải có đúng 10 chữ số!');
+            document.getElementById('phone').focus();
+            return false;
+          }
+
+          // Kiểm tra email hợp lệ
+          const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+          if (!emailRegex.test(email)) {
+            e.preventDefault();
+            alert('Email không hợp lệ! Vui lòng nhập đúng định dạng email.');
+            document.getElementById('email').focus();
+            return false;
+          }
+
+          // Kiểm tra mật khẩu (tối thiểu 6 ký tự, có chữ và số)
+          const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+          if (!passwordRegex.test(password)) {
+            e.preventDefault();
+            alert('Mật khẩu phải có ít nhất 6 ký tự, bao gồm cả chữ cái và số!');
+            return false;
+          }
+
+          // Kiểm tra mật khẩu khớp
+          if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('Mật khẩu xác nhận không khớp!');
+            return false;
+          }
+
+          return true;
+        });
+
+        // Chỉ cho phép nhập số vào ô điện thoại
+        document.getElementById('phone').addEventListener('input', function (e) {
+          this.value = this.value.replace(/[^0-9]/g, '');
+          if (this.value.length > 10) {
+            this.value = this.value.slice(0, 10);
+          }
+        });
+
+        // Chuyển email về chữ thường
+        document.getElementById('email').addEventListener('input', function (e) {
+          this.value = this.value.toLowerCase();
+        });
+      </script>
     </body>
 
     </html>

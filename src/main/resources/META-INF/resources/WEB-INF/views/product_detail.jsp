@@ -1,96 +1,100 @@
-<%@ page contentType="text/html; charset=UTF-8" %> <%@ taglib prefix="c"
-uri="http://java.sun.com/jsp/jstl/core" %> <%@ page
-import="org.springframework.security.core.context.SecurityContextHolder" %> <%@
-page import="org.springframework.security.core.Authentication" %> <%@ page
-import="org.springframework.security.authentication.AnonymousAuthenticationToken"
-%> <% Authentication
-auth=SecurityContextHolder.getContext().getAuthentication(); boolean
-isAuthenticated=auth !=null && auth.isAuthenticated() && !(auth instanceof
-AnonymousAuthenticationToken); request.setAttribute("isUserAuthenticated",
-isAuthenticated); %>
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>
-      Chi tiết sản phẩm - <c:out value="${product.name}" default="Sản phẩm" />
-    </title>
+<%@ page contentType="text/html; charset=UTF-8" %>
+  <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+    <%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
+      <%@ page import="org.springframework.security.core.Authentication" %>
+        <%@ page import="org.springframework.security.authentication.AnonymousAuthenticationToken" %>
+          <% Authentication auth=SecurityContextHolder.getContext().getAuthentication(); boolean isAuthenticated=auth
+            !=null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken);
+            request.setAttribute("isUserAuthenticated", isAuthenticated); %>
+            <!DOCTYPE html>
+            <html>
 
-    <style>
-      /* Hover animation cho product cards trong related/similar products */
-      .product {
-        transition: all 0.3s ease;
-        cursor: pointer;
-      }
+            <head>
+              <meta charset="UTF-8" />
+              <title>
+                Chi tiết sản phẩm -
+                <c:out value="${product.name}" default="Sản phẩm" />
+              </title>
 
-      .product:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-        z-index: 10;
-      }
+              <style>
+                /* Hover animation cho product cards trong related/similar products */
+                .product {
+                  transition: all 0.3s ease;
+                  cursor: pointer;
+                }
 
-      .product-img {
-        overflow: hidden;
-        position: relative;
-      }
+                .product:hover {
+                  transform: translateY(-10px);
+                  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+                  z-index: 10;
+                }
 
-      .product-img img {
-        transition: transform 0.3s ease;
-      }
+                .product-img {
+                  overflow: hidden;
+                  position: relative;
+                }
 
-      .product:hover .product-img img {
-        transform: scale(1.05);
-      }
-    </style>
-  </head>
+                .product-img img {
+                  transition: transform 0.3s ease;
+                }
 
-  <body>
-    <!-- BREADCRUMB -->
-    <div id="breadcrumb" class="section">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-12">
-            <ul class="breadcrumb-tree">
-              <li>
-                <a href="${pageContext.request.contextPath}/">Trang chủ</a>
-              </li>
-              <li>
-                <a href="${pageContext.request.contextPath}/shop">Sản phẩm</a>
-              </li>
-              <li class="active" id="breadcrumbName">Chi tiết sản phẩm</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- /BREADCRUMB -->
+                .product:hover .product-img img {
+                  transform: scale(1.05);
+                }
 
-    <!-- SECTION -->
-    <div class="section">
-      <div class="container">
-        <div class="row">
-          <!-- Main Content (col-md-9) -->
-          <div class="col-md-9">
-            <div class="row">
-              <!-- Product main img -->
-              <div class="col-md-5 col-md-push-2">
-                <div id="product-main-img">
-                  <!-- Main images will be inserted here -->
-                  <c:if
-                    test="${product.dealPercentage != null && product.dealPercentage > 0}"
-                  >
-                    <div
-                      class="product-label"
-                      style="
+                /* Vô hiệu hóa hover effect cho nút disabled */
+                .add-to-cart-btn:disabled,
+                .add-to-cart-btn:disabled:hover {
+                  background-color: #999 !important;
+                  cursor: not-allowed !important;
+                  opacity: 0.6 !important;
+                  transform: none !important;
+                  box-shadow: none !important;
+                  pointer-events: none;
+                }
+              </style>
+            </head>
+
+            <body>
+              <!-- BREADCRUMB -->
+              <div id="breadcrumb" class="section">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <ul class="breadcrumb-tree">
+                        <li>
+                          <a href="${pageContext.request.contextPath}/">Trang chủ</a>
+                        </li>
+                        <li>
+                          <a href="${pageContext.request.contextPath}/shop">Sản phẩm</a>
+                        </li>
+                        <li class="active" id="breadcrumbName">Chi tiết sản phẩm</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /BREADCRUMB -->
+
+              <!-- SECTION -->
+              <div class="section">
+                <div class="container">
+                  <div class="row">
+                    <!-- Main Content (col-md-9) -->
+                    <div class="col-md-9">
+                      <div class="row">
+                        <!-- Product main img -->
+                        <div class="col-md-5 col-md-push-2">
+                          <div id="product-main-img">
+                            <!-- Main images will be inserted here -->
+                            <c:if test="${product.dealPercentage != null && product.dealPercentage > 0}">
+                              <div class="product-label" style="
                         position: absolute;
                         top: 10px;
                         right: 10px;
                         z-index: 2;
-                      "
-                    >
-                      <span
-                        class="sale"
-                        style="
+                      ">
+                                <span class="sale" style="
                           background: #c50b12;
                           color: #fff;
                           padding: 4px 6px;
@@ -99,12 +103,8 @@ isAuthenticated); %>
                           box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
                           border: none;
                           animation: pulse 2s infinite;
-                        "
-                        >-${product.dealPercentage}%</span
-                      >
-                      <span
-                        class="new"
-                        style="
+                        ">-${product.dealPercentage}%</span>
+                                <span class="new" style="
                           background: #ff3b5c;
                           color: #fff;
                           padding: 4px 6px;
@@ -114,373 +114,288 @@ isAuthenticated); %>
                           border: none;
                           animation: pulse 2s infinite;
                           margin-left: 6px;
-                        "
-                        >HOT</span
-                      >
-                    </div>
-                  </c:if>
-                </div>
-              </div>
-              <!-- /Product main img -->
+                        ">HOT</span>
+                              </div>
+                            </c:if>
+                          </div>
+                        </div>
+                        <!-- /Product main img -->
 
-              <!-- Product thumb imgs -->
-              <div class="col-md-2 col-md-pull-5">
-                <div id="product-imgs">
-                  <!-- Thumbnails will be inserted here -->
-                </div>
-              </div>
-              <!-- /Product thumb imgs -->
+                        <!-- Product thumb imgs -->
+                        <div class="col-md-2 col-md-pull-5">
+                          <div id="product-imgs">
+                            <!-- Thumbnails will be inserted here -->
+                          </div>
+                        </div>
+                        <!-- /Product thumb imgs -->
 
-              <!-- Product details -->
-              <div class="col-md-5">
-                <div class="product-details">
-                  <h2 class="product-name" id="productName">Loading...</h2>
-                  <div>
-                    <div class="product-rating" id="productRating">
-                      <i class="fa fa-star-o"></i>
-                      <i class="fa fa-star-o"></i>
-                      <i class="fa fa-star-o"></i>
-                      <i class="fa fa-star-o"></i>
-                      <i class="fa fa-star-o"></i>
-                    </div>
-                    <a class="review-link" id="reviewLink" href="#tab3"
-                      >Đang tải...</a
-                    >
-                  </div>
-                  <div>
-                    <h3 class="product-price" id="productPrice">$0.00</h3>
-                    <span class="product-available" id="productStock"
-                      >In Stock</span
-                    >
-                  </div>
-                  <p id="productDescription">Loading product description...</p>
+                        <!-- Product details -->
+                        <div class="col-md-5">
+                          <div class="product-details">
+                            <h2 class="product-name" id="productName">Loading...</h2>
+                            <div>
+                              <div class="product-rating" id="productRating">
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                              </div>
+                              <a class="review-link" id="reviewLink" href="#tab3">Đang tải...</a>
+                            </div>
+                            <div>
+                              <h3 class="product-price" id="productPrice">$0.00</h3>
+                              <span class="product-available" id="productStock">In Stock</span>
+                            </div>
+                            <p id="productDescription">Loading product description...</p>
 
-                  <!-- Product Variants Section -->
-                  <div class="product-variants" style="margin: 20px 0">
-                    <!-- Storage Options -->
-                    <div
-                      class="variant-group"
-                      id="storageVariants"
-                      style="margin-bottom: 15px"
-                    >
-                      <h4
-                        style="
+                            <!-- Product Variants Section -->
+                            <div class="product-variants" style="margin: 20px 0">
+                              <!-- Storage Options -->
+                              <div class="variant-group" id="storageVariants" style="margin-bottom: 15px">
+                                <h4 style="
                           font-size: 16px;
                           font-weight: 600;
                           margin-bottom: 10px;
-                        "
-                      >
-                        Phiên bản
-                      </h4>
-                      <div
-                        class="variant-options"
-                        style="display: flex; gap: 10px; flex-wrap: wrap"
-                      >
-                        <!-- Storage buttons will be inserted here by JavaScript -->
-                      </div>
-                    </div>
+                        ">
+                                  Phiên bản
+                                </h4>
+                                <div class="variant-options" style="display: flex; gap: 10px; flex-wrap: wrap">
+                                  <!-- Storage buttons will be inserted here by JavaScript -->
+                                </div>
+                              </div>
 
-                    <!-- Color Options -->
-                    <div
-                      class="variant-group"
-                      id="colorVariants"
-                      style="margin-bottom: 15px"
-                    >
-                      <h4
-                        style="
+                              <!-- Color Options -->
+                              <div class="variant-group" id="colorVariants" style="margin-bottom: 15px">
+                                <h4 style="
                           font-size: 16px;
                           font-weight: 600;
                           margin-bottom: 10px;
-                        "
-                      >
-                        Màu sắc
-                      </h4>
-                      <div
-                        class="variant-options"
-                        style="display: flex; gap: 10px; flex-wrap: wrap"
-                      >
-                        <!-- Color buttons will be inserted here by JavaScript -->
+                        ">
+                                  Màu sắc
+                                </h4>
+                                <div class="variant-options" style="display: flex; gap: 10px; flex-wrap: wrap">
+                                  <!-- Color buttons will be inserted here by JavaScript -->
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="add-to-cart">
+                              <div class="qty-label">
+                                <div class="input-number">
+                                  <input type="number" id="quantity" value="1" min="1" />
+                                  <span class="qty-up">+</span>
+                                  <span class="qty-down">-</span>
+                                </div>
+                              </div>
+                              <button class="add-to-cart-btn" id="addToCartBtn">
+                                <i class="fa fa-shopping-cart"></i> Thêm Vào Giỏ
+                              </button>
+                            </div>
+
+                            <ul class="product-btns">
+                              <li>
+                                <a href="#" id="addToWishlistBtn"><i class="fa fa-heart-o"></i> Yêu Thích</a>
+                              </li>
+                            </ul>
+
+                            <ul class="product-links">
+                              <li>Thương Hiệu:</li>
+                              <li><a href="#" id="productCategory">Category</a></li>
+                            </ul>
+
+                            <ul class="product-links">
+                              <li>Chia Sẻ:</li>
+                              <li>
+                                <a href="#" id="shareFacebook" onclick="shareOnFacebook(); return false;"><i
+                                    class="fa fa-facebook"></i></a>
+                              </li>
+                              <li>
+                                <a href="#" id="shareTwitter" onclick="shareOnTwitter(); return false;"><i
+                                    class="fa fa-twitter"></i></a>
+                              </li>
+                              <li>
+                                <a href="#" id="shareGooglePlus" onclick="shareOnGooglePlus(); return false;"><i
+                                    class="fa fa-google-plus"></i></a>
+                              </li>
+                              <li>
+                                <a href="#" id="shareEmail" onclick="shareViaEmail(); return false;"><i
+                                    class="fa fa-envelope"></i></a>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <!-- /Product details -->
                       </div>
                     </div>
-                  </div>
+                    <!-- /Main Content -->
 
-                  <div class="add-to-cart">
-                    <div class="qty-label">
-                      <div class="input-number">
-                        <input type="number" id="quantity" value="1" min="1" />
-                        <span class="qty-up">+</span>
-                        <span class="qty-down">-</span>
+                    <!-- Sidebar (col-md-3) - Version Products -->
+                    <div class="col-md-3">
+                      <div class="aside">
+                        <h3 class="aside-title">Sản phẩm tương tự</h3>
+                        <div id="versionProducts" class="product-widget">
+                          <!-- Version products will be inserted here -->
+                        </div>
                       </div>
                     </div>
-                    <button class="add-to-cart-btn" id="addToCartBtn">
-                      <i class="fa fa-shopping-cart"></i> Thêm Vào Giỏ
-                    </button>
-                  </div>
+                    <!-- /Sidebar -->
 
-                  <ul class="product-btns">
-                    <li>
-                      <a href="#" id="addToWishlistBtn"
-                        ><i class="fa fa-heart-o"></i> Yêu Thích</a
-                      >
-                    </li>
-                  </ul>
-
-                  <ul class="product-links">
-                    <li>Thương Hiệu:</li>
-                    <li><a href="#" id="productCategory">Category</a></li>
-                  </ul>
-
-                  <ul class="product-links">
-                    <li>Chia Sẻ:</li>
-                    <li>
-                      <a
-                        href="#"
-                        id="shareFacebook"
-                        onclick="shareOnFacebook(); return false;"
-                        ><i class="fa fa-facebook"></i
-                      ></a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        id="shareTwitter"
-                        onclick="shareOnTwitter(); return false;"
-                        ><i class="fa fa-twitter"></i
-                      ></a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        id="shareGooglePlus"
-                        onclick="shareOnGooglePlus(); return false;"
-                        ><i class="fa fa-google-plus"></i
-                      ></a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        id="shareEmail"
-                        onclick="shareViaEmail(); return false;"
-                        ><i class="fa fa-envelope"></i
-                      ></a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              <!-- /Product details -->
-            </div>
-          </div>
-          <!-- /Main Content -->
-
-          <!-- Sidebar (col-md-3) - Version Products -->
-          <div class="col-md-3">
-            <div class="aside">
-              <h3 class="aside-title">Sản phẩm tương tự</h3>
-              <div id="versionProducts" class="product-widget">
-                <!-- Version products will be inserted here -->
-              </div>
-            </div>
-          </div>
-          <!-- /Sidebar -->
-
-          <!-- Product tab -->
-          <div class="col-md-12">
-            <div id="product-tab">
-              <!-- product tab nav -->
-              <ul class="tab-nav">
-                <li class="active">
-                  <a data-toggle="tab" href="#tab1">Mô tả</a>
-                </li>
-                <li><a data-toggle="tab" href="#tab2">Thông số kỹ thuật</a></li>
-                <li><a data-toggle="tab" href="#tab3">Đánh giá </a></li>
-              </ul>
-              <!-- /product tab nav -->
-
-              <!-- product tab content -->
-              <div class="tab-content">
-                <!-- tab1 -->
-                <div id="tab1" class="tab-pane fade in active">
-                  <div class="row">
+                    <!-- Product tab -->
                     <div class="col-md-12">
-                      <div
-                        id="tabDescription"
-                        class="description-content collapsed"
-                        style="
+                      <div id="product-tab">
+                        <!-- product tab nav -->
+                        <ul class="tab-nav">
+                          <li class="active">
+                            <a data-toggle="tab" href="#tab1">Mô tả</a>
+                          </li>
+                          <li><a data-toggle="tab" href="#tab2">Thông số kỹ thuật</a></li>
+                          <li><a data-toggle="tab" href="#tab3">Đánh giá </a></li>
+                        </ul>
+                        <!-- /product tab nav -->
+
+                        <!-- product tab content -->
+                        <div class="tab-content">
+                          <!-- tab1 -->
+                          <div id="tab1" class="tab-pane fade in active">
+                            <div class="row">
+                              <div class="col-md-12">
+                                <div id="tabDescription" class="description-content collapsed" style="
                           line-height: 1.8;
                           font-size: 14px;
                           max-height: 0;
                           overflow: hidden;
                           position: relative;
                           transition: max-height 0.5s ease;
-                        "
-                      >
-                        <p>Đang tải thông tin sản phẩm...</p>
-                      </div>
-                      <div style="text-align: center; margin-top: 15px">
-                        <button
-                          id="toggleDescriptionBtn"
-                          class="primary-btn"
-                          style="padding: 10px 30px; display: none"
-                        >
-                          <i class="fa fa-angle-down"></i> Xem mô tả chi tiết
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- /tab1 -->
-
-                <!-- tab2 -->
-                <div id="tab2" class="tab-pane fade in">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div id="specsContent">
-                        <p>Đang tải thông số kỹ thuật...</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- /tab2 -->
-
-                <!-- tab3 -->
-                <div id="tab3" class="tab-pane fade in">
-                  <div class="row">
-                    <!-- Rating Summary -->
-                    <div class="col-md-3">
-                      <div id="rating">
-                        <div class="rating-avg">
-                          <span id="avgRating">0.0</span>
-                          <div class="rating-stars" id="avgRatingStars">
-                            <i class="fa fa-star-o"></i>
-                            <i class="fa fa-star-o"></i>
-                            <i class="fa fa-star-o"></i>
-                            <i class="fa fa-star-o"></i>
-                            <i class="fa fa-star-o"></i>
-                          </div>
-                          <span
-                            id="totalReviewsText"
-                            style="font-size: 14px; color: #666"
-                            >0 đánh giá</span
-                          >
-                        </div>
-                        <ul class="rating" id="ratingDistribution">
-                          <!-- Rating distribution will be loaded here -->
-                        </ul>
-                      </div>
-                    </div>
-                    <!-- /Rating Summary -->
-
-                    <!-- Reviews List -->
-                    <div class="col-md-6">
-                      <div id="reviews">
-                        <ul class="reviews" id="reviewsList">
-                          <li style="text-align: center; color: #999">
-                            <p>Đang tải đánh giá...</p>
-                          </li>
-                        </ul>
-                        <!-- Pagination -->
-                        <div
-                          id="reviewsPagination"
-                          style="text-align: center; margin-top: 20px"
-                        >
-                          <!-- Pagination buttons will be loaded here -->
-                        </div>
-                      </div>
-                    </div>
-                    <!-- /Reviews List -->
-
-                    <!-- Review Form -->
-                    <div class="col-md-3">
-                      <div id="review-form">
-                        <h4 style="margin-bottom: 15px">Viết đánh giá</h4>
-                        <form id="reviewForm" class="review-form">
-                          <div class="input-rating" style="margin-bottom: 15px">
-                            <span>Xếp hạng: </span>
-                            <div class="stars">
-                              <input
-                                id="star5"
-                                name="rating"
-                                value="5"
-                                type="radio"
-                              /><label for="star5"></label>
-                              <input
-                                id="star4"
-                                name="rating"
-                                value="4"
-                                type="radio"
-                              /><label for="star4"></label>
-                              <input
-                                id="star3"
-                                name="rating"
-                                value="3"
-                                type="radio"
-                              /><label for="star3"></label>
-                              <input
-                                id="star2"
-                                name="rating"
-                                value="2"
-                                type="radio"
-                              /><label for="star2"></label>
-                              <input
-                                id="star1"
-                                name="rating"
-                                value="1"
-                                type="radio"
-                              /><label for="star1"></label>
+                        ">
+                                  <p>Đang tải thông tin sản phẩm...</p>
+                                </div>
+                                <div style="text-align: center; margin-top: 15px">
+                                  <button id="toggleDescriptionBtn" class="primary-btn"
+                                    style="padding: 10px 30px; display: none">
+                                    <i class="fa fa-angle-down"></i> Xem mô tả chi tiết
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <textarea
-                            id="reviewComment"
-                            class="input"
-                            placeholder="Nhận xét của bạn về sản phẩm"
-                            rows="5"
-                            required
-                          ></textarea>
-                          <button
-                            type="submit"
-                            class="primary-btn"
-                            style="width: 100%; margin-top: 10px"
-                          >
-                            Gửi đánh giá
-                          </button>
-                        </form>
+                          <!-- /tab1 -->
+
+                          <!-- tab2 -->
+                          <div id="tab2" class="tab-pane fade in">
+                            <div class="row">
+                              <div class="col-md-12">
+                                <div id="specsContent">
+                                  <p>Đang tải thông số kỹ thuật...</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- /tab2 -->
+
+                          <!-- tab3 -->
+                          <div id="tab3" class="tab-pane fade in">
+                            <div class="row">
+                              <!-- Rating Summary -->
+                              <div class="col-md-3">
+                                <div id="rating">
+                                  <div class="rating-avg">
+                                    <span id="avgRating">0.0</span>
+                                    <div class="rating-stars" id="avgRatingStars">
+                                      <i class="fa fa-star-o"></i>
+                                      <i class="fa fa-star-o"></i>
+                                      <i class="fa fa-star-o"></i>
+                                      <i class="fa fa-star-o"></i>
+                                      <i class="fa fa-star-o"></i>
+                                    </div>
+                                    <span id="totalReviewsText" style="font-size: 14px; color: #666">0 đánh giá</span>
+                                  </div>
+                                  <ul class="rating" id="ratingDistribution">
+                                    <!-- Rating distribution will be loaded here -->
+                                  </ul>
+                                </div>
+                              </div>
+                              <!-- /Rating Summary -->
+
+                              <!-- Reviews List -->
+                              <div class="col-md-6">
+                                <div id="reviews">
+                                  <ul class="reviews" id="reviewsList">
+                                    <li style="text-align: center; color: #999">
+                                      <p>Đang tải đánh giá...</p>
+                                    </li>
+                                  </ul>
+                                  <!-- Pagination -->
+                                  <div id="reviewsPagination" style="text-align: center; margin-top: 20px">
+                                    <!-- Pagination buttons will be loaded here -->
+                                  </div>
+                                </div>
+                              </div>
+                              <!-- /Reviews List -->
+
+                              <!-- Review Form -->
+                              <div class="col-md-3">
+                                <div id="review-form">
+                                  <h4 style="margin-bottom: 15px">Viết đánh giá</h4>
+                                  <form id="reviewForm" class="review-form">
+                                    <div class="input-rating" style="margin-bottom: 15px">
+                                      <span>Xếp hạng: </span>
+                                      <div class="stars">
+                                        <input id="star5" name="rating" value="5" type="radio" /><label
+                                          for="star5"></label>
+                                        <input id="star4" name="rating" value="4" type="radio" /><label
+                                          for="star4"></label>
+                                        <input id="star3" name="rating" value="3" type="radio" /><label
+                                          for="star3"></label>
+                                        <input id="star2" name="rating" value="2" type="radio" /><label
+                                          for="star2"></label>
+                                        <input id="star1" name="rating" value="1" type="radio" /><label
+                                          for="star1"></label>
+                                      </div>
+                                    </div>
+                                    <textarea id="reviewComment" class="input"
+                                      placeholder="Nhận xét của bạn về sản phẩm" rows="5" required></textarea>
+                                    <button type="submit" class="primary-btn" style="width: 100%; margin-top: 10px">
+                                      Gửi đánh giá
+                                    </button>
+                                  </form>
+                                </div>
+                              </div>
+                              <!-- /Review Form -->
+                            </div>
+                          </div>
+                          <!-- /tab3 -->
+                        </div>
+                        <!-- /product tab content -->
                       </div>
                     </div>
-                    <!-- /Review Form -->
+                    <!-- /product tab -->
                   </div>
                 </div>
-                <!-- /tab3 -->
               </div>
-              <!-- /product tab content -->
-            </div>
-          </div>
-          <!-- /product tab -->
-        </div>
-      </div>
-    </div>
-    <!-- /SECTION -->
+              <!-- /SECTION -->
 
-    <!-- Section -->
-    <div class="section">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-12">
-            <div class="section-title text-center">
-              <h3 class="title">Sản phẩm cùng hãng</h3>
-            </div>
-          </div>
-          <!-- Same brand products carousel -->
-          <div class="col-md-12">
-            <div id="sameProducts" class="product-slick-carousel">
-              <!-- Same brand products will be inserted here -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- /Section -->
+              <!-- Section -->
+              <div class="section">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="section-title text-center">
+                        <h3 class="title">Sản phẩm cùng hãng</h3>
+                      </div>
+                    </div>
+                    <!-- Same brand products carousel -->
+                    <div class="col-md-12">
+                      <div id="sameProducts" class="product-slick-carousel">
+                        <!-- Same brand products will be inserted here -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /Section -->
 
-    <script>
+              <script>
                 const ctx = "${pageContext.request.contextPath}";
                 const isUserLoggedIn = ${ isUserAuthenticated };
                 const isAdmin = <c:out value="${pageContext.request.isUserInRole('ADMIN')}" default="false" />;
@@ -631,9 +546,28 @@ isAuthenticated); %>
 
                   // Update stock status - check isActive first, then stock
                   if (p.isActive === false) {
-                    document.getElementById('productStock').innerHTML = '<span style="background:#28a745;color:#fff;font-size:18px;font-weight:bold;padding:4px 16px;border-radius:6px;display:inline-block;margin-top:8px;">NGỪNG KINH DOANH</span>';
+                    // Ẩn phần stock status khi ngừng kinh doanh
+                    document.getElementById('productStock').style.display = 'none';
+
+                    // Thay đổi nút "Thêm vào giỏ hàng" thành "Ngừng kinh doanh" và vô hiệu hóa
+                    const addToCartBtn = document.getElementById('addToCartBtn');
+                    addToCartBtn.innerHTML = '<i class="fa fa-ban"></i> Ngừng kinh doanh';
+                    addToCartBtn.disabled = true;
+                    addToCartBtn.style.backgroundColor = '#999';
+                    addToCartBtn.style.cursor = 'not-allowed';
+                    addToCartBtn.style.opacity = '0.6';
                   } else {
+                    // Hiển thị lại stock status
+                    document.getElementById('productStock').style.display = '';
                     document.getElementById('productStock').textContent = (p.stock > 0 ? 'Còn hàng' : 'Hết hàng');
+
+                    // Đảm bảo nút "Thêm vào giỏ hàng" hoạt động bình thường
+                    const addToCartBtn = document.getElementById('addToCartBtn');
+                    addToCartBtn.innerHTML = '<i class="fa fa-shopping-cart"></i> Thêm Vào Giỏ';
+                    addToCartBtn.disabled = false;
+                    addToCartBtn.style.backgroundColor = '';
+                    addToCartBtn.style.cursor = '';
+                    addToCartBtn.style.opacity = '';
                   }
 
                   // Tạo short description từ specs cho phần product details
@@ -732,6 +666,12 @@ isAuthenticated); %>
 
                   // Setup add to cart button
                   document.getElementById('addToCartBtn').addEventListener('click', () => {
+                    // Kiểm tra xem sản phẩm có đang ngừng kinh doanh không
+                    if (p.isActive === false) {
+                      alert('Sản phẩm này hiện đang ngừng kinh doanh!');
+                      return;
+                    }
+
                     const quantity = parseInt(document.getElementById('quantity').value) || 1;
                     addToCart(p.id, quantity);
                   });
@@ -955,13 +895,13 @@ isAuthenticated); %>
                         '<p class="product-category">' + categoryName + '</p>' +
                         '<h3 class="product-name"><a href="' + ctx + '/product/' + product.id + '">' + product.name + '</a></h3>' +
                         '<h4 class="product-price">' + formatPrice(product.price) + '</h4>' +
-                      '<div class="product-rating" id="rating-same-' + product.id + '">' +
-                      '<i class="fa fa-star-o"></i>' +
-                      '<i class="fa fa-star-o"></i>' +
-                      '<i class="fa fa-star-o"></i>' +
-                      '<i class="fa fa-star-o"></i>' +
-                      '<i class="fa fa-star-o"></i>' +
-                      '</div>' +
+                        '<div class="product-rating" id="rating-same-' + product.id + '">' +
+                        '<i class="fa fa-star-o"></i>' +
+                        '<i class="fa fa-star-o"></i>' +
+                        '<i class="fa fa-star-o"></i>' +
+                        '<i class="fa fa-star-o"></i>' +
+                        '<i class="fa fa-star-o"></i>' +
+                        '</div>' +
                         '<div class="product-btns">' +
                         '<button class="add-to-wishlist" data-product-id="' + product.id + '" onclick="toggleRelatedWishlist(' + product.id + ', this)"><i class="fa fa-heart-o"></i><span class="tooltipp">Yêu thích</span></button>' +
                         '<button class="quick-view" onclick="window.location.href=\'' + ctx + '/product/' + product.id + '\'"><i class="fa fa-eye"></i><span class="tooltipp">Xem chi tiết</span></button>' +
@@ -996,12 +936,12 @@ isAuthenticated); %>
 
                   container.innerHTML = '';
                   products.slice(0, 5).forEach(product => {
-          let imgSrc = ctx + '/images/no-image.png';
-          if (product.imageUrls && product.imageUrls.length > 0 && product.imageUrls[0]) {
-            imgSrc = ctx + product.imageUrls[0];
-          } else if (product.imageUrl) {
-            imgSrc = ctx + product.imageUrl;
-          }
+                    let imgSrc = ctx + '/images/no-image.png';
+                    if (product.imageUrls && product.imageUrls.length > 0 && product.imageUrls[0]) {
+                      imgSrc = ctx + product.imageUrls[0];
+                    } else if (product.imageUrl) {
+                      imgSrc = ctx + product.imageUrl;
+                    }
 
                     // Tính giá giảm và số tiền tiết kiệm
                     let priceHtml = '';
@@ -1054,12 +994,12 @@ isAuthenticated); %>
                   // Render ALL products (không giới hạn 4)
                   products.forEach(product => {
                     const categoryName = product.category ? product.category.name : 'Chưa phân loại';
-          let imgSrc = ctx + '/images/no-image.png';
-          if (product.imageUrls && product.imageUrls.length > 0 && product.imageUrls[0]) {
-            imgSrc = ctx + product.imageUrls[0];
-          } else if (product.imageUrl) {
-            imgSrc = ctx + product.imageUrl;
-          }
+                    let imgSrc = ctx + '/images/no-image.png';
+                    if (product.imageUrls && product.imageUrls.length > 0 && product.imageUrls[0]) {
+                      imgSrc = ctx + product.imageUrls[0];
+                    } else if (product.imageUrl) {
+                      imgSrc = ctx + product.imageUrl;
+                    }
                     const discountLabel = (product.dealPercentage && product.dealPercentage > 0)
                       ? '<div class="product-label" style="position:absolute;top:10px;right:10px;z-index:2;">'
                       + '<span class="sale" style="background:#c50b12;color:#fff;padding:4px 6px;border-radius:4px;font-weight:700;box-shadow:0 1px 0 rgba(0,0,0,0.08);border:none;animation:pulse 2s infinite;">-' + product.dealPercentage + '%</span>'
@@ -1093,12 +1033,12 @@ isAuthenticated); %>
                       '<h3 class="product-name"><a href="' + ctx + '/product/' + product.id + '">' + product.name + '</a></h3>' +
                       priceHtml +
                       '<div class="product-rating" id="rating-same-' + product.id + '">' +
-                            '<i class="fa fa-star-o"></i>' +
-                            '<i class="fa fa-star-o"></i>' +
-                            '<i class="fa fa-star-o"></i>' +
-                            '<i class="fa fa-star-o"></i>' +
-                            '<i class="fa fa-star-o"></i>' +
-                            '</div>' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '<i class="fa fa-star-o"></i>' +
+                      '</div>' +
                       '<div class="product-btns">' +
                       '<button class="add-to-wishlist" data-product-id="' + product.id + '" onclick="toggleRelatedWishlist(' + product.id + ', this)"><i class="fa fa-heart-o"></i><span class="tooltipp">Yêu thích</span></button>' +
                       '<button class="quick-view" onclick="window.location.href=\'' + ctx + '/product/' + product.id + '\'"><i class="fa fa-eye"></i><span class="tooltipp">Xem chi tiết</span></button>' +
@@ -1161,8 +1101,8 @@ isAuthenticated); %>
                     loadRelatedWishlistStatus();
                   }
 
-      // Load rating cho các sản phẩm cùng hãng
-                        loadSameProductsRatings(products);
+                  // Load rating cho các sản phẩm cùng hãng
+                  loadSameProductsRatings(products);
                 }
 
                 // Load rating cho tất cả sản phẩm cùng hãng
@@ -1699,7 +1639,7 @@ isAuthenticated); %>
                   }
                 }
 
-               // ==================== REVIEW AND RATING FUNCTIONS ====================
+                // ==================== REVIEW AND RATING FUNCTIONS ====================
 
                 let currentReviewPage = 0;
                 const reviewsPerPage = 10;
@@ -2255,6 +2195,7 @@ isAuthenticated); %>
                   const body = encodeURIComponent('Xem sản phẩm này: ' + productData.name + '\n\n' + window.location.href);
                   window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
                 }
-    </script>
-  </body>
-</html>
+              </script>
+            </body>
+
+            </html>

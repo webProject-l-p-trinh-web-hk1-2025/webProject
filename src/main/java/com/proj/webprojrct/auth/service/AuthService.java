@@ -82,6 +82,9 @@ public class AuthService {
             userRepository.save(user);
 
             return new LoginResponse(user, accessToken, refreshToken);
+        } catch (org.springframework.security.authentication.DisabledException e) {
+            model.addAttribute("error", "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.");
+            throw new RuntimeException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.");
         } catch (BadCredentialsException e) {
             model.addAttribute("error", "Sai số điện thoại hoặc mật khẩu!");
             throw new RuntimeException("Sai số điện thoại hoặc mật khẩu!");
@@ -89,12 +92,29 @@ public class AuthService {
     }
 
     public void registerUser(RegisterRequest request) {
+        // Validate password
+        if (!isValidPassword(request.getPassword())) {
+            throw new RuntimeException("Mật khẩu phải có ít nhất 6 ký tự, bao gồm cả chữ cái và số!");
+        }
+
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new RuntimeException("Mật khẩu và xác nhận mật khẩu không khớp!");
         }
+
+        // Validate phone (10 digits)
+        if (!isValidPhone(request.getPhone())) {
+            throw new RuntimeException("Số điện thoại phải có đúng 10 chữ số!");
+        }
+
         if (userRepository.existsByPhone(request.getPhone())) {
             throw new RuntimeException("Số điện thoại đã được đăng ký!");
         }
+
+        // Validate email
+        if (!isValidEmail(request.getEmail())) {
+            throw new RuntimeException("Email không hợp lệ!");
+        }
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được đăng ký!");
         }
@@ -199,6 +219,11 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Mật khẩu cũ không đúng!");
             //return "Mật khẩu cũ không đúng!";
+        }
+
+        // Validate mật khẩu mới (tối thiểu 6 ký tự, có chữ và số)
+        if (!isValidPassword(request.getNewPassword())) {
+            throw new RuntimeException("Mật khẩu mới phải có ít nhất 6 ký tự, bao gồm cả chữ cái và số!");
         }
 
         if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
@@ -329,6 +354,42 @@ public class AuthService {
     private String generateOtp() {
         int otp = (int) (Math.random() * 900000) + 100000;
         return String.valueOf(otp);
+    }
+
+    /**
+     * Validate số điện thoại (phải có đúng 10 chữ số)
+     */
+    private boolean isValidPhone(String phone) {
+        if (phone == null || phone.isEmpty()) {
+            return false;
+        }
+        // Chỉ chấp nhận 10 chữ số
+        return phone.matches("^[0-9]{10}$");
+    }
+
+    /**
+     * Validate email theo format chuẩn
+     */
+    private boolean isValidEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return false;
+        }
+        // Regex cho email hợp lệ
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
+    }
+
+    /**
+     * Validate mật khẩu (tối thiểu 6 ký tự, có ít nhất 1 chữ cái và 1 số)
+     */
+    private boolean isValidPassword(String password) {
+        if (password == null || password.length() < 6) {
+            return false;
+        }
+        // Phải có ít nhất 1 chữ cái và 1 số
+        boolean hasLetter = password.matches(".*[A-Za-z].*");
+        boolean hasDigit = password.matches(".*\\d.*");
+        return hasLetter && hasDigit;
     }
 
 }

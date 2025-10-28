@@ -37,28 +37,30 @@ public class AdminCategoryController {
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort,
             Model model) {
-        
+
         // Parse sort parameter
         String[] sortParams = sort.split(",");
         String sortField = sortParams[0];
-        Sort.Direction sortDirection = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc") 
+        Sort.Direction sortDirection = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
                 ? Sort.Direction.DESC : Sort.Direction.ASC;
-        
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortField));
         Page<CategoryDto> categoryPage = categoryService.getPagedCategories(pageable, name);
-        
+
         model.addAttribute("categories", categoryPage);
-        
+
         // Load all categories for parent name lookup
         model.addAttribute("allCategories", categoryService.getAll());
-        
+
         // Add filter parameters to model
-        if (name != null) model.addAttribute("filterName", name);
+        if (name != null) {
+            model.addAttribute("filterName", name);
+        }
         model.addAttribute("filterSort", sort);
-        
+
         return "admin/category_list_new";
     }
-    
+
     @GetMapping("/new")
     public String createForm(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -103,18 +105,21 @@ public class AdminCategoryController {
         model.addAttribute("categorys", dtos);
         return "admin/category_form";
     }
-    
+
     @PostMapping("/{id}/delete")
     public String deleteCategory(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             categoryService.delete(id);
             redirectAttributes.addFlashAttribute("success", "Đã xóa danh mục thành công!");
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            // Xử lý lỗi từ service (CONFLICT, NOT_FOUND, etc.)
+            redirectAttributes.addFlashAttribute("error", e.getReason());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Không thể xóa danh mục: " + e.getMessage());
         }
         return "redirect:/admin/categories";
     }
-    
+
     @GetMapping("/{id}")
     public String viewCategory(@PathVariable Long id, Model model) {
         CategoryDto category = categoryService.getById(id);

@@ -47,6 +47,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     var auth = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                } else {
+                    // Token không hợp lệ -> xóa cả 2 token
+                    clearTokens(res);
                 }
             }
         } catch (io.jsonwebtoken.ExpiredJwtException ex) {
@@ -75,10 +78,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 var auth = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
+            } else {
+                // Refresh token không hợp lệ hoặc hết hạn -> xóa cả 2 token
+                clearTokens(res);
             }
+        } catch (Exception ex) {
+            // Token bị lỗi (malformed, signature invalid, etc.) -> xóa cả 2 token
+            clearTokens(res);
         }
 
         chain.doFilter(req, res);
+    }
+
+    private void clearTokens(HttpServletResponse response) {
+        // Xóa access_token
+        Cookie accessCookie = new Cookie("access_token", null);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(0);
+        response.addCookie(accessCookie);
+
+        // Xóa refresh_token
+        Cookie refreshCookie = new Cookie("refresh_token", null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
     }
 
 }

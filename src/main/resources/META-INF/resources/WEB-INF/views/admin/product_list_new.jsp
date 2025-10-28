@@ -371,7 +371,17 @@
                 <c:forEach var="product" items="${products.content}">
                   <tr>
                     <td class="text-center">
-                      <img src="${pageContext.request.contextPath}${product.imageUrl}" class="thumb" alt="${product.name}">
+                      <c:choose>
+                        <c:when test="${not empty product.images}">
+                          <img src="${pageContext.request.contextPath}${product.images[0].url}" class="thumb" alt="${product.name}">
+                        </c:when>
+                        <c:when test="${not empty product.imageUrls}">
+                          <img src="${pageContext.request.contextPath}${product.imageUrls[0]}" class="thumb" alt="${product.name}">
+                        </c:when>
+                        <c:otherwise>
+                          <img src="${pageContext.request.contextPath}${product.imageUrl}" class="thumb" alt="${product.name}">
+                        </c:otherwise>
+                      </c:choose>
                     </td>
                     <td>${product.name}</td>
                     <td>${product.brand}</td>

@@ -493,6 +493,31 @@
                                                             <div class="product">
                                                                 <div class="product-img">
                                                                     <c:choose>
+                                                                        <c:when test="${not empty product.imageUrls}">
+                                                                            <c:set var="foundImage" value="false" />
+                                                                            <c:forEach items="${product.imageUrls}" var="imgUrl" varStatus="status">
+                                                                                <c:if test="${not empty imgUrl && !foundImage}">
+                                                                                    <img src="${pageContext.request.contextPath}${imgUrl}"
+                                                                                        alt="${product.name}"
+                                                                                        style="max-height: 250px; object-fit: contain;">
+                                                                                    <c:set var="foundImage" value="true" />
+                                                                                </c:if>
+                                                                            </c:forEach>
+                                                                            <c:if test="${!foundImage}">
+                                                                                <c:choose>
+                                                                                    <c:when test="${not empty product.imageUrl}">
+                                                                                        <img src="${pageContext.request.contextPath}${product.imageUrl}"
+                                                                                            alt="${product.name}"
+                                                                                            style="max-height: 250px; object-fit: contain;">
+                                                                                    </c:when>
+                                                                                    <c:otherwise>
+                                                                                        <img src="${pageContext.request.contextPath}/img/product-placeholder.png"
+                                                                                            alt="${product.name}"
+                                                                                            style="max-height: 250px; object-fit: contain;">
+                                                                                    </c:otherwise>
+                                                                                </c:choose>
+                                                                            </c:if>
+                                                                        </c:when>
                                                                         <c:when test="${not empty product.imageUrl}">
                                                                             <img src="${pageContext.request.contextPath}${product.imageUrl}"
                                                                                 alt="${product.name}"
@@ -689,6 +714,31 @@
                                     <div class="product">
                                         <div class="product-img">
                                             <c:choose>
+                                                <c:when test="${not empty product.imageUrls}">
+                                                    <c:set var="foundImage" value="false" />
+                                                    <c:forEach items="${product.imageUrls}" var="imgUrl" varStatus="status">
+                                                        <c:if test="${not empty imgUrl && !foundImage}">
+                                                            <img src="${pageContext.request.contextPath}${imgUrl}"
+                                                                alt="${product.name}"
+                                                                style="max-height: 250px; object-fit: contain;">
+                                                            <c:set var="foundImage" value="true" />
+                                                        </c:if>
+                                                    </c:forEach>
+                                                    <c:if test="${!foundImage}">
+                                                        <c:choose>
+                                                            <c:when test="${not empty product.imageUrl}">
+                                                                <img src="${pageContext.request.contextPath}${product.imageUrl}"
+                                                                    alt="${product.name}"
+                                                                    style="max-height: 250px; object-fit: contain;">
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <img src="${pageContext.request.contextPath}/img/product-placeholder.png"
+                                                                    alt="${product.name}"
+                                                                    style="max-height: 250px; object-fit: contain;">
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </c:if>
+                                                </c:when>
                                                 <c:when test="${not empty product.imageUrl}">
                                                     <img src="${pageContext.request.contextPath}${product.imageUrl}"
                                                         alt="${product.name}"

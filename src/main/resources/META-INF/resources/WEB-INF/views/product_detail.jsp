@@ -537,6 +537,11 @@ isAuthenticated); %>
                 name: "<c:out value='${vp.name}'/>",
                 price: ${vp.price},
                 imageUrl: "<c:out value='${vp.imageUrl}'/>",
+                imageUrls: [
+                  <c:forEach items="${vp.imageUrls}" var="imgUrl" varStatus="status">
+                    "<c:out value='${imgUrl}'/>"<c:if test="${!status.last}">,</c:if>
+                  </c:forEach>
+                ],
                 onDeal: ${vp.onDeal != null ? vp.onDeal : false},
                 dealPercentage: ${vp.dealPercentage != null ? vp.dealPercentage : 0}
               }<c:if test="${!status.last}">,</c:if>
@@ -552,6 +557,11 @@ isAuthenticated); %>
                 brand: "<c:out value='${sp.brand}'/>",
                 price: ${sp.price},
                 imageUrl: "<c:out value='${sp.imageUrl}'/>",
+                imageUrls: [
+                  <c:forEach items="${sp.imageUrls}" var="imgUrl" varStatus="status">
+                    "<c:out value='${imgUrl}'/>"<c:if test="${!status.last}">,</c:if>
+                  </c:forEach>
+                ],
                 dealPercentage: ${sp.dealPercentage != null ? sp.dealPercentage : 0},
                 category: {
                   name: "<c:out value='${sp.category != null ? sp.category.name : "Chưa phân loại"}'/>"
@@ -986,7 +996,12 @@ isAuthenticated); %>
 
                   container.innerHTML = '';
                   products.slice(0, 5).forEach(product => {
-                    const imgSrc = product.imageUrl ? ctx + product.imageUrl : ctx + '/images/no-image.png';
+          let imgSrc = ctx + '/images/no-image.png';
+          if (product.imageUrls && product.imageUrls.length > 0 && product.imageUrls[0]) {
+            imgSrc = ctx + product.imageUrls[0];
+          } else if (product.imageUrl) {
+            imgSrc = ctx + product.imageUrl;
+          }
 
                     // Tính giá giảm và số tiền tiết kiệm
                     let priceHtml = '';
@@ -1039,7 +1054,12 @@ isAuthenticated); %>
                   // Render ALL products (không giới hạn 4)
                   products.forEach(product => {
                     const categoryName = product.category ? product.category.name : 'Chưa phân loại';
-                    const imgSrc = product.imageUrl ? ctx + product.imageUrl : ctx + '/images/no-image.png';
+          let imgSrc = ctx + '/images/no-image.png';
+          if (product.imageUrls && product.imageUrls.length > 0 && product.imageUrls[0]) {
+            imgSrc = ctx + product.imageUrls[0];
+          } else if (product.imageUrl) {
+            imgSrc = ctx + product.imageUrl;
+          }
                     const discountLabel = (product.dealPercentage && product.dealPercentage > 0)
                       ? '<div class="product-label" style="position:absolute;top:10px;right:10px;z-index:2;">'
                       + '<span class="sale" style="background:#c50b12;color:#fff;padding:4px 6px;border-radius:4px;font-weight:700;box-shadow:0 1px 0 rgba(0,0,0,0.08);border:none;animation:pulse 2s infinite;">-' + product.dealPercentage + '%</span>'

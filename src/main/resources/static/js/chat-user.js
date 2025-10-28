@@ -400,6 +400,22 @@ async function fetchAndDisplayUserChat() {
   );
   const userChat = await userChatResponse.json();
   chatArea.innerHTML = "";
+
+  // Hiển thị tin nhắn chào mừng cho user (không phải admin)
+  if (currentRole !== "ADMIN") {
+    const welcomeDiv = document.createElement("div");
+    welcomeDiv.classList.add("message", "receiver");
+
+    // const now = new Date();
+    // const timeStr = now.getHours().toString().padStart(2, '0') + ':' +
+    //   now.getMinutes().toString().padStart(2, '0');
+
+    welcomeDiv.innerHTML =
+      '<p style="margin: 0;">Xin chào! 👋</p>' +
+      '<p style="margin: 5px 0 0 0;">Chào mừng bạn đến với hệ thống hỗ trợ của CellPhoneStore. Chúng tôi có thể giúp gì cho bạn hôm nay?</p>';
+    chatArea.appendChild(welcomeDiv);
+  }
+
   userChat.forEach((chat) => {
     if (chat.mediaPath) {
       const el = displayMediaMessage(

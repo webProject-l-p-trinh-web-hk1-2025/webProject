@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.proj.webprojrct.auth.dto.request.RegisterRequest;
 import com.proj.webprojrct.auth.service.Oauth2RegistrationService;
+import com.proj.webprojrct.auth.service.AuthService;
 import com.proj.webprojrct.user.repository.UserRepository;
 import com.proj.webprojrct.user.entity.User;
 import com.proj.webprojrct.user.entity.UserRole;
@@ -25,6 +26,7 @@ public class Oauth2RegistrationController {
     private final Oauth2RegistrationService registrationService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final AuthService authService;
 
     /**
      * Hiển thị form nhập thông tin bổ sung khi OAuth2 user chưa tồn tại
@@ -47,6 +49,10 @@ public class Oauth2RegistrationController {
             System.out.println("User with email " + email + " already exists. Logging in...");
             String accessToken = jwtUtil.generateAccessToken(user);
             String refreshToken = jwtUtil.generateRefreshToken(user);
+
+            // Lưu refresh token vào database
+            authService.saveRefreshToken(user.getPhone(), refreshToken);
+
             Cookie accessCookie = new Cookie("access_token", accessToken);
             accessCookie.setHttpOnly(true);
             accessCookie.setPath("/");
@@ -56,6 +62,7 @@ public class Oauth2RegistrationController {
             refreshCookie.setHttpOnly(true);
             refreshCookie.setPath("/");
             response.addCookie(refreshCookie);
+
             session.removeAttribute("oauth2_email");
             session.removeAttribute("oauth2_name");
             session.removeAttribute("oauth2_picture");
@@ -99,6 +106,9 @@ public class Oauth2RegistrationController {
             String accessToken = jwtUtil.generateAccessToken(user);
             String refreshToken = jwtUtil.generateRefreshToken(user);
 
+            // Lưu refresh token vào database
+            authService.saveRefreshToken(user.getPhone(), refreshToken);
+
             Cookie accessCookie = new Cookie("access_token", accessToken);
             accessCookie.setHttpOnly(true);
             accessCookie.setPath("/");
@@ -109,12 +119,16 @@ public class Oauth2RegistrationController {
             refreshCookie.setPath("/");
             response.addCookie(refreshCookie);
 
-            // Xóa session tạm
+            // Xóa session OAuth2 tạm
             session.removeAttribute("oauth2_email");
             session.removeAttribute("oauth2_name");
             session.removeAttribute("oauth2_picture");
 
-            return "redirect:/"; // redirect về trang chính, user đã được đăng nhập bằng JWT
+            // Lưu userId vào session để trang verify biết
+            session.setAttribute("newUserId", user.getId());
+
+            // Chuyển đến trang xác thực phone (giống như đăng ký thường)
+            return "redirect:/register-phone-verify";
         } catch (RuntimeException e) {
             // Xử lý lỗi (email hoặc phone đã tồn tại)
             model.addAttribute("error", e.getMessage());

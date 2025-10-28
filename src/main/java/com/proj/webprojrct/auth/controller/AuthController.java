@@ -184,7 +184,8 @@ public class AuthController {
     }
 
     @PostMapping("/doregister")
-    public String register(@ModelAttribute RegisterRequest request, Model model, RedirectAttributes redirectAttributes) {
+    public String register(@ModelAttribute RegisterRequest request, Model model, RedirectAttributes redirectAttributes,
+            HttpSession session, HttpServletResponse response) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
@@ -192,9 +193,42 @@ public class AuthController {
         }
 
         try {
-            authService.registerUser(request);
-            redirectAttributes.addFlashAttribute("message", "Đăng ký thành công! Vui lòng đăng nhập.");
-            return "redirect:/register";
+            // Tạo user nhưng chưa xác thực phone
+            User newUser = authService.registerUser(request);
+
+            // Tự động đăng nhập user bằng cách tạo token
+            UserDetails userDetails = new CustomUserDetails(newUser);
+            String accessToken = authService.generateAccessToken(newUser);
+            String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+
+            // Lưu refresh token vào database
+            authService.saveRefreshToken(newUser.getPhone(), refreshToken);
+
+            // Lưu token vào cookie
+            Cookie accessCookie = new Cookie("access_token", accessToken);
+            accessCookie.setHttpOnly(true);
+            accessCookie.setPath("/");
+            response.addCookie(accessCookie);
+
+            Cookie refreshCookie = new Cookie("refresh_token", refreshToken);
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setPath("/");
+            response.addCookie(refreshCookie);
+
+            // Authenticate user trong SecurityContext
+            UsernamePasswordAuthenticationToken authentication
+                    = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Lưu userId vào session để trang verify biết
+            session.setAttribute("newUserId", newUser.getId());
+
+            // Chuyển đến trang xác thực phone với tùy chọn "Để sau"
+            redirectAttributes.addFlashAttribute("message", "Đăng ký thành công! Vui lòng xác thực số điện thoại.");
+            redirectAttributes.addFlashAttribute("phone", request.getPhone());
+            System.out.println("Debug: Stored newUserId in session = " + newUser.getId());
+            System.out.println("Debug: User auto-logged in with token");
+            return "redirect:/register-phone-verify";
         } catch (RuntimeException e) {
             // preserve entered values except passwords
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -280,7 +314,37 @@ public class AuthController {
         return "change-password";
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    // ========== REGISTER PHONE VERIFICATION ==========
+    @GetMapping("/register-phone-verify")
+    public String showRegisterPhoneVerify(HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("newUserId");
+        System.out.println("Debug: newUserId in session = " + userId);
+        if (userId == null) {
+            model.addAttribute("error", "Phiên đã hết hạn. Vui lòng đăng ký lại.");
+            return "redirect:/register";
+        }
+
+        // Lấy thông tin user để hiển thị phone
+        User user = userRepo.findById(userId).orElse(null);
+        if (user == null) {
+            model.addAttribute("error", "Không tìm thấy thông tin tài khoản.");
+            return "redirect:/register";
+        }
+
+        model.addAttribute("phone", user.getPhone());
+        model.addAttribute("userId", userId);
+        return "register-phone-verify";
+    }
+
+    @PostMapping("/register-phone-skip")
+    public String skipPhoneVerification(HttpSession session, RedirectAttributes redirectAttributes) {
+        // Xóa session và chuyển về login
+        session.removeAttribute("newUserId");
+        redirectAttributes.addFlashAttribute("message", "Bạn có thể xác thực số điện thoại sau trong phần cài đặt tài khoản.");
+        return "redirect:/login";
+    }
+
+    // ========== END REGISTER PHONE VERIFICATION ==========
     @GetMapping("/verify-otp")
     public String showOtpForm(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -343,13 +407,6 @@ public class AuthController {
     @ResponseBody
     public Map<String, Object> sendOtpAPI(@RequestParam("type") String type) {
         Map<String, Object> response = new HashMap<>();
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
-            response.put("success", false);
-            response.put("message", "Bạn cần đăng nhập để thực hiện chức năng này");
-            return response;
-        }
 
         try {
             String msg;
@@ -375,13 +432,6 @@ public class AuthController {
     @ResponseBody
     public Map<String, Object> verifyOtpAPI(@RequestParam("otp") String otpInput) {
         Map<String, Object> response = new HashMap<>();
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
-            response.put("success", false);
-            response.put("message", "Bạn cần đăng nhập để thực hiện chức năng này");
-            return response;
-        }
 
         try {
             String msg = authService.verifyOtp(otpInput);

@@ -95,7 +95,7 @@
                                 <i class="fa fa-arrow-left"></i> Quay lại
                             </a>
                             <button type="submit" class="btn btn-login" style="flex:2;">
-                                <i class="fa fa-check"></i> Hoàn tất và đăng nhập
+                                <i class="fa fa-check"></i> Hoàn tất và tiếp tục
                             </button>
                         </div>
                     </form>

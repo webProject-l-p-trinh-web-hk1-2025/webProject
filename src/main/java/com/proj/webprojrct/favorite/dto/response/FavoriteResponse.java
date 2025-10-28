@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FavoriteResponse {
+
     private Long id;
     private Long userId;
     private Long productId;
@@ -17,5 +18,8 @@ public class FavoriteResponse {
     private Double productPrice;
     private String productImageUrl;
     private Integer productStock;
+    private String productBrand;
+    private Integer dealPercentage;
+    private Boolean productIsActive;
     private LocalDateTime createdAt;
 }

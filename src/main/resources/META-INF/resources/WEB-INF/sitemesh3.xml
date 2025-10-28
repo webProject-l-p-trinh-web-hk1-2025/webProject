@@ -17,6 +17,7 @@
     <!-- exclude phần này vì chưa có template cho login register -->
     <mapping path="/login" exclude="true"/>
     <mapping path="/oauth2/complete" exclude="true"/>
+    <mapping path="/register-phone-verify" exclude="true"/>
     <mapping path="/register" exclude="true"/>
     <mapping path="/resetPassword" exclude="true"/>
     <mapping path="/verify-otp" exclude="true"/>

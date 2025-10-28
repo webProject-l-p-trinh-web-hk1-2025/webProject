@@ -33,16 +33,16 @@ public class FavoriteServiceImpl implements FavoriteService {
         // Kiểm tra user tồn tại
         userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         // Kiểm tra product tồn tại
         productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-        
+
         // Kiểm tra đã yêu thích chưa
         if (favoriteRepository.existsByUserIdAndProductId(userId, productId)) {
             throw new RuntimeException("Product already in favorites");
         }
-        
+
         // Thêm vào yêu thích
         Favorite favorite = new Favorite();
         favorite.setUserId(userId);
@@ -58,21 +58,21 @@ public class FavoriteServiceImpl implements FavoriteService {
         if (!favoriteRepository.existsByUserIdAndProductId(userId, productId)) {
             throw new RuntimeException("Favorite not found");
         }
-        
+
         favoriteRepository.deleteByUserIdAndProductId(userId, productId);
     }
 
     @Override
     public List<FavoriteResponse> getFavoritesByUserId(Long userId) {
         List<Favorite> favorites = favoriteRepository.findByUserId(userId);
-        
+
         return favorites.stream().map(favorite -> {
             FavoriteResponse response = new FavoriteResponse();
             response.setId(favorite.getId());
             response.setUserId(favorite.getUserId());
             response.setProductId(favorite.getProductId());
             response.setCreatedAt(favorite.getCreatedAt());
-            
+
             // Lấy thông tin sản phẩm
             Product product = productRepository.findById(favorite.getProductId()).orElse(null);
             if (product != null) {
@@ -80,8 +80,11 @@ public class FavoriteServiceImpl implements FavoriteService {
                 response.setProductPrice(product.getPrice().doubleValue());
                 response.setProductImageUrl(product.getImageUrl());
                 response.setProductStock(product.getStock());
+                response.setProductBrand(product.getBrand());
+                response.setDealPercentage(product.getDealPercentage());
+                response.setProductIsActive(product.getIsActive());
             }
-            
+
             return response;
         }).collect(Collectors.toList());
     }

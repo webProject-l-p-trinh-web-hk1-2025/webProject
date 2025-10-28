@@ -63,8 +63,8 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/oauth2/**", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/about", "/product/**", "/products", "/shop", "/deals", "/cart", "/wishlist", "/css/**", "/js/**", "/fonts/**", "/img/**", "/image/**", "/uploads/**", "/favicon.ico", "/error", "/error/**", "/webjars/**", "/WEB-INF/views/**", "/WEB-INF/decorators/**", "/common/**").permitAll()
-                .requestMatchers("/api/products/**", "/api/categories/**", "/api/media/**", "/api/cart/**", "/api/favorite/**", "/api/documents/**", "/api/reviews/**").permitAll()
+                .requestMatchers("/", "/oauth2/**", "/login", "/dologin", "/register", "/doregister", "/register-phone-verify", "/register-phone-skip", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/about", "/product/**", "/products", "/shop", "/deals", "/cart", "/wishlist", "/css/**", "/js/**", "/fonts/**", "/img/**", "/image/**", "/uploads/**", "/favicon.ico", "/error", "/error/**", "/webjars/**", "/WEB-INF/views/**", "/WEB-INF/decorators/**", "/common/**").permitAll()
+                .requestMatchers("/api/products/**", "/api/categories/**", "/api/media/**", "/api/cart/**", "/api/favorite/**", "/api/documents/**", "/api/reviews/**", "/api/send-otp", "/api/verify-otp").permitAll()
                 .requestMatchers("/about", "/faq", "/warranty", "/return", "/payment", "/shipping", "/contact").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")

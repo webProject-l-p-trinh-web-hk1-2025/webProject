@@ -91,7 +91,11 @@ public class AuthService {
         }
     }
 
-    public void registerUser(RegisterRequest request) {
+    // ========== REGISTRATION OTP METHODS ==========
+    /**
+     * Validate đăng ký nhưng không tạo user
+     */
+    public void validateRegisterRequest(RegisterRequest request) {
         // Validate password
         if (!isValidPassword(request.getPassword())) {
             throw new RuntimeException("Mật khẩu phải có ít nhất 6 ký tự, bao gồm cả chữ cái và số!");
@@ -118,12 +122,85 @@ public class AuthService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được đăng ký!");
         }
+    }
 
+    /**
+     * Tạo user sau khi OTP đã được xác thực
+     */
+    public User createUserFromRegistration(RegisterRequest request) {
         User user = authMapper.toEntity(request);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(UserRole.USER);
+        user.setVerifyPhone(true); // Đã xác thực OTP
+        return userRepository.save(user);
+    }
 
-        userRepository.save(user);
+    /**
+     * Gửi OTP cho đăng ký (lưu trong session, không phải user.otpCode)
+     */
+    // public String sendRegisterOtp(String phone, HttpSession session) {
+    //     String otp = generateOTP();
+    //     String formattedPhone = formatPhone(phone);
+    //     String smsBody = "Mã OTP để hoàn tất đăng ký của bạn là: " + otp;
+    //     try {
+    //         boolean sent = sSms.sendSMS(formattedPhone, smsBody);
+    //         if (!sent) {
+    //             throw new RuntimeException("Gửi SMS thất bại. Vui lòng kiểm tra lại SĐT hoặc liên hệ admin.");
+    //         }
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //         throw new RuntimeException("Lỗi hệ thống gửi SMS, vui lòng thử lại sau.");
+    //     }
+    //     // Lưu OTP vào session (không phải database)
+    //     session.setAttribute("registerOtp", otp);
+    //     session.setAttribute("registerOtpExpiry", System.currentTimeMillis() + 300000); // 5 phút
+    //     return "Mã OTP đã được gửi đến số điện thoại của bạn!";
+    // }
+    /**
+     * Xác thực OTP cho đăng ký (kiểm tra trong session)
+     */
+    // public void verifyRegisterOtp(String otpInput, HttpSession session) {
+    //     String storedOtp = (String) session.getAttribute("registerOtp");
+    //     Long expiry = (Long) session.getAttribute("registerOtpExpiry");
+    //     if (storedOtp == null || expiry == null) {
+    //         throw new RuntimeException("Mã OTP không tồn tại hoặc đã hết hạn. Vui lòng gửi lại mã OTP.");
+    //     }
+    //     if (System.currentTimeMillis() > expiry) {
+    //         session.removeAttribute("registerOtp");
+    //         session.removeAttribute("registerOtpExpiry");
+    //         throw new RuntimeException("Mã OTP đã hết hạn. Vui lòng gửi lại mã OTP.");
+    //     }
+    //     if (!storedOtp.equals(otpInput)) {
+    //         throw new RuntimeException("Mã OTP không đúng. Vui lòng thử lại.");
+    //     }
+    // }
+    // // ========== END REGISTRATION OTP METHODS ==========
+    public User registerUser(RegisterRequest request) {
+        // Validate password
+        if (!isValidPassword(request.getPassword())) {
+            throw new RuntimeException("Mật khẩu phải có ít nhất 6 ký tự, bao gồm cả chữ cái và số!");
+        }
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu và xác nhận mật khẩu không khớp!");
+        }
+        // Validate phone (10 digits)
+        if (!isValidPhone(request.getPhone())) {
+            throw new RuntimeException("Số điện thoại phải có đúng 10 chữ số!");
+        }
+        if (userRepository.existsByPhone(request.getPhone())) {
+            throw new RuntimeException("Số điện thoại đã được đăng ký!");
+        }
+        // Validate email
+        if (!isValidEmail(request.getEmail())) {
+            throw new RuntimeException("Email không hợp lệ!");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email đã được đăng ký!");
+        }
+        User user = authMapper.toEntity(request);
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setRole(UserRole.USER);
+        return userRepository.save(user);
     }
 
     public User handleRefreshToken(String refreshToken) {
@@ -143,6 +220,13 @@ public class AuthService {
 
     public String generateAccessToken(User user) {
         return jwtUtil.generateAccessToken(user);
+    }
+
+    public void saveRefreshToken(String phone, String refreshToken) {
+        User user = userRepository.findByPhone(phone)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
     }
 
     public boolean PhoneResetPasswordHandle(String phone, Model model) {

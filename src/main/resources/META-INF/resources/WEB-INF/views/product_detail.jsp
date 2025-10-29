@@ -164,20 +164,6 @@
                                   <!-- Storage buttons will be inserted here by JavaScript -->
                                 </div>
                               </div>
-
-                              <!-- Color Options -->
-                              <div class="variant-group" id="colorVariants" style="margin-bottom: 15px">
-                                <h4 style="
-                          font-size: 16px;
-                          font-weight: 600;
-                          margin-bottom: 10px;
-                        ">
-                                  Màu sắc
-                                </h4>
-                                <div class="variant-options" style="display: flex; gap: 10px; flex-wrap: wrap">
-                                  <!-- Color buttons will be inserted here by JavaScript -->
-                                </div>
-                              </div>
                             </div>
 
                             <div class="add-to-cart">
@@ -201,7 +187,7 @@
 
                             <ul class="product-links">
                               <li>Thương Hiệu:</li>
-                              <li><a href="#" id="productCategory">Category</a></li>
+                              <li><a href="#" id="productBrand">Brand</a></li>
                             </ul>
 
                             <ul class="product-links">
@@ -578,9 +564,9 @@
                   // Load document description cho tab "Mô tả"
                   loadProductDocument(p.id);
 
-                  // Update category
-                  if (p.category) {
-                    document.getElementById('productCategory').textContent = p.category.name;
+                  // Update brand
+                  if (p.brand) {
+                    document.getElementById('productBrand').textContent = p.brand;
                   }
 
                   // Get all images
@@ -680,19 +666,6 @@
                   document.getElementById('addToWishlistBtn').addEventListener('click', (e) => {
                     e.preventDefault();
                     addToWishlist(p.id);
-                  });
-
-                  // Setup quantity controls
-                  document.querySelector('.qty-up').addEventListener('click', () => {
-                    const input = document.getElementById('quantity');
-                    input.value = parseInt(input.value) + 1;
-                  });
-
-                  document.querySelector('.qty-down').addEventListener('click', () => {
-                    const input = document.getElementById('quantity');
-                    if (parseInt(input.value) > 1) {
-                      input.value = parseInt(input.value) - 1;
-                    }
                   });
                 }
 
@@ -993,7 +966,7 @@
 
                   // Render ALL products (không giới hạn 4)
                   products.forEach(product => {
-                    const categoryName = product.category ? product.category.name : 'Chưa phân loại';
+                    const brandName = product.brand || 'Chưa xác định';
                     let imgSrc = ctx + '/images/no-image.png';
                     if (product.imageUrls && product.imageUrls.length > 0 && product.imageUrls[0]) {
                       imgSrc = ctx + product.imageUrls[0];
@@ -1029,7 +1002,7 @@
                       discountLabel +
                       '</div>' +
                       '<div class="product-body">' +
-                      '<p class="product-category">' + categoryName + '</p>' +
+                      '<p class="product-category">' + brandName + '</p>' +
                       '<h3 class="product-name"><a href="' + ctx + '/product/' + product.id + '">' + product.name + '</a></h3>' +
                       priceHtml +
                       '<div class="product-rating" id="rating-same-' + product.id + '">' +
@@ -1263,20 +1236,16 @@
                     if (variants.length === 0) {
                       // Hide variant sections if no variants
                       document.getElementById('storageVariants').style.display = 'none';
-                      document.getElementById('colorVariants').style.display = 'none';
                       return;
                     }
 
-                    // Extract storages and colors
+                    // Extract storages only (no color variants)
                     const storageSet = new Set();
-                    const colorSet = new Set();
-                    const variantMap = new Map(); // Map to store product details by storage+color
+                    const variantMap = new Map(); // Map to store product details by storage
 
                     // Add current product first
-                    const currentColor = extractColor(currentProductName);
                     if (currentProductStorage) storageSet.add(currentProductStorage);
-                    if (currentColor) colorSet.add(currentColor);
-                    variantMap.set(currentProductStorage + '|' + currentColor, {
+                    variantMap.set(currentProductStorage, {
                       id: currentProductId,
                       name: currentProductName,
                       storage: currentProductStorage,
@@ -1286,12 +1255,10 @@
                     // Parse all variants (same model only)
                     variants.forEach(product => {
                       const storage = product.storage; // Use storage field directly
-                      const color = extractColor(product.name);
 
                       if (storage) storageSet.add(storage);
-                      if (color) colorSet.add(color);
 
-                      variantMap.set(storage + '|' + color, {
+                      variantMap.set(storage, {
                         id: product.id,
                         name: product.name,
                         storage: storage,
@@ -1307,13 +1274,8 @@
                       return sizeA - sizeB;
                     });
 
-                    const colors = Array.from(colorSet);
-
-                    // Render storage options
-                    renderStorageOptions(storages, currentProductStorage, variantMap, currentColor);
-
-                    // Render color options
-                    renderColorOptions(colors, currentColor, variantMap, currentProductStorage);
+                    // Render storage options only
+                    renderStorageOptions(storages, currentProductStorage, variantMap);
 
                   } catch (error) {
                     console.error('Error loading variants:', error);
@@ -1349,43 +1311,9 @@
                 }
 
                 /**
-                 * Extract color from product name
-                 * For products without specific color info, return null
-                 */
-                function extractColor(productName) {
-                  // List of known models to remove (LONGEST FIRST!)
-                  const models = [
-                    'iPhone 15 Pro Max', 'iPhone 15 Plus', 'iPhone 15 Pro', 'iPhone 15',
-                    'iPhone 17 Pro Max', 'iPhone 17',
-                    'iPhone 13',
-                    'Galaxy Z Flip6', 'Galaxy A35',
-                    'Redmi Note 13 5G',
-                    'OPPO Reno12 Pro',
-                    'Xiaomi 14 Ultra',
-                    'realme C67'
-                  ];
-
-                  let remaining = productName;
-
-                  // Remove model name (match longest first)
-                  for (const model of models) {
-                    if (productName.startsWith(model)) {
-                      remaining = productName.substring(model.length).trim();
-                      break;
-                    }
-                  }
-
-                  // Remove storage part if exists (e.g., "128 GB", "256 GB", "512 GB", "1 TB")
-                  remaining = remaining.replace(/\d+\s*(GB|TB)/gi, '').trim();
-
-                  // What's left should be the color (if any)
-                  return remaining || null;
-                }
-
-                /**
                  * Render storage option buttons
                  */
-                function renderStorageOptions(storages, currentStorage, variantMap, currentColor) {
+                function renderStorageOptions(storages, currentStorage, variantMap) {
                   const container = document.querySelector('#storageVariants .variant-options');
                   if (!storages || storages.length === 0) {
                     document.getElementById('storageVariants').style.display = 'none';
@@ -1394,7 +1322,7 @@
 
                   container.innerHTML = '';
                   storages.forEach(storage => {
-                    const variant = variantMap.get(storage + '|' + currentColor);
+                    const variant = variantMap.get(storage);
                     const isSelected = storage === currentStorage;
                     const isAvailable = variant && !variant.isCurrent;
 
@@ -1440,103 +1368,6 @@
                   });
                 }
 
-                /**
-                 * Render color option buttons
-                 */
-                function renderColorOptions(colors, currentColor, variantMap, currentStorage) {
-                  const container = document.querySelector('#colorVariants .variant-options');
-                  if (!colors || colors.length === 0) {
-                    document.getElementById('colorVariants').style.display = 'none';
-                    return;
-                  }
-
-                  container.innerHTML = '';
-                  colors.forEach(color => {
-                    const variant = variantMap.get(currentStorage + '|' + color);
-                    const isSelected = color === currentColor;
-                    const isAvailable = variant && !variant.isCurrent;
-
-                    const button = document.createElement('div');
-                    button.className = 'color-variant-btn' + (isSelected ? ' selected' : '');
-                    button.style.cssText = `
-                            padding: 12px 16px;
-                            border: 2px solid \${isSelected ? '#d70018' : '#ddd'};
-                            border-radius: 8px;
-                            background: white;
-                            cursor: \${isAvailable ? 'pointer' : 'default'};
-                            transition: all 0.3s;
-                            opacity: \${isAvailable ? '1' : '0.6'};
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            gap: 8px;
-                          `;
-
-                    // Color preview circle (optional, based on color name)
-                    const colorCircle = document.createElement('div');
-                    colorCircle.style.cssText = `
-                            width: 24px;
-                            height: 24px;
-                            border-radius: 50%;
-                            background: \${getColorCode(color)};
-                            border: 1px solid #ddd;
-                          `;
-
-                    const colorText = document.createElement('span');
-                    colorText.textContent = color;
-                    colorText.style.cssText = `
-                            font-weight: \${isSelected ? 'bold' : 'normal'};
-                            color: \${isSelected ? '#d70018' : '#333'};
-                          `;
-
-                    button.appendChild(colorCircle);
-                    button.appendChild(colorText);
-
-                    if (isSelected) {
-                      const checkmark = document.createElement('i');
-                      checkmark.className = 'fa fa-check';
-                      checkmark.style.cssText = 'color: #d70018; margin-left: auto;';
-                      button.appendChild(checkmark);
-                    }
-
-                    if (isAvailable) {
-                      button.onclick = () => window.location.href = ctx + '/product/' + variant.id;
-                      button.onmouseover = () => {
-                        if (!isSelected) {
-                          button.style.borderColor = '#d70018';
-                          button.style.boxShadow = '0 2px 8px rgba(215, 0, 24, 0.2)';
-                        }
-                      };
-                      button.onmouseout = () => {
-                        if (!isSelected) {
-                          button.style.borderColor = '#ddd';
-                          button.style.boxShadow = 'none';
-                        }
-                      };
-                    }
-
-                    container.appendChild(button);
-                  });
-                }
-
-                /**
-                 * Get color code from color name (basic mapping)
-                 */
-                function getColorCode(colorName) {
-                  const colorMap = {
-                    'Titan Tự Nhiên': '#e8e8e8',
-                    'Titan Trắng': '#f5f5f5',
-                    'Titan Đen': '#2c2c2c',
-                    'Titan Sa Mạc': '#d4a574',
-                    'Xanh': '#4a90e2',
-                    'Đỏ': '#e74c3c',
-                    'Vàng': '#f1c40f',
-                    'Xám': '#95a5a6',
-                    'Bạc': '#c0c0c0',
-                    'Vàng Đồng': '#cd7f32'
-                  };
-                  return colorMap[colorName] || '#ddd';
-                }
                 //====================== DOCUMENT FUNCTIONS ==========================================================================================================//
                 async function loadProductDocument(productId) {
                   try {

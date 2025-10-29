@@ -19,6 +19,7 @@ import java.util.Date;
 @Entity
 @Table(name = "storage_media")
 public class StorageMedia {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

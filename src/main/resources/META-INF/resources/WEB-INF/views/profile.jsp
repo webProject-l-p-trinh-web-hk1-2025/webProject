@@ -808,7 +808,8 @@
                                                             style="padding:10px 20px; background:#D10024; color:white; border:none; border-radius:3px; font-weight:600; text-decoration:none; font-size:14px; display:inline-block;">
                                                             <i class="fa fa-eye"></i> Xem chi tiết
                                                         </a>
-                                                        <c:if test="${order.status == 'PENDING'}">
+                                                        <c:if
+                                                            test="${order.status == 'PENDING' || order.status == 'PAID'}">
                                                             <button onclick="cancelOrder(${order.orderId})"
                                                                 style="padding:10px 20px; background:#dc3545; color:white; border:none; border-radius:3px; font-weight:600; font-size:14px; display:inline-block; margin-left:10px; cursor:pointer;">
                                                                 <i class="fa fa-times-circle"></i> Hủy đơn hàng
@@ -1386,18 +1387,25 @@
                                     }
                                 })
                                     .then(response => {
-                                        if (!response.ok) throw new Error('Không thể hủy đơn hàng');
-                                        return response.json();
+                                        // Lưu status code để xử lý
+                                        const statusCode = response.status;
+                                        return response.json().then(data => ({ statusCode, data }));
                                     })
-                                    .then(data => {
-                                        alert(data.message || 'Đã hủy đơn hàng thành công!');
-                                        location.reload(); // Reload để cập nhật trạng thái
-                                        // Reload và giữ nguyên tab đơn hàng
-                                        window.location.href = '${pageContext.request.contextPath}/profile#orders';
+                                    .then(({ statusCode, data }) => {
+                                        if (statusCode === 200) {
+                                            // Thành công
+                                            alert(data.message || 'Đã hủy đơn hàng thành công!');
+                                            // Reload và giữ nguyên tab đơn hàng
+                                            window.location.href = '${pageContext.request.contextPath}/profile#orders';
+                                            location.reload();
+                                        } else {
+                                            // Lỗi từ server
+                                            alert(data.message || 'Không thể hủy đơn hàng!');
+                                        }
                                     })
                                     .catch(error => {
-                                        console.error(error);
-                                        alert('Lỗi khi hủy đơn hàng: ' + error.message);
+                                        console.error('Error:', error);
+                                        alert('Lỗi kết nối! Vui lòng thử lại sau.');
                                     });
                             }
 

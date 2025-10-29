@@ -186,6 +186,39 @@ public class SellerController {
         return "redirect:/seller/orders";
     }
 
+    @PostMapping("/seller/cancel-order/{orderId}")
+    public String cancelOrder(
+            @PathVariable("orderId") Long orderId,
+            @RequestParam("cancelNote") String cancelNote,
+            Model model,
+            HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        try {
+            // Validate cancel note
+            if (cancelNote == null || cancelNote.trim().length() < 10) {
+                model.addAttribute("error", "Lý do hủy đơn phải có ít nhất 10 ký tự.");
+                return "redirect:/seller/orders";
+            }
+
+            // Cancel order with refund if needed
+            boolean isRefunded = sellerService.cancelOrder(orderId, cancelNote.trim(), authentication, request);
+
+            if (isRefunded) {
+                model.addAttribute("success", "Đơn hàng đã được hủy và hoàn tiền thành công. Tiền sẽ được hoàn lại vào tài khoản khách hàng trong 5-7 ngày làm việc.");
+            } else {
+                model.addAttribute("success", "Đơn hàng đã được hủy thành công. Thông báo đã được gửi đến khách hàng.");
+            }
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            model.addAttribute("error", "Lỗi khi hủy đơn hàng: " + e.getMessage());
+        }
+        return "redirect:/seller/orders";
+    }
+
     @PostMapping("/seller/ship-order/{orderId}")
     public String shipOrder(@PathVariable("orderId") Long orderId, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

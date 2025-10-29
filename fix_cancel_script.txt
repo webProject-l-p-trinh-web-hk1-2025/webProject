@@ -1,0 +1,89 @@
+// Thay thế 2 hàm JavaScript này vào file orders.jsp
+
+function openCancelModal(orderId) {
+    selectedOrderId = orderId;
+    document.getElementById('cancelNote').value = '';
+    
+    // Kiểm tra xem đơn hàng có cần hoàn tiền không
+    try {
+        const cancelBtn = document.querySelector(`button.btn-cancel[data-order-id="${orderId}"]`);
+        if (cancelBtn) {
+            const orderCard = cancelBtn.closest('.order-card');
+            if (orderCard) {
+                const paymentBadge = orderCard.querySelector('.payment-badge');
+                const paymentText = paymentBadge ? paymentBadge.textContent.trim() : '';
+                
+                const refundNotice = document.getElementById('refundNotice');
+                if (paymentText.includes('VNPAY') && paymentText.includes('SUCCESS')) {
+                    refundNotice.style.display = 'block';
+                } else {
+                    refundNotice.style.display = 'none';
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Could not detect payment method:', e);
+        document.getElementById('refundNotice').style.display = 'none';
+    }
+    
+    document.getElementById('cancelOrderModal').classList.add('active');
+}
+
+function submitCancelOrder() {
+    const note = document.getElementById('cancelNote').value.trim();
+
+    if (!note) {
+        alert('Vui lòng nhập lý do hủy đơn hàng!');
+        return;
+    }
+
+    if (note.length < 10) {
+        alert('Lý do hủy đơn phải có ít nhất 10 ký tự!');
+        return;
+    }
+
+    if (!selectedOrderId) {
+        alert('Lỗi: Không tìm thấy mã đơn hàng!');
+        return;
+    }
+
+    // Kiểm tra xem đơn hàng có cần hoàn tiền không
+    let confirmMessage = 'Bạn có chắc chắn muốn HỦY đơn hàng #' + selectedOrderId + '?';
+    
+    try {
+        const cancelBtn = document.querySelector(`button.btn-cancel[data-order-id="${selectedOrderId}"]`);
+        if (cancelBtn) {
+            const orderCard = cancelBtn.closest('.order-card');
+            if (orderCard) {
+                const paymentBadge = orderCard.querySelector('.payment-badge');
+                const paymentText = paymentBadge ? paymentBadge.textContent.trim() : '';
+                
+                if (paymentText.includes('VNPAY') && paymentText.includes('SUCCESS')) {
+                    confirmMessage = 'Đơn hàng này đã thanh toán qua VNPay.\n' +
+                        'Hệ thống sẽ TỰ ĐỘNG HOÀN TIỀN cho khách hàng.\n\n' +
+                        'Bạn có chắc chắn muốn HỦY VÀ HOÀN TIỀN đơn hàng #' + selectedOrderId + '?';
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Could not detect payment method:', e);
+    }
+
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+
+    // Submit form
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '${pageContext.request.contextPath}/seller/cancel-order/' + selectedOrderId;
+
+    const noteInput = document.createElement('input');
+    noteInput.type = 'hidden';
+    noteInput.name = 'cancelNote';
+    noteInput.value = note;
+    form.appendChild(noteInput);
+
+    document.body.appendChild(form);
+    form.submit();
+}

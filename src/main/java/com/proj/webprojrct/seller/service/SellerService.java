@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 
@@ -16,6 +18,7 @@ import com.proj.webprojrct.order.dto.response.OrderItemResponse;
 import com.proj.webprojrct.order.dto.response.OrderSellerResponse;
 import com.proj.webprojrct.payment.entity.Payment;
 import com.proj.webprojrct.payment.repository.PaymentRepository;
+import com.proj.webprojrct.payment.vnpay.service.PaymentService;
 import com.proj.webprojrct.user.entity.UserRole;
 import com.proj.webprojrct.product.entity.Product;
 import com.proj.webprojrct.product.repository.ProductRepository;
@@ -32,6 +35,7 @@ public class SellerService {
     private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
+    private final PaymentService paymentService;
 
     public List<OrderSellerResponse> getAllOrders(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -168,6 +172,61 @@ public class SellerService {
         order.setStatus("ACCEPTED");
         orderRepository.save(order);
         return true;
+    }
+
+    public boolean cancelOrder(Long orderId, String cancelNote, Authentication authentication, HttpServletRequest request) throws Exception {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+
+        if (user.getRole() == null || (user.getRole() != UserRole.SELLER && user.getRole() != UserRole.ADMIN)) {
+            throw new IllegalArgumentException("User is not a seller or admin");
+        }
+
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found with id: " + orderId);
+        }
+
+        // Chỉ cho phép hủy đơn hàng có trạng thái PAID hoặc ACCEPTED
+        if (!"PAID".equals(order.getStatus()) && !"ACCEPTED".equals(order.getStatus())) {
+            throw new IllegalArgumentException("Không thể hủy đơn hàng với trạng thái: " + order.getStatus());
+        }
+
+        // Kiểm tra phương thức thanh toán
+        String paymentMethod = getPaymentMethodByOrderId(orderId);
+        String paymentStatus = getPaymentStatusByOrderId(orderId);
+
+        boolean isRefunded = false;
+
+        // Nếu là VNPay và đã thanh toán thành công, thực hiện hoàn tiền
+        if ("VNPAY".equalsIgnoreCase(paymentMethod) && "SUCCESS".equalsIgnoreCase(paymentStatus)) {
+            String refundResult = paymentService.handleRefund(orderId, "02", 100, request);
+
+            // Kiểm tra kết quả hoàn tiền
+            // VNPay trả về JSON response với:
+            // - vnp_ResponseCode = "00": Giao dịch thành công
+            // - vnp_TransactionStatus = "05": Đang hoàn tiền
+            if (refundResult == null
+                    || !refundResult.contains("\"vnp_ResponseCode\":\"00\"")
+                    || !refundResult.contains("\"vnp_TransactionStatus\":\"05\"")) {
+                throw new Exception("Hoàn tiền VNPay thất bại. Vui lòng thử lại sau.");
+            }
+            isRefunded = true;
+        }
+
+        // Cập nhật trạng thái đơn hàng thành CANCELLED
+        order.setStatus("CANCELLED");
+        order.setCancelNote(cancelNote);
+        orderRepository.save(order);
+
+        // Lưu thông tin có hoàn tiền hay không vào cancelNote để hiển thị sau
+        if (isRefunded) {
+            order.setCancelNote("[ĐÃ HOÀN TIỀN] " + cancelNote);
+            orderRepository.save(order);
+        }
+
+        // TODO: Gửi thông báo cho user về việc hủy đơn
+        return isRefunded;
     }
 
     public List<OrderSellerResponse> getAllOrderRefund(Authentication authentication) {

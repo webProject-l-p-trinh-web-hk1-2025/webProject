@@ -25,6 +25,7 @@
                         font-weight: 600;
                         font-size: 14px;
                         text-transform: uppercase;
+                        white-space: nowrap;
                     }
 
                     .status-pending {
@@ -62,6 +63,8 @@
                         display: flex;
                         padding: 10px 0;
                         border-bottom: 1px solid #f5f5f5;
+                        flex-wrap: wrap;
+                        align-items: flex-start;
                     }
 
                     .info-row:last-child {
@@ -71,12 +74,17 @@
                     .info-label {
                         font-weight: 600;
                         color: #555;
-                        min-width: 150px;
+                        min-width: 100px;
+                        flex-shrink: 0;
                     }
 
                     .info-value {
                         color: #333;
                         flex: 1;
+                        word-wrap: break-word;
+                        word-break: break-word;
+                        overflow-wrap: break-word;
+                        min-width: 0;
                     }
 
                     .product-table {
@@ -387,6 +395,26 @@
                                         <span class="info-label">Ngày tạo:</span>
                                         <span class="info-value">${order.createdAt}</span>
                                     </div>
+
+                                    <!-- Cancel Note -->
+                                    <c:if test="${order.status == 'CANCELLED' && not empty order.cancelNote}">
+                                        <div class="info-row" style="margin-top: 15px;">
+                                            <div
+                                                style="width: 100%; background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px;">
+                                                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                                    <i class="fa fa-info-circle"
+                                                        style="color: #856404; margin-right: 8px; font-size: 18px;"></i>
+                                                    <strong style="color: #856404; font-size: 16px;">Lý do hủy
+                                                        đơn:</strong>
+                                                </div>
+                                                <p
+                                                    style="color: #856404; margin: 0; padding-left: 26px; line-height: 1.6;">
+                                                    ${order.cancelNote}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
                                     <div class="info-row"
                                         style="border-top: 2px solid #d70018; padding-top: 15px; margin-top: 15px;">
                                         <span class="info-label" style="font-size: 18px;">Tổng tiền:</span>
@@ -422,7 +450,7 @@
                                             </div>
 
                                             <div class="payment-actions">
-                                                <a href="${pageContext.request.contextPath}/order"
+                                                <a href="${pageContext.request.contextPath}/profile#orders"
                                                     class="btn btn-secondary">
                                                     <i class="fa fa-arrow-left"></i> Quay lại
                                                 </a>
@@ -441,7 +469,7 @@
                                                 (COD).
                                             </div>
                                             <div class="payment-actions">
-                                                <a href="${pageContext.request.contextPath}/order"
+                                                <a href="${pageContext.request.contextPath}/profile#orders"
                                                     class="btn btn-primary">
                                                     <i class="fa fa-list"></i> Quay lại danh sách đơn hàng
                                                 </a>
@@ -462,7 +490,7 @@
                                             </div>
 
                                             <div class="payment-actions">
-                                                <a href="${pageContext.request.contextPath}/order"
+                                                <a href="${pageContext.request.contextPath}/profile#orders"
                                                     class="btn btn-secondary">
                                                     <i class="fa fa-arrow-left"></i> Quay lại
                                                 </a>
@@ -479,7 +507,21 @@
                                                 Thanh toán đã hoàn tất! Cảm ơn bạn đã mua hàng.
                                             </div>
                                             <div class="payment-actions">
-                                                <a href="${pageContext.request.contextPath}/order"
+                                                <a href="${pageContext.request.contextPath}/profile#orders"
+                                                    class="btn btn-primary">
+                                                    <i class="fa fa-list"></i> Quay lại danh sách đơn hàng
+                                                </a>
+                                            </div>
+                                        </c:when>
+                                        <c:when test="${statusPayment.status == 'REFUNDING'}">
+                                            <div class="alert-success">
+                                                <i class="fa fa-check-circle"></i>
+                                                Đơn hàng đã được hủy và hoàn tiền thành công. Tiền sẽ được hoàn lại vào
+                                                tài khoản
+                                                khách hàng trong 5-7 ngày làm việc.
+                                            </div>
+                                            <div class="payment-actions">
+                                                <a href="${pageContext.request.contextPath}/profile#orders"
                                                     class="btn btn-primary">
                                                     <i class="fa fa-list"></i> Quay lại danh sách đơn hàng
                                                 </a>
@@ -501,7 +543,7 @@
                                             </div>
 
                                             <div class="payment-actions">
-                                                <a href="${pageContext.request.contextPath}/order"
+                                                <a href="${pageContext.request.contextPath}/profile#orders"
                                                     class="btn btn-secondary">
                                                     <i class="fa fa-arrow-left"></i> Quay lại
                                                 </a>

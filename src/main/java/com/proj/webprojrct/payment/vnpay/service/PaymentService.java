@@ -56,7 +56,7 @@ public class PaymentService {
     private final OrderRepository orderRepository;
 
     private final PaymentUrlVnpayRepository paymentUrlVnpayRepository;
-    
+
     private final OrderService orderService;
 
     public PaymentResDto createPaymentUrl(Long orderId, HttpServletRequest request) throws UnsupportedEncodingException {
@@ -258,7 +258,7 @@ public class PaymentService {
             System.out.println("Trạng thái giao dịch (vnp_TransactionStatus): " + transactionStatus);
             System.out.println("Chi tiết: " + statusMessages.getOrDefault(transactionStatus, "Trạng thái không xác định"));
             System.out.println("========================================");
-            
+
             // Log tất cả parameters từ VNPAY
             System.out.println("\n=== ALL VNPAY PARAMETERS ===");
             request.getParameterMap().forEach((key, value) -> {
@@ -275,8 +275,16 @@ public class PaymentService {
             long orderId = Long.parseLong(request.getParameter("vnp_TxnRef"));
             PaymentUrlVnpay paymentUrl = paymentUrlVnpayRepository.findByOrderId(orderId);
             paymentUrlVnpayRepository.delete(paymentUrl);
-            
-            // Update product stock when payment is successful (responseCode = "00")
+            if (transactionStatus.equals("00")) {
+                //cập nhật trạng thái payment
+                Payment payment = paymentRepository.findByOrderId(orderId);
+                payment.setStatus("SUCCESS");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+                String paidAtStr = request.getParameter("vnp_PayDate");
+                LocalDateTime paidAt = LocalDateTime.parse(paidAtStr, formatter);
+                payment.setPaidAt(paidAtStr);
+                paymentRepository.save(payment);
+            } // Update product stock when payment is successful (responseCode = "00")
             if ("00".equals(responseCode)) {
                 try {
                     orderService.updateProductStockAfterPayment(orderId);
@@ -485,6 +493,14 @@ public class PaymentService {
         in.close();
         System.out.println(response.toString());
 
+        if (response.toString().contains("\"vnp_TransactionStatus\":\"05\"")) {
+            Payment payment = paymentRepository.findByOrderId(orderId);
+            System.out
+                    .println("Updating payment status to REFUNDING for orderId: " + orderId);
+            payment.setStatus("REFUNDING");
+            paymentRepository.save(payment);
+        }
+
         return response.toString();
     }
 
@@ -501,7 +517,7 @@ public class PaymentService {
                 .paidAt(createdAt)
                 .build();
         paymentRepository.save(payment);
-        
+
         // cập nhật số lượng 
         try {
             orderService.updateProductStockAfterPayment(orderId);

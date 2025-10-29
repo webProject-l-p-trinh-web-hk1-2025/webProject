@@ -1,552 +1,611 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+    <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+        <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+            <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<div id="profile-content">
-    <style>
-        /* Profile History Styles - Optimized for profile sidebar layout */
-        .profile-orders-title {
-            color: #333;
-            margin-bottom: 25px;
-            font-size: 22px;
-            font-weight: bold;
-            text-align: left;
-            border-bottom: 2px solid #d10024;
-            padding-bottom: 12px;
-        }
+                <div id="profile-content">
+                    <style>
+                        /* Profile History Styles - Optimized for profile sidebar layout */
+                        .profile-orders-title {
+                            color: #333;
+                            margin-bottom: 25px;
+                            font-size: 22px;
+                            font-weight: bold;
+                            text-align: left;
+                            border-bottom: 2px solid #d10024;
+                            padding-bottom: 12px;
+                        }
 
-        .order-card {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease;
-        }
+                        .order-card {
+                            background: white;
+                            border-radius: 8px;
+                            padding: 15px;
+                            margin-bottom: 15px;
+                            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+                            transition: box-shadow 0.3s ease;
+                        }
 
-        .order-card:hover {
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-        }
+                        .order-card:hover {
+                            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+                        }
 
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
+                        .order-header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding-bottom: 12px;
+                            border-bottom: 1px solid #f0f0f0;
+                            margin-bottom: 12px;
+                            flex-wrap: wrap;
+                            gap: 8px;
+                        }
 
-        .order-id {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
+                        .order-id {
+                            font-size: 16px;
+                            font-weight: bold;
+                            color: #333;
+                        }
 
-        .order-date {
-            color: #666;
-            font-size: 13px;
-            margin-top: 3px;
-        }
+                        .order-date {
+                            color: #666;
+                            font-size: 13px;
+                            margin-top: 3px;
+                        }
 
-        .order-status-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-weight: 600;
-            font-size: 11px;
-            text-transform: uppercase;
-        }
+                        .order-status-badge {
+                            display: inline-block;
+                            padding: 5px 12px;
+                            border-radius: 15px;
+                            font-weight: 600;
+                            font-size: 11px;
+                            text-transform: uppercase;
+                        }
 
-        .status-PENDING {
-            background: #fff3cd;
-            color: #856404;
-        }
+                        .status-PENDING {
+                            background: #fff3cd;
+                            color: #856404;
+                        }
 
-        .status-PROCESSING {
-            background: #cfe2ff;
-            color: #084298;
-        }
+                        .status-PROCESSING {
+                            background: #cfe2ff;
+                            color: #084298;
+                        }
 
-        .status-SHIPPED {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
+                        .status-SHIPPED {
+                            background: #d1ecf1;
+                            color: #0c5460;
+                        }
 
-        .status-DELIVERED {
-            background: #d4edda;
-            color: #155724;
-        }
+                        .status-DELIVERED {
+                            background: #d4edda;
+                            color: #155724;
+                        }
 
-        .status-CANCELLED {
-            background: #f8d7da;
-            color: #721c24;
-        }
+                        .status-CANCELLED {
+                            background: #f8d7da;
+                            color: #721c24;
+                        }
 
-        .order-body {
-            padding: 12px 0;
-        }
+                        .cancel-note-container {
+                            background: #fff3cd;
+                            border-left: 4px solid #ffc107;
+                            padding: 10px 12px;
+                            margin-top: 10px;
+                            border-radius: 4px;
+                        }
 
-        .order-items {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            max-width: 100%;
-        }
+                        .cancel-note-label {
+                            font-weight: bold;
+                            color: #856404;
+                            font-size: 12px;
+                            margin-bottom: 5px;
+                            display: block;
+                        }
 
-        .order-item-image {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            padding: 3px;
-            background: #ffffff;
-            flex-shrink: 0;
-        }
+                        .cancel-note-text {
+                            color: #333;
+                            font-size: 13px;
+                            line-height: 1.5;
+                            margin: 0;
+                        }
 
-        .order-total {
-            font-size: 17px;
-            font-weight: bold;
-            color: #d70018;
-            margin-top: 10px;
-        }
+                        .order-body {
+                            padding: 12px 0;
+                        }
 
-        .order-footer {
-            display: flex;
-            gap: 8px;
-            padding-top: 12px;
-            border-top: 1px solid #f0f0f0;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
+                        .order-items {
+                            display: flex;
+                            gap: 8px;
+                            margin-bottom: 12px;
+                            flex-wrap: wrap;
+                            max-width: 100%;
+                        }
 
-        .btn-order {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 13px;
-        }
+                        .order-item-image {
+                            width: 50px;
+                            height: 50px;
+                            object-fit: contain;
+                            border: 1px solid #e0e0e0;
+                            border-radius: 4px;
+                            padding: 3px;
+                            background: #ffffff;
+                            flex-shrink: 0;
+                        }
 
-        .btn-view {
-            background: linear-gradient(135deg, #d70018 0%, #f05423 100%);
-            color: white;
-        }
+                        .order-total {
+                            font-size: 17px;
+                            font-weight: bold;
+                            color: #d70018;
+                            margin-top: 10px;
+                        }
 
-        .btn-view:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(215, 0, 24, 0.3);
-            color: white;
-        }
+                        .order-footer {
+                            display: flex;
+                            gap: 8px;
+                            padding-top: 12px;
+                            border-top: 1px solid #f0f0f0;
+                            margin-top: 10px;
+                            flex-wrap: wrap;
+                        }
 
-        .btn-cancel {
-            background: #6c757d;
-            color: white;
-        }
+                        .btn-order {
+                            padding: 8px 16px;
+                            border: none;
+                            border-radius: 5px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            text-decoration: none;
+                            display: inline-block;
+                            font-size: 13px;
+                        }
 
-        .btn-cancel:hover {
-            background: #5a6268;
-        }
+                        .btn-view {
+                            background: linear-gradient(135deg, #d70018 0%, #f05423 100%);
+                            color: white;
+                        }
 
-        .btn-cancel:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
+                        .btn-view:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 12px rgba(215, 0, 24, 0.3);
+                            color: white;
+                        }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
+                        .btn-cancel {
+                            background: #6c757d;
+                            color: white;
+                        }
 
-        .empty-state i {
-            font-size: 60px;
-            color: #ccc;
-            margin-bottom: 15px;
-        }
+                        .btn-cancel:hover {
+                            background: #5a6268;
+                        }
 
-        .empty-state h3 {
-            color: #666;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
+                        .btn-cancel:disabled {
+                            background: #ccc;
+                            cursor: not-allowed;
+                        }
 
-        .empty-state p {
-            color: #999;
-            font-size: 14px;
-        }
+                        .empty-state {
+                            text-align: center;
+                            padding: 40px 20px;
+                            background: white;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                        }
 
-        .empty-state a {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 25px;
-            background: linear-gradient(135deg, #d70018 0%, #f05423 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
+                        .empty-state i {
+                            font-size: 60px;
+                            color: #ccc;
+                            margin-bottom: 15px;
+                        }
 
-        .empty-state a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(215, 0, 24, 0.3);
-        }
+                        .empty-state h3 {
+                            color: #666;
+                            margin-bottom: 10px;
+                            font-size: 18px;
+                        }
 
-        .alert-message {
-            padding: 12px 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-weight: 600;
-            display: none;
-            font-size: 14px;
-        }
+                        .empty-state p {
+                            color: #999;
+                            font-size: 14px;
+                        }
 
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+                        .empty-state a {
+                            display: inline-block;
+                            margin-top: 15px;
+                            padding: 10px 25px;
+                            background: linear-gradient(135deg, #d70018 0%, #f05423 100%);
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            font-weight: 600;
+                            transition: all 0.3s;
+                        }
 
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+                        .empty-state a:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 12px rgba(215, 0, 24, 0.3);
+                        }
 
-        .orders-count {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 14px;
-            color: #666;
-            font-weight: 600;
-        }
+                        .alert-message {
+                            padding: 12px 15px;
+                            border-radius: 6px;
+                            margin-bottom: 15px;
+                            font-weight: 600;
+                            display: none;
+                            font-size: 14px;
+                        }
 
-        .orders-count i {
-            color: #28a745;
-        }
+                        .alert-success {
+                            background: #d4edda;
+                            color: #155724;
+                            border: 1px solid #c3e6cb;
+                        }
 
-        #pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
+                        .alert-error {
+                            background: #f8d7da;
+                            color: #721c24;
+                            border: 1px solid #f5c6cb;
+                        }
 
-        #pagination button {
-            padding: 8px 16px;
-            background: #d70018;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-            transition: all 0.3s;
-        }
+                        .alert-info {
+                            background: #d1ecf1;
+                            color: #0c5460;
+                            border: 1px solid #bee5eb;
+                        }
 
-        #pagination button:hover:not(:disabled) {
-            background: #b3001a;
-            transform: translateY(-1px);
-        }
+                        .orders-count {
+                            text-align: center;
+                            margin-bottom: 15px;
+                            font-size: 14px;
+                            color: #666;
+                            font-weight: 600;
+                        }
 
-        #pagination button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
+                        .orders-count i {
+                            color: #28a745;
+                        }
 
-        #pageInfo {
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-        }
+                        #pagination {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            gap: 10px;
+                            margin-top: 20px;
+                            flex-wrap: wrap;
+                        }
 
-        @media (max-width: 768px) {
-            .order-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+                        #pagination button {
+                            padding: 8px 16px;
+                            background: #d70018;
+                            color: white;
+                            border: none;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            font-weight: 600;
+                            font-size: 13px;
+                            transition: all 0.3s;
+                        }
 
-            .order-item-image {
-                width: 45px;
-                height: 45px;
-            }
+                        #pagination button:hover:not(:disabled) {
+                            background: #b3001a;
+                            transform: translateY(-1px);
+                        }
 
-            .order-footer {
-                flex-direction: column;
-            }
+                        #pagination button:disabled {
+                            background: #ccc;
+                            cursor: not-allowed;
+                            opacity: 0.6;
+                        }
 
-            .btn-order {
-                width: 100%;
-                text-align: center;
-            }
-        }
-    </style>
+                        #pageInfo {
+                            font-weight: 600;
+                            color: #333;
+                            font-size: 14px;
+                        }
 
-    <h1 class="profile-orders-title">
-        <i class="fa fa-list-alt"></i> Lịch sử mua hàng
-    </h1>
+                        @media (max-width: 768px) {
+                            .order-header {
+                                flex-direction: column;
+                                align-items: flex-start;
+                            }
 
-    <div id="messageContainer" class="alert-message"></div>
+                            .order-item-image {
+                                width: 45px;
+                                height: 45px;
+                            }
 
-    <!-- Orders List -->
-    <c:choose>
-        <c:when test="${empty orders}">
-            <!-- Empty State -->
-            <div class="empty-state">
-                <i class="fa fa-shopping-bag"></i>
-                <h3>Bạn chưa có đơn hàng nào</h3>
-                <p>Hãy khám phá các sản phẩm của chúng tôi và đặt hàng ngay!</p>
-                <a href="${pageContext.request.contextPath}/shop">
-                    <i class="fa fa-shopping-cart"></i> Mua sắm ngay
-                </a>
-            </div>
-        </c:when>
-        <c:otherwise>
-            <!-- Orders count -->
-            <div class="orders-count">
-                <i class="fa fa-check-circle"></i>
-                Tổng số: <span id="totalOrdersCount">${fn:length(orders)}</span> đơn hàng
-                <span style="margin: 0 10px;">|</span>
-                Đang hiển thị: <span id="displayCount">5</span> đơn hàng
-            </div>
+                            .order-footer {
+                                flex-direction: column;
+                            }
 
-            <!-- Order Cards -->
-            <div id="orders-container">
-                <c:forEach var="order" items="${orders}" varStatus="loop">
-                    <div class="order-card" data-order-index="${loop.index}">
-                        <!-- Order Header -->
-                        <div class="order-header">
-                            <div>
-                                <div class="order-id">
-                                    <i class="fa fa-shopping-bag"></i> Đơn hàng #${order.orderId}
-                                </div>
-                                <div class="order-date">
-                                    <i class="fa fa-calendar"></i> ${order.createdAt}
-                                </div>
+                            .btn-order {
+                                width: 100%;
+                                text-align: center;
+                            }
+                        }
+                    </style>
+
+                    <h1 class="profile-orders-title">
+                        <i class="fa fa-list-alt"></i> Lịch sử mua hàng
+                    </h1>
+
+                    <div id="messageContainer" class="alert-message"></div>
+
+                    <!-- Orders List -->
+                    <c:choose>
+                        <c:when test="${empty orders}">
+                            <!-- Empty State -->
+                            <div class="empty-state">
+                                <i class="fa fa-shopping-bag"></i>
+                                <h3>Bạn chưa có đơn hàng nào</h3>
+                                <p>Hãy khám phá các sản phẩm của chúng tôi và đặt hàng ngay!</p>
+                                <a href="${pageContext.request.contextPath}/shop">
+                                    <i class="fa fa-shopping-cart"></i> Mua sắm ngay
+                                </a>
                             </div>
-                            <div>
-                                <span class="order-status-badge status-${order.status}" id="status-${order.orderId}">
-                                    ${order.status}
-                                </span>
+                        </c:when>
+                        <c:otherwise>
+                            <!-- Orders count -->
+                            <div class="orders-count">
+                                <i class="fa fa-check-circle"></i>
+                                Tổng số: <span id="totalOrdersCount">${fn:length(orders)}</span> đơn hàng
+                                <span style="margin: 0 10px;">|</span>
+                                Đang hiển thị: <span id="displayCount">5</span> đơn hàng
                             </div>
-                        </div>
 
-                        <!-- Order Body -->
-                        <div class="order-body">
-                            <!-- Product Images -->
-                            <div class="order-items">
-                                <c:forEach var="item" items="${order.items}" varStatus="status">
-                                    <c:if test="${status.index < 4}">
-                                        <c:choose>
-                                            <c:when test="${fn:startsWith(item.productImageUrl, '/uploads/')}">
-                                                <img src="${pageContext.request.contextPath}${item.productImageUrl}"
-                                                    alt="${item.productName}" class="order-item-image"
-                                                    title="${item.productName}" 
-                                                    onerror="this.src='${pageContext.request.contextPath}/static/image/no-image.png'"/>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <img src="${pageContext.request.contextPath}/uploads/products/${item.productImageUrl}"
-                                                    alt="${item.productName}" class="order-item-image"
-                                                    title="${item.productName}"
-                                                    onerror="this.src='${pageContext.request.contextPath}/static/image/no-image.png'"/>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </c:if>
-                                </c:forEach>
-                                <c:if test="${fn:length(order.items) > 4}">
-                                    <div class="order-item-image"
-                                        style="display: flex; align-items: center; justify-content: center; background: #e9ecef; font-weight: bold; color: #666; font-size: 12px;">
-                                        +${fn:length(order.items) - 4}
+                            <!-- Order Cards -->
+                            <div id="orders-container">
+                                <c:forEach var="order" items="${orders}" varStatus="loop">
+                                    <div class="order-card" data-order-index="${loop.index}">
+                                        <!-- Order Header -->
+                                        <div class="order-header">
+                                            <div>
+                                                <div class="order-id">
+                                                    <i class="fa fa-shopping-bag"></i> Đơn hàng #${order.orderId}
+                                                </div>
+                                                <div class="order-date">
+                                                    <i class="fa fa-calendar"></i> ${order.createdAt}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <span class="order-status-badge status-${order.status}"
+                                                    id="status-${order.orderId}">
+                                                    ${order.status}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Order Body -->
+                                        <div class="order-body">
+                                            <!-- Product Images -->
+                                            <div class="order-items">
+                                                <c:forEach var="item" items="${order.items}" varStatus="status">
+                                                    <c:if test="${status.index < 4}">
+                                                        <c:choose>
+                                                            <c:when
+                                                                test="${fn:startsWith(item.productImageUrl, '/uploads/')}">
+                                                                <img src="${pageContext.request.contextPath}${item.productImageUrl}"
+                                                                    alt="${item.productName}" class="order-item-image"
+                                                                    title="${item.productName}"
+                                                                    onerror="this.src='${pageContext.request.contextPath}/static/image/no-image.png'" />
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <img src="${pageContext.request.contextPath}/uploads/products/${item.productImageUrl}"
+                                                                    alt="${item.productName}" class="order-item-image"
+                                                                    title="${item.productName}"
+                                                                    onerror="this.src='${pageContext.request.contextPath}/static/image/no-image.png'" />
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </c:if>
+                                                </c:forEach>
+                                                <c:if test="${fn:length(order.items) > 4}">
+                                                    <div class="order-item-image"
+                                                        style="display: flex; align-items: center; justify-content: center; background: #e9ecef; font-weight: bold; color: #666; font-size: 12px;">
+                                                        +${fn:length(order.items) - 4}
+                                                    </div>
+                                                </c:if>
+                                            </div>
+
+                                            <!-- Total Amount -->
+                                            <div class="order-total">
+                                                <i class="fa fa-money"></i> Tổng tiền:
+                                                <fmt:formatNumber value="${order.totalAmount}" pattern="#,###" /> ₫
+                                            </div>
+
+                                            <!-- Cancel Note (if order is cancelled) -->
+                                            <c:if test="${order.status == 'CANCELLED' && not empty order.cancelNote}">
+                                                <div class="cancel-note-container">
+                                                    <span class="cancel-note-label">
+                                                        <i class="fa fa-info-circle"></i> Lý do hủy đơn:
+                                                    </span>
+                                                    <p class="cancel-note-text">${order.cancelNote}</p>
+                                                </div>
+                                            </c:if>
+                                        </div>
+
+                                        <!-- Order Footer -->
+                                        <div class="order-footer">
+                                            <a class="btn-order btn-view"
+                                                href="${pageContext.request.contextPath}/order/${order.orderId}">
+                                                <i class="fa fa-eye"></i> Xem chi tiết
+                                            </a>
+                                            <c:if test="${order.status == 'PENDING' || order.status == 'PAID'}">
+                                                <button class="btn-order btn-cancel" data-order-id="${order.orderId}">
+                                                    <i class="fa fa-times-circle"></i> Hủy đơn hàng
+                                                </button>
+                                            </c:if>
+                                        </div>
                                     </div>
-                                </c:if>
+                                </c:forEach>
                             </div>
 
-                            <!-- Total Amount -->
-                            <div class="order-total">
-                                <i class="fa fa-money"></i> Tổng tiền:
-                                <fmt:formatNumber value="${order.totalAmount}" pattern="#,###" /> ₫
-                            </div>
-                        </div>
-
-                        <!-- Order Footer -->
-                        <div class="order-footer">
-                            <a class="btn-order btn-view"
-                                href="${pageContext.request.contextPath}/order/${order.orderId}">
-                                <i class="fa fa-eye"></i> Xem chi tiết
-                            </a>
-                            <c:if test="${order.status == 'PENDING'}">
-                                <button class="btn-order btn-cancel" data-order-id="${order.orderId}">
-                                    <i class="fa fa-times-circle"></i> Hủy đơn hàng
+                            <!-- Pagination -->
+                            <div id="pagination">
+                                <button id="prevBtn" onclick="changePage(-1)">
+                                    <i class="fa fa-chevron-left"></i> Trước
                                 </button>
-                            </c:if>
-                        </div>
-                    </div>
-                </c:forEach>
-            </div>
+                                <span id="pageInfo"></span>
+                                <button id="nextBtn" onclick="changePage(1)">
+                                    Sau <i class="fa fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
 
-            <!-- Pagination -->
-            <div id="pagination">
-                <button id="prevBtn" onclick="changePage(-1)">
-                    <i class="fa fa-chevron-left"></i> Trước
-                </button>
-                <span id="pageInfo"></span>
-                <button id="nextBtn" onclick="changePage(1)">
-                    Sau <i class="fa fa-chevron-right"></i>
-                </button>
-            </div>
-        </c:otherwise>
-    </c:choose>
+                    <script>
+                        // Pagination variables
+                        const ORDERS_PER_PAGE = 5;
+                        let currentPage = 1;
+                        let totalOrders = 0;
 
-    <script>
-        // Pagination variables
-        const ORDERS_PER_PAGE = 5;
-        let currentPage = 1;
-        let totalOrders = 0;
+                        function initOrderHistory() {
+                            const orderCards = document.querySelectorAll('#profile-content .order-card');
+                            totalOrders = orderCards.length;
 
-        function initOrderHistory() {
-            const orderCards = document.querySelectorAll('#profile-content .order-card');
-            totalOrders = orderCards.length;
+                            const totalSpan = document.getElementById('totalOrdersCount');
+                            if (totalSpan) {
+                                totalSpan.textContent = totalOrders;
+                            }
 
-            const totalSpan = document.getElementById('totalOrdersCount');
-            if (totalSpan) {
-                totalSpan.textContent = totalOrders;
-            }
+                            if (totalOrders > 0) {
+                                showPage(1);
+                            } else {
+                                const displayCountElement = document.getElementById('displayCount');
+                                if (displayCountElement) displayCountElement.textContent = '0';
+                                const pageInfo = document.getElementById('pageInfo');
+                                if (pageInfo) pageInfo.textContent = 'Trang 0 / 0';
+                                const prevBtn = document.getElementById('prevBtn');
+                                const nextBtn = document.getElementById('nextBtn');
+                                if (prevBtn) prevBtn.disabled = true;
+                                if (nextBtn) nextBtn.disabled = true;
+                            }
 
-            if (totalOrders > 0) {
-                showPage(1);
-            } else {
-                const displayCountElement = document.getElementById('displayCount');
-                if (displayCountElement) displayCountElement.textContent = '0';
-                const pageInfo = document.getElementById('pageInfo');
-                if (pageInfo) pageInfo.textContent = 'Trang 0 / 0';
-                const prevBtn = document.getElementById('prevBtn');
-                const nextBtn = document.getElementById('nextBtn');
-                if (prevBtn) prevBtn.disabled = true;
-                if (nextBtn) nextBtn.disabled = true;
-            }
+                            // Attach cancel button handlers
+                            document.querySelectorAll('#profile-content .btn-cancel').forEach(function (btn) {
+                                btn.addEventListener('click', function () {
+                                    const id = this.getAttribute('data-order-id');
+                                    if (id) cancelOrder(id);
+                                });
+                            });
+                        }
 
-            // Attach cancel button handlers
-            document.querySelectorAll('#profile-content .btn-cancel').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    const id = this.getAttribute('data-order-id');
-                    if (id) cancelOrder(id);
-                });
-            });
-        }
+                        // Run on DOMContentLoaded and also expose for AJAX loading
+                        document.addEventListener('DOMContentLoaded', initOrderHistory);
 
-        // Run on DOMContentLoaded and also expose for AJAX loading
-        document.addEventListener('DOMContentLoaded', initOrderHistory);
-        
-        // If already loaded (for AJAX case), run immediately
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            setTimeout(initOrderHistory, 1);
-        }
+                        // If already loaded (for AJAX case), run immediately
+                        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                            setTimeout(initOrderHistory, 1);
+                        }
 
-        function showPage(page) {
-            const orderCards = document.querySelectorAll('#profile-content .order-card');
-            totalOrders = orderCards.length;
-            const totalPages = Math.max(1, Math.ceil(totalOrders / ORDERS_PER_PAGE));
+                        function showPage(page) {
+                            const orderCards = document.querySelectorAll('#profile-content .order-card');
+                            totalOrders = orderCards.length;
+                            const totalPages = Math.max(1, Math.ceil(totalOrders / ORDERS_PER_PAGE));
 
-            if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
+                            if (page < 1) page = 1;
+                            if (page > totalPages) page = totalPages;
 
-            currentPage = page;
+                            currentPage = page;
 
-            // Hide all orders
-            orderCards.forEach(card => {
-                card.style.display = 'none';
-            });
+                            // Hide all orders
+                            orderCards.forEach(card => {
+                                card.style.display = 'none';
+                            });
 
-            // Show orders for current page
-            const start = (page - 1) * ORDERS_PER_PAGE;
-            const end = start + ORDERS_PER_PAGE;
+                            // Show orders for current page
+                            const start = (page - 1) * ORDERS_PER_PAGE;
+                            const end = start + ORDERS_PER_PAGE;
 
-            let displayedCount = 0;
-            for (let i = start; i < end && i < orderCards.length; i++) {
-                orderCards[i].style.display = 'block';
-                displayedCount++;
-            }
+                            let displayedCount = 0;
+                            for (let i = start; i < end && i < orderCards.length; i++) {
+                                orderCards[i].style.display = 'block';
+                                displayedCount++;
+                            }
 
-            // Update display count
-            const displayCountElement = document.getElementById('displayCount');
-            if (displayCountElement) {
-                displayCountElement.textContent = displayedCount;
-            }
+                            // Update display count
+                            const displayCountElement = document.getElementById('displayCount');
+                            if (displayCountElement) {
+                                displayCountElement.textContent = displayedCount;
+                            }
 
-            // Update pagination UI
-            const pageInfoEl = document.getElementById('pageInfo');
-            if (pageInfoEl) pageInfoEl.textContent = 'Trang ' + currentPage + ' / ' + totalPages;
+                            // Update pagination UI
+                            const pageInfoEl = document.getElementById('pageInfo');
+                            if (pageInfoEl) pageInfoEl.textContent = 'Trang ' + currentPage + ' / ' + totalPages;
 
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            if (prevBtn) prevBtn.disabled = currentPage === 1;
-            if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+                            const prevBtn = document.getElementById('prevBtn');
+                            const nextBtn = document.getElementById('nextBtn');
+                            if (prevBtn) prevBtn.disabled = currentPage === 1;
+                            if (nextBtn) nextBtn.disabled = currentPage === totalPages;
 
-            // Scroll to top
-            const titleEl = document.querySelector('.profile-orders-title');
-            if (titleEl) {
-                try { titleEl.scrollIntoView({ behavior: 'smooth' }); } catch (e) { }
-            }
-        }
+                            // Scroll to top
+                            const titleEl = document.querySelector('.profile-orders-title');
+                            if (titleEl) {
+                                try { titleEl.scrollIntoView({ behavior: 'smooth' }); } catch (e) { }
+                            }
+                        }
 
-        function changePage(direction) {
-            showPage(currentPage + direction);
-        }
+                        function changePage(direction) {
+                            showPage(currentPage + direction);
+                        }
 
-        function cancelOrder(orderId) {
-            if (!confirm("Bạn có chắc muốn hủy đơn hàng này?")) return;
+                        function cancelOrder(orderId) {
+                            if (!confirm("Bạn có chắc muốn hủy đơn hàng này?")) return;
 
-            fetch('/api/orders/' + orderId + '/cancel', {
-                method: 'PUT',
-                credentials: 'include'
-            })
-            .then(response => {
-                if (!response.ok) throw new Error("Không thể hủy đơn hàng");
-                return response.json();
-            })
-            .then(data => {
-                showMessage(data.message, 'success');
-                const statusEl = document.getElementById('status-' + orderId);
-                if (statusEl) {
-                    statusEl.textContent = 'CANCELLED';
-                    statusEl.className = 'order-status-badge status-CANCELLED';
-                }
+                            // Hiển thị loading
+                            showMessage('Đang xử lý hủy đơn hàng...', 'info');
 
-                const btn = document.querySelector('[data-order-id="' + orderId + '"]');
-                if (btn) btn.style.display = 'none';
-            })
-            .catch(error => {
-                console.error(error);
-                showMessage('Lỗi khi hủy đơn hàng!', 'error');
-            });
-        }
+                            fetch('/api/orders/' + orderId + '/cancel', {
+                                method: 'PUT',
+                                credentials: 'include'
+                            })
+                                .then(response => {
+                                    // Lưu status code để xử lý
+                                    const statusCode = response.status;
+                                    return response.json().then(data => ({ statusCode, data }));
+                                })
+                                .then(({ statusCode, data }) => {
+                                    if (statusCode === 200) {
+                                        // Thành công
+                                        showMessage(data.message || 'Đã hủy đơn hàng thành công!', 'success');
 
-        function showMessage(message, type) {
-            var container = document.getElementById('messageContainer');
-            container.textContent = message;
-            container.className = 'alert-message alert-' + type;
-            container.style.display = 'block';
+                                        // Cập nhật trạng thái đơn hàng
+                                        const statusEl = document.getElementById('status-' + orderId);
+                                        if (statusEl) {
+                                            statusEl.textContent = 'CANCELLED';
+                                            statusEl.className = 'order-status-badge status-CANCELLED';
+                                        }
 
-            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                        // Ẩn nút hủy
+                                        const btn = document.querySelector('[data-order-id="' + orderId + '"]');
+                                        if (btn) btn.style.display = 'none';
 
-            setTimeout(function () {
-                container.style.display = 'none';
-            }, 5000);
-        }
-    </script>
-</div>
+                                        // Reload trang sau 2 giây để cập nhật thông tin đầy đủ
+                                        setTimeout(() => {
+                                            window.location.reload();
+                                        }, 2000);
+                                    } else {
+                                        // Lỗi từ server
+                                        showMessage(data.message || 'Không thể hủy đơn hàng!', 'error');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    showMessage('Lỗi kết nối! Vui lòng thử lại sau.', 'error');
+                                });
+                        }
+
+                        function showMessage(message, type) {
+                            var container = document.getElementById('messageContainer');
+                            container.textContent = message;
+                            container.className = 'alert-message alert-' + type;
+                            container.style.display = 'block';
+
+                            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                            setTimeout(function () {
+                                container.style.display = 'none';
+                            }, 5000);
+                        }
+                    </script>
+                </div>

@@ -84,28 +84,36 @@ public class OrderController {
         }
 
         try {
-            // Gọi VNPay refund (giả sử refund toàn phần khi hủy)
-            String refundResult = paymentService.handleRefund(orderId, "02", 100, request);
-
-            // Parse JSON kết quả từ VNPay
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(refundResult);
-            String responseCode = root.path("vnp_ResponseCode").asText();
-            String txnStatus = root.path("vnp_TransactionStatus").asText();
+            // Kiểm tra phương thức thanh toán và trạng thái
             String paymentStatus = paymentService.getPaymentStatusByOrderId(orderId);
             String paymentMethod = paymentService.getPaymentMethodByOrderId(orderId);
-            if (!"SUCCESS".equals(paymentStatus) || paymentStatus == null || "COD".equals(paymentMethod)) {
-                orderService.cancelOrder(orderId);
-                return ResponseEntity.ok(new ResponseMessage("Đã hủy đơn hàng thành công!"));
-            }
 
-            // Nếu refund thành công (ResponseCode = 00 và TransactionStatus = 00)
-            if ("00".equals(responseCode) && "05".equals(txnStatus)) {
-                orderService.cancelOrder(orderId);
-                return ResponseEntity.ok(new ResponseMessage("Đã hủy và hoàn tiền đơn hàng thành công!"));
+            boolean isRefunded = false;
+
+            // Nếu là VNPay và đã thanh toán thành công, gọi API hoàn tiền
+            if ("SUCCESS".equals(paymentStatus) && "VNPAY".equals(paymentMethod)) {
+                // Gọi VNPay refund (100% khi user hủy)
+                String refundResult = paymentService.handleRefund(orderId, "02", 100, request);
+
+                // Parse JSON kết quả từ VNPay
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(refundResult);
+                String responseCode = root.path("vnp_ResponseCode").asText();
+                String txnStatus = root.path("vnp_TransactionStatus").asText();
+
+                // Nếu refund thành công (ResponseCode = 00 và TransactionStatus = 05)
+                if ("00".equals(responseCode) && "05".equals(txnStatus)) {
+                    isRefunded = true;
+                    orderService.cancelOrder(orderId);
+                    return ResponseEntity.ok(new ResponseMessage("Đơn hàng đã được hủy và hoàn tiền thành công! Tiền sẽ được hoàn lại vào tài khoản của bạn trong 5-7 ngày làm việc."));
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new ResponseMessage("Hoàn tiền thất bại. Vui lòng liên hệ hỗ trợ. Chi tiết: " + refundResult));
+                }
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new ResponseMessage("Hoàn tiền thất bại hoặc chưa xác nhận. Phản hồi: " + refundResult));
+                // COD hoặc chưa thanh toán - chỉ hủy đơn
+                orderService.cancelOrder(orderId);
+                return ResponseEntity.ok(new ResponseMessage("Đơn hàng đã được hủy thành công!"));
             }
 
         } catch (Exception e) {

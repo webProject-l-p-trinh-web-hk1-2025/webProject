@@ -18,5 +18,6 @@ public class OrderResponse {
     private BigDecimal totalAmount;
     private String shippingAddress;
     private String createdAt;
+    private String cancelNote;
     private List<OrderItemResponse> items;
 }

@@ -181,6 +181,7 @@ public class OrderServiceImpl implements OrderService {
         response.setShippingAddress(order.getShippingAddress());
         // **Chuyển LocalDateTime sang String đã format**
         response.setCreatedAt(order.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+        response.setCancelNote(order.getCancelNote());
         response.setItems(itemResponses);
         return response;
     }
@@ -225,6 +226,7 @@ public class OrderServiceImpl implements OrderService {
             response.setTotalAmount(order.getTotalAmount());
             response.setShippingAddress(order.getShippingAddress());
             response.setCreatedAt(order.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+            response.setCancelNote(order.getCancelNote());
             response.setItems(itemResponses);
             return response;
         }).collect(Collectors.toList());
@@ -235,8 +237,8 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
         System.out.println("Order status: " + order.getStatus());
-        if (!order.getStatus().equals("PENDING")) {
-            throw new IllegalArgumentException("Only PENDING orders can be cancelled.");
+        if (!order.getStatus().equals("PENDING") && !order.getStatus().equals("PAID")) {
+            throw new IllegalArgumentException("Only PENDING or PAID orders can be cancelled.");
         }
 
         order.setStatus("CANCELLED");

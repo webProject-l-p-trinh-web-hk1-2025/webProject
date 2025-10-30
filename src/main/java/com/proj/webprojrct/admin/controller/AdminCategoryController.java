@@ -38,6 +38,13 @@ public class AdminCategoryController {
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort,
             Model model) {
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
+        }
+
         // Parse sort parameter
         String[] sortParams = sort.split(",");
         String sortField = sortParams[0];
@@ -108,6 +115,12 @@ public class AdminCategoryController {
 
     @PostMapping("/{id}/delete")
     public String deleteCategory(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
+        }
         try {
             categoryService.delete(id);
             redirectAttributes.addFlashAttribute("success", "Đã xóa danh mục thành công!");
@@ -122,6 +135,13 @@ public class AdminCategoryController {
 
     @GetMapping("/{id}")
     public String viewCategory(@PathVariable Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
+        }
+
         CategoryDto category = categoryService.getById(id);
         model.addAttribute("category", category);
         return "admin/category_detail";

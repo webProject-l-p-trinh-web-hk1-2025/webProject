@@ -499,24 +499,4 @@ public class SellerController {
         }
     }
 
-    // @PostMapping("/seller/accept-order-refund/{orderId}")
-    // public String postSellerOrdersRefund(@PathVariable("orderId") Long orderId,
-    //         @RequestParam String transType,
-    //         @RequestParam int percent, Model model) {
-    //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    //     if (authentication == null || !authentication.isAuthenticated()) {
-    //         return "redirect:/login";
-    //     }
-    //     try {
-    //         if (sellerService.processRefund(orderId, transType, percent, authentication)) {
-    //             model.addAttribute("success", "Order refund accepted successfully.");
-    //         } else {
-    //             model.addAttribute("error", "Failed to accept the order refund.");
-    //         }
-    //     } catch (IllegalArgumentException e) {
-    //         model.addAttribute("error", e.getMessage());
-    //         return "redirect:/home";
-    //     }
-    //     return "redirect:/seller/oders-refund";
-    // }
 }

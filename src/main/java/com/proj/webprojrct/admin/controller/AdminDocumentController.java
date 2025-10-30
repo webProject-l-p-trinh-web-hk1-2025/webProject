@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,13 +22,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.proj.webprojrct.document.entity.Document;
+import com.proj.webprojrct.common.config.security.CustomUserDetails;
 import com.proj.webprojrct.document.dto.request.DocumentCreateRequest;
 import com.proj.webprojrct.document.service.DocumentService;
 import com.proj.webprojrct.product.dto.response.ProductResponse;
 import com.proj.webprojrct.product.service.ProductService;
+import com.proj.webprojrct.user.entity.UserRole;
 import com.proj.webprojrct.document.repository.DocumentRepository;
 
 import java.util.Map;
+
+import org.springframework.security.core.Authentication;
+
+import com.proj.webprojrct.user.entity.User;
 
 @Controller
 @RequestMapping("/admin/document")
@@ -35,13 +42,13 @@ public class AdminDocumentController {
 
     @Autowired
     private DocumentService documentService;
-    
+
     @Autowired
     private ProductService productService;
-    
+
     @Autowired
     private DocumentRepository documentRepository;
-    
+
     @GetMapping
     public String show(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -49,25 +56,33 @@ public class AdminDocumentController {
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort,
             Model model) {
-        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
+        }
+
         // Parse sort parameter
         String[] sortParams = sort.split(",");
         String sortField = sortParams.length > 0 ? sortParams[0] : "id";
         String sortDir = sortParams.length > 1 ? sortParams[1] : "asc";
-        
+
         Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
-        
+
         Page<Document> documentPage = documentService.getPagedDocuments(pageable, title);
         List<ProductResponse> products = productService.getAll();
-        
+
         model.addAttribute("documents", documentPage);
         model.addAttribute("products", products);
-        
+
         // Add filter parameters to model
-        if (title != null) model.addAttribute("filterTitle", title);
+        if (title != null) {
+            model.addAttribute("filterTitle", title);
+        }
         model.addAttribute("filterSort", sort);
-        
+
         return "admin/document_list";
     }
 
@@ -85,18 +100,18 @@ public class AdminDocumentController {
     public String showCreateForm(Model model) {
         model.addAttribute("document", null);
         model.addAttribute("formAction", "/admin/document/create");
-        
+
         // Load danh sách products chưa có document
         List<ProductResponse> allProducts = productService.getAll();
         List<Long> productIdsWithDocuments = documentRepository.findAllProductIdsWithDocuments();
-        
+
         // Lọc ra những sản phẩm chưa có document
         List<ProductResponse> availableProducts = allProducts.stream()
-            .filter(product -> !productIdsWithDocuments.contains(product.getId()))
-            .collect(Collectors.toList());
-        
+                .filter(product -> !productIdsWithDocuments.contains(product.getId()))
+                .collect(Collectors.toList());
+
         model.addAttribute("products", availableProducts);
-        
+
         return "admin/document_form";
     }
 
@@ -125,19 +140,19 @@ public class AdminDocumentController {
     public String showEditForm(@PathVariable Long id, Model model) {
         Document document = documentService.getDocument(id);
         model.addAttribute("document", document);
-        
+
         // Load danh sách products chưa có document
         List<ProductResponse> allProducts = productService.getAll();
         List<Long> productIdsWithDocuments = documentRepository.findAllProductIdsWithDocuments();
-        
+
         // Lọc ra những sản phẩm chưa có document, NHƯNG vẫn giữ lại sản phẩm hiện tại của document này
         List<ProductResponse> availableProducts = allProducts.stream()
-            .filter(product -> !productIdsWithDocuments.contains(product.getId()) 
+                .filter(product -> !productIdsWithDocuments.contains(product.getId())
                 || product.getId().equals(document.getProductId()))
-            .collect(Collectors.toList());
-        
+                .collect(Collectors.toList());
+
         model.addAttribute("products", availableProducts);
-        
+
         return "admin/document_form";
     }
 
@@ -162,7 +177,7 @@ public class AdminDocumentController {
             return ResponseEntity.status(500).body(Map.of("error", "Could not upload the image"));
         }
     }
-    
+
     @GetMapping("/delete/{id}")
     public String deleteDocument(@PathVariable Long id, Model model) {
         try {
@@ -173,7 +188,7 @@ public class AdminDocumentController {
         }
         return "redirect:/admin/document";
     }
-    
+
     // API endpoint to get document by productId (for product detail page)
     @GetMapping("/api/product/{productId}")
     @ResponseBody

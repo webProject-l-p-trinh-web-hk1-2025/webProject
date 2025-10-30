@@ -30,8 +30,6 @@ import org.springframework.ui.Model;
 
 import com.proj.webprojrct.auth.dto.request.ChangePassRequest;
 import com.proj.webprojrct.auth.dto.request.RegisterRequest;
-
-import lombok.RequiredArgsConstructor;
 import com.proj.webprojrct.auth.entity.OtpCode;
 
 import com.proj.webprojrct.auth.mapper.AuthMapper;
@@ -91,10 +89,6 @@ public class AuthService {
         }
     }
 
-    // ========== REGISTRATION OTP METHODS ==========
-    /**
-     * Validate đăng ký nhưng không tạo user
-     */
     public void validateRegisterRequest(RegisterRequest request) {
         // Validate password
         if (!isValidPassword(request.getPassword())) {
@@ -135,46 +129,6 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    /**
-     * Gửi OTP cho đăng ký (lưu trong session, không phải user.otpCode)
-     */
-    // public String sendRegisterOtp(String phone, HttpSession session) {
-    //     String otp = generateOTP();
-    //     String formattedPhone = formatPhone(phone);
-    //     String smsBody = "Mã OTP để hoàn tất đăng ký của bạn là: " + otp;
-    //     try {
-    //         boolean sent = sSms.sendSMS(formattedPhone, smsBody);
-    //         if (!sent) {
-    //             throw new RuntimeException("Gửi SMS thất bại. Vui lòng kiểm tra lại SĐT hoặc liên hệ admin.");
-    //         }
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //         throw new RuntimeException("Lỗi hệ thống gửi SMS, vui lòng thử lại sau.");
-    //     }
-    //     // Lưu OTP vào session (không phải database)
-    //     session.setAttribute("registerOtp", otp);
-    //     session.setAttribute("registerOtpExpiry", System.currentTimeMillis() + 300000); // 5 phút
-    //     return "Mã OTP đã được gửi đến số điện thoại của bạn!";
-    // }
-    /**
-     * Xác thực OTP cho đăng ký (kiểm tra trong session)
-     */
-    // public void verifyRegisterOtp(String otpInput, HttpSession session) {
-    //     String storedOtp = (String) session.getAttribute("registerOtp");
-    //     Long expiry = (Long) session.getAttribute("registerOtpExpiry");
-    //     if (storedOtp == null || expiry == null) {
-    //         throw new RuntimeException("Mã OTP không tồn tại hoặc đã hết hạn. Vui lòng gửi lại mã OTP.");
-    //     }
-    //     if (System.currentTimeMillis() > expiry) {
-    //         session.removeAttribute("registerOtp");
-    //         session.removeAttribute("registerOtpExpiry");
-    //         throw new RuntimeException("Mã OTP đã hết hạn. Vui lòng gửi lại mã OTP.");
-    //     }
-    //     if (!storedOtp.equals(otpInput)) {
-    //         throw new RuntimeException("Mã OTP không đúng. Vui lòng thử lại.");
-    //     }
-    // }
-    // // ========== END REGISTRATION OTP METHODS ==========
     public User registerUser(RegisterRequest request) {
         // Validate password
         if (!isValidPassword(request.getPassword())) {
@@ -239,7 +193,7 @@ public class AuthService {
             model.addAttribute("error", "Số điện thoại chưa được xác thực.");
             return false;
         }
-        ////
+
         String newPassword = PasswordConfig.generateRandomPassword();
         String smsBody = "Mật khẩu mới sau khi reset của bạn là: " + newPassword;
         String formattedPhone = formatPhone(phone);
@@ -257,11 +211,7 @@ public class AuthService {
             model.addAttribute("error", "Gửi SMS thất bại. Vui lòng kiểm tra lại SĐT hoặc liên hệ admin.");
             return false;
         }
-        // if (!sSms.sendSMS(formattedPhone, smsBody)) {
-        //     return false;
-        // }
-        //String formattedPhone = formatPhone(phone);
-        //smsS.sendSms(formattedPhone, smsBody);
+
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
@@ -440,9 +390,6 @@ public class AuthService {
         return String.valueOf(otp);
     }
 
-    /**
-     * Validate số điện thoại (phải có đúng 10 chữ số)
-     */
     private boolean isValidPhone(String phone) {
         if (phone == null || phone.isEmpty()) {
             return false;
@@ -451,9 +398,6 @@ public class AuthService {
         return phone.matches("^[0-9]{10}$");
     }
 
-    /**
-     * Validate email theo format chuẩn
-     */
     private boolean isValidEmail(String email) {
         if (email == null || email.isEmpty()) {
             return false;
@@ -463,9 +407,6 @@ public class AuthService {
         return email.matches(emailRegex);
     }
 
-    /**
-     * Validate mật khẩu (tối thiểu 6 ký tự, có ít nhất 1 chữ cái và 1 số)
-     */
     private boolean isValidPassword(String password) {
         if (password == null || password.length() < 6) {
             return false;

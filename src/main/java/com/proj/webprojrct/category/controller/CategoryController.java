@@ -39,38 +39,40 @@ public class CategoryController {
 
     @PutMapping("/{id}")
     public CategoryDto update(@PathVariable Long id, @RequestBody CategoryDto dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         return service.update(id, dto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
     public CategoryDto getById(@PathVariable Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         return service.getById(id);
     }
 
     @GetMapping
     public List<CategoryDto> getAll() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         return service.getAll();
     }
-    
+
     // Lấy danh mục cha (Hãng) - dùng cho dropdown "Hãng" trong form sản phẩm
     @GetMapping("/parents")
     public List<CategoryDto> getParentCategories() {
+
         return service.getParentCategories();
     }
-    
+
     // Lấy danh mục con (Dòng sản phẩm) theo parentId - AJAX từ form khi chọn hãng
     @GetMapping("/children/{parentId}")
     public List<CategoryDto> getChildCategories(@PathVariable Long parentId) {
+
         return service.getChildCategories(parentId);
     }
 }

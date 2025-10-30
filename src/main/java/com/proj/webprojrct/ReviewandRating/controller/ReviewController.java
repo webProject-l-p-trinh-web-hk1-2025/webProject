@@ -87,11 +87,4 @@ public class ReviewController {
         return "redirect:/products/" + productId + "/reviews";
     }
 
-    // Hiển thị tất cả rating và bình luận sang một trang trống mới (chỉ phục vụ cho việc xem bình luận)
-    // Có thể xóa phần này  
-    // @GetMapping("/reviews/{reviewId}")
-    // public String viewReviewThread(@PathVariable Long reviewId, Model model) {
-    // reviewService.handleGetReviewThread(reviewId).ifPresent(r -> model.addAttribute("review", r));
-    //     return "reviews/thread";
-    // }
 }

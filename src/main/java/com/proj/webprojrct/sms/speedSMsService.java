@@ -22,7 +22,7 @@ public class speedSMsService {
         try {
             // String userInfo = api.getUserInfo();
             // System.out.println(userInfo);
-            String result = api.sendSMS(phone, content, 5, "cd30a7cbc7ad93af");
+            String result = api.sendSMS(phone, content, 5, "460371d0b8416b7f");
             System.out.println(result);
             return true;
         } catch (IOException e) {

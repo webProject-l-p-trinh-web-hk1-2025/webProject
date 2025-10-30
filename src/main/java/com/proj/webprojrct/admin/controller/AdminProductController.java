@@ -5,8 +5,10 @@ import com.proj.webprojrct.product.entity.Product;
 import com.proj.webprojrct.product.repository.ProductRepository;
 import com.proj.webprojrct.product.service.ProductService;
 import com.proj.webprojrct.storage.service.ProductStorageService;
+import com.proj.webprojrct.user.entity.UserRole;
 import com.proj.webprojrct.reviewandrating.repository.ReviewRepository;
 import com.proj.webprojrct.cart.repository.CartItemRepository;
+import com.proj.webprojrct.common.config.security.CustomUserDetails;
 import com.proj.webprojrct.favorite.repository.FavoriteRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 import org.springframework.http.HttpStatus;
+
+import com.proj.webprojrct.user.entity.User;
 
 @Controller
 @RequiredArgsConstructor
@@ -48,19 +52,27 @@ public class AdminProductController {
             @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort,
             Model model) {
-        
+
         // Use service search method for pagination
         Page<ProductResponse> productPage = productService.search(brand, name, minPrice, maxPrice, page, size, sort);
-        
+
         model.addAttribute("products", productPage);
-        
+
         // Add filter parameters to model
-        if (brand != null) model.addAttribute("filterBrand", brand);
-        if (name != null) model.addAttribute("filterName", name);
-        if (minPrice != null) model.addAttribute("filterMinPrice", minPrice);
-        if (maxPrice != null) model.addAttribute("filterMaxPrice", maxPrice);
+        if (brand != null) {
+            model.addAttribute("filterBrand", brand);
+        }
+        if (name != null) {
+            model.addAttribute("filterName", name);
+        }
+        if (minPrice != null) {
+            model.addAttribute("filterMinPrice", minPrice);
+        }
+        if (maxPrice != null) {
+            model.addAttribute("filterMaxPrice", maxPrice);
+        }
         model.addAttribute("filterSort", sort);
-        
+
         return "admin/product_list_new";
     }
 
@@ -95,10 +107,10 @@ public class AdminProductController {
             @RequestParam(value = "image", required = false) MultipartFile image
     ) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
         }
 
         // Tạo sản phẩm mới
@@ -138,11 +150,12 @@ public class AdminProductController {
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
         }
+
         productRepository.deleteById(id);
     }
 
@@ -150,11 +163,12 @@ public class AdminProductController {
     @PostMapping("/{id}/delete")
     public void deleteProductPost(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
         }
+
         productRepository.deleteById(id);
     }
 
@@ -162,11 +176,12 @@ public class AdminProductController {
     @GetMapping("/edit")
     public String edit() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
         }
+
         return "admin/product_edit";
     }
 
@@ -174,11 +189,12 @@ public class AdminProductController {
     @GetMapping("/edit/{id}")
     public String editById(@PathVariable Long id, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
         }
+
         ProductResponse p = productService.getById(id);
         model.addAttribute("product", p);
         return "admin/product_edit";
@@ -189,10 +205,10 @@ public class AdminProductController {
     @PostMapping("/{id}/deal-toggle")
     public ProductResponse toggleDeal(@PathVariable Long id, @RequestBody java.util.Map<String, Object> body) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
         }
 
         Boolean onDeal = false;
@@ -219,20 +235,24 @@ public class AdminProductController {
     @PostMapping("/{id}/active-toggle")
     @ResponseBody
     public Product toggleActiveStatus(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Access denied: Only ADMIN users can access category management.");
+        }
+
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sản phẩm không tồn tại"));
-        
+
         // Handle null case - default to true if null
         Boolean currentStatus = product.getIsActive();
         if (currentStatus == null) {
             currentStatus = true; // Default value
         }
-        
+
         product.setIsActive(!currentStatus);
         return productRepository.save(product);
     }
-
-
-/////////////////////////////////////// Deal admin/////////////////////////////////////////////////////////////////////////////////////
 
 }

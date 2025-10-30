@@ -25,7 +25,7 @@ public class CategoryPageController {
         }
         return "admin/category_detail";
     }
-    
+
     // Note: All /admin/categories/* routes have been moved to AdminCategoryController
     // to avoid routing conflicts and maintain proper separation of concerns
 }

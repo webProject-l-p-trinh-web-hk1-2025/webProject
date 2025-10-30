@@ -341,98 +341,32 @@
                         font-size: 14px;
                     }
 
-                    /* Modal Styles */
-                    .modal-overlay {
-                        display: none;
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background: rgba(0, 0, 0, 0.5);
-                        z-index: 9999;
-                        align-items: center;
-                        justify-content: center;
-                    }
-
-                    .modal-overlay.active {
-                        display: flex;
-                    }
-
-                    .modal-content {
-                        background: white;
+                    /* Cancel Form Styles */
+                    .cancel-form {
+                        margin-top: 20px;
+                        padding: 20px;
+                        background: #fff;
+                        border: 2px solid #dc3545;
                         border-radius: 8px;
-                        padding: 30px;
-                        max-width: 500px;
-                        width: 90%;
-                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                        animation: slideDown 0.3s ease;
                     }
 
-                    .modal-header {
-                        margin-bottom: 20px;
-                        padding-bottom: 15px;
-                        border-bottom: 2px solid #dc3545;
-                    }
-
-                    .modal-header h3 {
+                    .cancel-form h4 {
                         color: #dc3545;
-                        margin: 0;
-                        font-size: 22px;
+                        margin-bottom: 15px;
+                        font-size: 18px;
                     }
 
-                    .modal-body {
-                        margin-bottom: 20px;
-                    }
+                    @keyframes slideDown {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-10px);
+                        }
 
-                    .modal-body label {
-                        display: block;
-                        font-weight: bold;
-                        margin-bottom: 8px;
-                        color: #333;
-                    }
-
-                    .modal-body textarea {
-                        width: 100%;
-                        padding: 10px;
-                        border: 1px solid #ddd;
-                        border-radius: 4px;
-                        resize: vertical;
-                        min-height: 120px;
-                        font-family: inherit;
-                    }
-
-                    .modal-footer {
-                        display: flex;
-                        gap: 10px;
-                        justify-content: flex-end;
-                    }
-
-                    .btn-modal-cancel {
-                        padding: 10px 20px;
-                        background: #6c757d;
-                        color: white;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                        font-weight: bold;
-                    }
-
-                    .btn-modal-cancel:hover {
-                        background: #5a6268;
-                    }
-
-                    .btn-modal-confirm {
-                        padding: 10px 20px;
-                        background: #dc3545;
-                        color: white;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                        font-weight: bold;
-                    }
-
-                    .btn-modal-confirm:hover {
-                        background: #c82333;
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
                     }
                 </style>
 
@@ -580,23 +514,72 @@
                         <c:if test="${order.status == 'PAID'}">
                             <form action="${pageContext.request.contextPath}/seller/accept-order/${order.orderId}"
                                 method="post" style="display: inline;">
-                                <button type="submit" class="btn-action btn-accept"
-                                    onclick="return confirm('Xác nhận chấp nhận đơn hàng này?');">
+                                <button type="submit" class="btn-action btn-accept">
                                     <i class="fa fa-check"></i> Xác nhận đơn hàng
                                 </button>
                             </form>
-                            <button type="button" class="btn-action btn-cancel"
-                                onclick="openCancelModal(${order.orderId})">
+                            <button type="button" class="btn-action btn-cancel" onclick="toggleCancelForm()">
                                 <i class="fa fa-times"></i> Hủy đơn hàng
                             </button>
                         </c:if>
 
                         <!-- Nút hủy đơn hàng (ACCEPTED) -->
                         <c:if test="${order.status == 'ACCEPTED'}">
-                            <button type="button" class="btn-action btn-cancel"
-                                onclick="openCancelModal(${order.orderId})">
+                            <button type="button" class="btn-action btn-cancel" onclick="toggleCancelForm()">
                                 <i class="fa fa-times"></i> Hủy đơn hàng
                             </button>
+                        </c:if>
+
+                        <!-- Form hủy đơn hàng -->
+                        <c:if test="${order.status == 'PAID' || order.status == 'ACCEPTED'}">
+                            <div id="cancelOrderForm" class="cancel-form" style="display: none;">
+                                <h4><i class="fa fa-times-circle"></i> Hủy Đơn Hàng #${order.orderId}</h4>
+                                <p style="color: #666; margin-bottom: 15px;">
+                                    Vui lòng nhập lý do hủy đơn hàng. Thông tin này sẽ được gửi đến khách hàng.
+                                </p>
+
+                                <c:if test="${order.paymentMethod == 'VNPAY' && order.paymentStatus == 'SUCCESS'}">
+                                    <div
+                                        style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px; border-radius: 4px;">
+                                        <strong style="color: #856404;">
+                                            <i class="fa fa-exclamation-triangle"></i> Lưu ý:
+                                        </strong>
+                                        <p style="color: #856404; margin: 5px 0 0 0; font-size: 13px;">
+                                            Đơn hàng này đã thanh toán qua VNPay. Hệ thống sẽ <strong>TỰ ĐỘNG HOÀN
+                                                TIỀN</strong>
+                                            cho khách hàng trong vòng 5-7 ngày làm việc.
+                                        </p>
+                                    </div>
+                                </c:if>
+
+                                <form action="${pageContext.request.contextPath}/seller/cancel-order/${order.orderId}"
+                                    method="post" onsubmit="return validateCancelForm()">
+                                    <div style="margin-bottom: 15px;">
+                                        <label for="cancelNote"
+                                            style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">
+                                            <i class="fa fa-comment"></i> Lý do hủy đơn: <span
+                                                style="color: red;">*</span>
+                                        </label>
+                                        <textarea name="cancelNote" id="cancelNote"
+                                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; min-height: 100px; font-family: inherit;"
+                                            placeholder="Ví dụ: Sản phẩm hết hàng, Không thể giao đến địa chỉ của bạn..."
+                                            required></textarea>
+                                        <small style="color: #999; display: block; margin-top: 5px;">
+                                            <i class="fa fa-info-circle"></i> Tối thiểu 10 ký tự
+                                        </small>
+                                    </div>
+
+                                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                        <button type="button" class="btn-action"
+                                            style="background: #6c757d; color: white;" onclick="toggleCancelForm()">
+                                            <i class="fa fa-times"></i> Hủy bỏ
+                                        </button>
+                                        <button type="submit" class="btn-action btn-cancel">
+                                            <i class="fa fa-check"></i> Xác Nhận Hủy Đơn
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </c:if>
 
                         <!-- Nút chuyển sang vận chuyển (ACCEPTED) -->
@@ -651,135 +634,46 @@
                     </div>
                 </div>
 
-                <!-- Cancel Order Modal -->
-                <div id="cancelOrderModal" class="modal-overlay">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3><i class="fa fa-times-circle"></i> Hủy Đơn Hàng</h3>
-                        </div>
-                        <div class="modal-body">
-                            <p style="color: #666; margin-bottom: 15px;">
-                                Vui lòng nhập lý do hủy đơn hàng. Thông tin này sẽ được gửi đến khách hàng.
-                            </p>
-                            <div id="refundNotice"
-                                style="display: none; background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px; border-radius: 4px;">
-                                <strong style="color: #856404;">
-                                    <i class="fa fa-exclamation-triangle"></i> Lưu ý:
-                                </strong>
-                                <p style="color: #856404; margin: 5px 0 0 0; font-size: 13px;">
-                                    Đơn hàng này đã thanh toán qua VNPay. Hệ thống sẽ <strong>TỰ ĐỘNG HOÀN TIỀN</strong>
-                                    cho khách hàng trong vòng 5-7 ngày làm việc.
-                                </p>
-                            </div>
-                            <label for="cancelNote">
-                                <i class="fa fa-comment"></i> Lý do hủy đơn: <span style="color: red;">*</span>
-                            </label>
-                            <textarea id="cancelNote"
-                                placeholder="Ví dụ: Sản phẩm hết hàng, Không thể giao đến địa chỉ của bạn..."
-                                required></textarea>
-                            <small style="color: #999; display: block; margin-top: 5px;">
-                                <i class="fa fa-info-circle"></i> Tối thiểu 10 ký tự
-                            </small>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn-modal-cancel" onclick="closeCancelModal()">
-                                <i class="fa fa-times"></i> Đóng
-                            </button>
-                            <button type="button" class="btn-modal-confirm" onclick="submitCancelOrder()">
-                                <i class="fa fa-check"></i> Xác Nhận Hủy
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <script>
-                    let selectedOrderId = null;
-
-                    function openCancelModal(orderId) {
-                        selectedOrderId = orderId;
-                        document.getElementById('cancelNote').value = '';
-
-                        // Kiểm tra payment method từ badge
-                        const paymentBadge = document.querySelector('.payment-badge');
-                        const paymentText = paymentBadge ? paymentBadge.textContent.trim() : '';
-
-                        const refundNotice = document.getElementById('refundNotice');
-                        if (paymentText.includes('VNPAY') && paymentText.includes('SUCCESS')) {
-                            refundNotice.style.display = 'block';
+                    function toggleCancelForm() {
+                        const form = document.getElementById('cancelOrderForm');
+                        if (form.style.display === 'none' || form.style.display === '') {
+                            form.style.display = 'block';
+                            // Clear form
+                            document.getElementById('cancelNote').value = '';
+                            // Scroll to form
+                            form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                         } else {
-                            refundNotice.style.display = 'none';
+                            form.style.display = 'none';
                         }
-
-                        document.getElementById('cancelOrderModal').classList.add('active');
                     }
 
-                    function closeCancelModal() {
-                        selectedOrderId = null;
-                        document.getElementById('cancelOrderModal').classList.remove('active');
-                    }
-
-                    function submitCancelOrder() {
+                    function validateCancelForm() {
                         const note = document.getElementById('cancelNote').value.trim();
 
                         if (!note) {
                             alert('Vui lòng nhập lý do hủy đơn hàng!');
-                            return;
+                            return false;
                         }
 
                         if (note.length < 10) {
                             alert('Lý do hủy đơn phải có ít nhất 10 ký tự!');
-                            return;
+                            return false;
                         }
 
-                        if (!selectedOrderId) {
-                            alert('Lỗi: Không tìm thấy mã đơn hàng!');
-                            return;
-                        }
-
-                        // Kiểm tra payment method
                         const paymentBadge = document.querySelector('.payment-badge');
                         const paymentText = paymentBadge ? paymentBadge.textContent.trim() : '';
 
-                        let confirmMessage = 'Bạn có chắc chắn muốn HỦY đơn hàng #' + selectedOrderId + '?';
+                        let confirmMessage = 'Bạn có chắc chắn muốn HỦY đơn hàng này?';
 
                         if (paymentText.includes('VNPAY') && paymentText.includes('SUCCESS')) {
                             confirmMessage = 'Đơn hàng này đã thanh toán qua VNPay.\n' +
                                 'Hệ thống sẽ TỰ ĐỘNG HOÀN TIỀN cho khách hàng.\n\n' +
-                                'Bạn có chắc chắn muốn HỦY VÀ HOÀN TIỀN đơn hàng #' + selectedOrderId + '?';
+                                'Bạn có chắc chắn muốn HỦY VÀ HOÀN TIỀN đơn hàng này?';
                         }
 
-                        if (!confirm(confirmMessage)) {
-                            return;
-                        }
-
-                        // Submit form
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = '${pageContext.request.contextPath}/seller/cancel-order/' + selectedOrderId;
-
-                        const noteInput = document.createElement('input');
-                        noteInput.type = 'hidden';
-                        noteInput.name = 'cancelNote';
-                        noteInput.value = note;
-                        form.appendChild(noteInput);
-
-                        document.body.appendChild(form);
-                        form.submit();
+                        return confirm(confirmMessage);
                     }
-
-                    // Close modal when clicking outside
-                    document.getElementById('cancelOrderModal').addEventListener('click', function (e) {
-                        if (e.target === this) {
-                            closeCancelModal();
-                        }
-                    });
-
-                    // Close modal with ESC key
-                    document.addEventListener('keydown', function (e) {
-                        if (e.key === 'Escape') {
-                            closeCancelModal();
-                        }
-                    });
 
                     function processRefund() {
                         const trantype = document.getElementById('trantype').value;

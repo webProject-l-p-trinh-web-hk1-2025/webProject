@@ -8,16 +8,12 @@ import com.proj.webprojrct.user.repository.UserRepository;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpSession;
 import com.proj.webprojrct.common.config.security.CustomUserDetails;
 
-import jakarta.servlet.http.HttpSession;
-
-import java.lang.annotation.Repeatable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,14 +31,10 @@ import com.proj.webprojrct.auth.dto.request.LoginRequest;
 import com.proj.webprojrct.auth.dto.response.LoginResponse;
 
 import lombok.*;
-
 import com.proj.webprojrct.auth.dto.request.ChangePassRequest;
-
 import com.proj.webprojrct.auth.dto.request.RegisterRequest;
-
 import com.proj.webprojrct.auth.dto.request.LoginRequest;
 import com.proj.webprojrct.auth.dto.request.RegisterRequest;
-
 import com.proj.webprojrct.auth.dto.response.LoginResponse;
 
 @AllArgsConstructor
@@ -139,7 +131,10 @@ public class AuthController {
     public String logout(@CookieValue(value = "refresh_token", required = false) String refreshToken,
             HttpServletResponse response,
             HttpSession session) {
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            SecurityContextHolder.clearContext();
+        }
         // Xóa token trong DB
         if (refreshToken != null) {
             try {
@@ -294,6 +289,13 @@ public class AuthController {
 
     @PostMapping("/change-password")
     public String changePassword(@ModelAttribute ChangePassRequest request, RedirectAttributes redirectAttributes) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            redirectAttributes.addFlashAttribute("passwordChangeMessage", "Bạn cần đăng nhập để đổi mật khẩu.");
+            redirectAttributes.addFlashAttribute("passwordChangeSuccess", false);
+            return "redirect:/login";
+        }
+
         String message;
         boolean success = true;
         try {
@@ -310,6 +312,10 @@ public class AuthController {
 
     @GetMapping("/change-password")
     public String showChangePasswordForm(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
         model.addAttribute("changePassRequest", new ChangePassRequest());
         return "change-password";
     }
@@ -317,6 +323,10 @@ public class AuthController {
     // ========== REGISTER PHONE VERIFICATION ==========
     @GetMapping("/register-phone-verify")
     public String showRegisterPhoneVerify(HttpSession session, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
         Long userId = (Long) session.getAttribute("newUserId");
         System.out.println("Debug: newUserId in session = " + userId);
         if (userId == null) {
@@ -357,6 +367,7 @@ public class AuthController {
 
     @PostMapping("/send-otp-email")
     public String sendOtpEmail(Model model) {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
             return "redirect:/home";
@@ -406,6 +417,14 @@ public class AuthController {
     @PostMapping("/api/send-otp")
     @ResponseBody
     public Map<String, Object> sendOtpAPI(@RequestParam("type") String type) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Người dùng chưa đăng nhập");
+            return errorResponse;
+        }
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -431,6 +450,14 @@ public class AuthController {
     @PostMapping("/api/verify-otp")
     @ResponseBody
     public Map<String, Object> verifyOtpAPI(@RequestParam("otp") String otpInput) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Người dùng chưa đăng nhập");
+            return errorResponse;
+        }
         Map<String, Object> response = new HashMap<>();
 
         try {

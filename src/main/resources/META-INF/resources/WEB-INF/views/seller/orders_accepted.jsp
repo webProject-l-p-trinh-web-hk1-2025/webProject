@@ -395,8 +395,7 @@
                                             <form
                                                 action="${pageContext.request.contextPath}/seller/ship-order/${order.orderId}"
                                                 method="post" style="display:inline;">
-                                                <button type="submit" class="btn-ship"
-                                                    onclick="return confirm('Xác nhận chuyển trạng thái đơn hàng sang ĐANG VẬN CHUYỂN?');">
+                                                <button type="submit" class="btn-ship">
                                                     <i class="fa fa-truck"></i> Chuyển sang Vận Chuyển
                                                 </button>
                                             </form>

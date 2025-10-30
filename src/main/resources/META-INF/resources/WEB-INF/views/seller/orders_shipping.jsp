@@ -381,8 +381,7 @@
                                             <form
                                                 action="${pageContext.request.contextPath}/seller/deliver-order/${order.orderId}"
                                                 method="post" style="display:inline;">
-                                                <button type="submit" class="btn-deliver"
-                                                    onclick="return confirm('Xác nhận đơn hàng đã GIAO THÀNH CÔNG?');">
+                                                <button type="submit" class="btn-deliver">
                                                     <i class="fa fa-check-circle"></i> Xác Nhận Đã Giao Hàng
                                                 </button>
                                             </form>

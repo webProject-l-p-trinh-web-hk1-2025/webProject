@@ -353,6 +353,12 @@
                                                         </td>
                                                         <td style="text-align: left; padding-left: 15px;">
                                                             <strong>${item.productName}</strong>
+                                                            <c:if test="${not empty item.color}">
+                                                                <br>
+                                                                <small style="color: #666;">
+                                                                    Màu: <strong>${item.color}</strong>
+                                                                </small>
+                                                            </c:if>
                                                             <c:if test="${item.productId != null}">
                                                                 <br>
                                                                 <small style="color: #999;">ID:

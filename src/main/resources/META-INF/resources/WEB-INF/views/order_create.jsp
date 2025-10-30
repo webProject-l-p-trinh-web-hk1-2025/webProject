@@ -398,6 +398,8 @@
                             itemDiv.innerHTML =
                                 '<div class="item-details">' +
                                 '<p class="item-name">' + productName + '</p>' +
+                                // Display color if available
+                                (item.color ? 'Màu: <strong>' + item.color + '</strong></p>' : '') +
                                 '<p class="item-info">Số lượng: ' + item.quantity + '</p>' +
                                 '</div>' +
                                 priceHTML;

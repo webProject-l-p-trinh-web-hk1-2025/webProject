@@ -1,6 +1,5 @@
 package com.proj.webprojrct.product.controller;
 
-import com.proj.webprojrct.common.config.security.CustomUserDetails;
 import com.proj.webprojrct.product.dto.request.*;
 import com.proj.webprojrct.product.dto.response.ProductResponse;
 import com.proj.webprojrct.product.service.ProductService;
@@ -47,7 +46,8 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     public ProductResponse createMultipart(
             @Valid @RequestPart("data") ProductCreateRequest req,
-            @RequestPart(value = "image", required = false) MultipartFile image
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "color", required = false) String color
     ) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -59,7 +59,7 @@ public class ProductController {
         try {
             ProductResponse res = service.create(req);
             if (image != null && !image.isEmpty()) {
-                service.uploadImage(res.getId(), image);
+                service.uploadImage(res.getId(), image, color);
                 res = service.getById(res.getId());
             }
             return res;
@@ -232,7 +232,8 @@ public class ProductController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ProductResponse update(@PathVariable Long id,
             @Valid @RequestPart("data") ProductUpdateRequest req,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "color", required = false) String color) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()
@@ -242,7 +243,7 @@ public class ProductController {
         try {
             ProductResponse res = service.update(id, req);
             if (image != null && !image.isEmpty()) {
-                service.uploadImage(id, image);
+                service.uploadImage(id, image, color);
                 res = service.getById(id);
             }
             return res;
@@ -302,7 +303,10 @@ public class ProductController {
 
     /* Upload ảnh riêng */
     @PostMapping("/{id}/image")
-    public ResponseEntity<ProductResponse> uploadImage(@PathVariable Long id, @RequestParam("image") MultipartFile file) {
+    public ResponseEntity<ProductResponse> uploadImage(
+            @PathVariable Long id, 
+            @RequestParam("image") MultipartFile file,
+            @RequestParam(value = "color", required = false) String color) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()
@@ -310,7 +314,7 @@ public class ProductController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập!");
         }
         try {
-            service.uploadImage(id, file);
+            service.uploadImage(id, file, color);
             return ResponseEntity.ok(service.getById(id));
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi tải ảnh: " + e.getMessage());
@@ -322,7 +326,10 @@ public class ProductController {
      * product.
      */
     @PostMapping("/{id}/images")
-    public ResponseEntity<ProductResponse> uploadImages(@PathVariable Long id, @RequestParam("images") MultipartFile[] files) {
+    public ResponseEntity<ProductResponse> uploadImages(
+            @PathVariable Long id, 
+            @RequestParam("images") MultipartFile[] files,
+            @RequestParam(value = "color", required = false) String color) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()
@@ -333,7 +340,7 @@ public class ProductController {
             if (files != null) {
                 for (MultipartFile f : files) {
                     if (f != null && !f.isEmpty()) {
-                        service.uploadImage(id, f);
+                        service.uploadImage(id, f, color);
                     }
                 }
             }

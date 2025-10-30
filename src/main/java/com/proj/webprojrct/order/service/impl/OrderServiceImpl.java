@@ -90,6 +90,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setProductId(itemReq.getProductId());
                 orderItem.setQuantity(itemReq.getQuantity());
                 orderItem.setPrice(itemReq.getPrice());
+                orderItem.setColor(itemReq.getColor()); // Save selected color
                 orderItemRepository.save(orderItem);
             }
         }
@@ -119,6 +120,12 @@ public class OrderServiceImpl implements OrderService {
                 double itemPrice = item.getPrice().doubleValue();
                 double itemTotal = itemPrice * item.getQuantity();
                 emailBody.append(String.format("• %s\n", product.getName()));
+                
+                // Add color info if available
+                if (item.getColor() != null && !item.getColor().isEmpty()) {
+                    emailBody.append(String.format("  Màu: %s\n", item.getColor()));
+                }
+                
                 emailBody.append(String.format("  Số lượng: %d x %,.0fđ = %,.0fđ\n\n",
                         item.getQuantity(), itemPrice, itemTotal));
             }
@@ -159,17 +166,28 @@ public class OrderServiceImpl implements OrderService {
             resp.setProductId(item.getProductId());
             resp.setQuantity(item.getQuantity());
             resp.setPrice(item.getPrice());
+            resp.setColor(item.getColor()); // Add color to response
 
             Product product = productRepository.findById(item.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product not found"));
             resp.setProductName(product.getName());
 
+            // Get image URL based on selected color (if available)
             List<ProductImage> images = productImageRepository.findByProduct(product);
-            if (!images.isEmpty()) {
-                resp.setProductImageUrl(images.get(0).getUrl());
-            } else {
-                resp.setProductImageUrl(null);
+            String imageUrl = null;
+            
+            if (item.getColor() != null && !images.isEmpty()) {
+                // Find first image matching the selected color
+                imageUrl = images.stream()
+                    .filter(img -> item.getColor().equals(img.getColor()))
+                    .map(ProductImage::getUrl)
+                    .findFirst()
+                    .orElse(images.isEmpty() ? null : images.get(0).getUrl()); // Fallback to first image
+            } else if (!images.isEmpty()) {
+                imageUrl = images.get(0).getUrl();
             }
+            
+            resp.setProductImageUrl(imageUrl);
             return resp;
         }).collect(Collectors.toList());
 
@@ -205,17 +223,28 @@ public class OrderServiceImpl implements OrderService {
                 resp.setProductId(item.getProductId());
                 resp.setQuantity(item.getQuantity());
                 resp.setPrice(item.getPrice());
+                resp.setColor(item.getColor()); // Add color to response
 
                 Product product = productRepository.findById(item.getProductId())
                         .orElseThrow(() -> new RuntimeException("Product not found"));
                 resp.setProductName(product.getName());
 
+                // Get image URL based on selected color (if available)
                 List<ProductImage> images = productImageRepository.findByProduct(product);
-                if (!images.isEmpty()) {
-                    resp.setProductImageUrl(images.get(0).getUrl());
-                } else {
-                    resp.setProductImageUrl(null);
+                String imageUrl = null;
+                
+                if (item.getColor() != null && !images.isEmpty()) {
+                    // Find first image matching the selected color
+                    imageUrl = images.stream()
+                        .filter(img -> item.getColor().equals(img.getColor()))
+                        .map(ProductImage::getUrl)
+                        .findFirst()
+                        .orElse(images.isEmpty() ? null : images.get(0).getUrl()); // Fallback to first image
+                } else if (!images.isEmpty()) {
+                    imageUrl = images.get(0).getUrl();
                 }
+                
+                resp.setProductImageUrl(imageUrl);
                 return resp;
             }).collect(Collectors.toList());
 

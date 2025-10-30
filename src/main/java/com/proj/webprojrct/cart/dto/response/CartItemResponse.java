@@ -12,6 +12,7 @@ public class CartItemResponse {
     private Long cartId;
     private Long productId;
     private Integer quantity;
+    private String color; // Selected color variant
     
     // Thông tin sản phẩm để hiển thị
     private String productName;

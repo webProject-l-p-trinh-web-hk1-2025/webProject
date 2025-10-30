@@ -33,6 +33,7 @@ public interface ProductMapper {
     @Mapping(target = "category", expression = "java(categoryToDto(entity.getCategory()))")
     @Mapping(target = "imageUrls", expression = "java(imagesToUrls(entity))")
     @Mapping(target = "images", expression = "java(imagesToDtos(entity))")
+    @Mapping(target = "availableColors", expression = "java(extractAvailableColors(entity))")
     ProductResponse toResponse(Product entity);
 
     List<ProductResponse> toResponseList(List<Product> entities);
@@ -68,8 +69,20 @@ public interface ProductMapper {
         }
         java.util.List<com.proj.webprojrct.product.dto.ImageDto> out = new java.util.ArrayList<>();
         for (var img : entity.getImages()) {
-            out.add(new com.proj.webprojrct.product.dto.ImageDto(img.getId(), img.getUrl()));
+            out.add(new com.proj.webprojrct.product.dto.ImageDto(img.getId(), img.getUrl(), img.getColor()));
         }
         return out;
+    }
+
+    default java.util.List<String> extractAvailableColors(Product entity) {
+        if (entity == null || entity.getImages() == null || entity.getImages().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        // Extract unique colors from images
+        return entity.getImages().stream()
+                .map(ProductImage::getColor)
+                .filter(color -> color != null && !color.trim().isEmpty())
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
     }
 }

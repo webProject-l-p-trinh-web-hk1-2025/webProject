@@ -286,6 +286,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                 name: item.productName,
                 price: item.productPrice,
                 quantity: item.quantity,
+                color: item.color || null, // Add selected color
                 imageUrl: item.productImageUrl,
                 stock: item.productStock || 0, // Lấy stock từ API
                 onDeal: item.productOnDeal || false, // Lấy onDeal
@@ -362,6 +363,8 @@ uri="http://java.sun.com/jsp/jstl/core" %>
             item.name +
             "</a>" +
             "</h4>" +
+            // Display selected color if available
+            (item.color ? 'Màu: <strong>' + item.color + '</strong></p>' : '') +
             (function () {
               if (item.onDeal && item.dealPercentage > 0) {
                 var discountedPrice =
@@ -760,6 +763,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
               productName: item.name,
               quantity: item.quantity,
               price: finalPrice, // Sử dụng giá sau khi giảm
+              color: item.color || null, // Include selected color
               originalPrice: item.price, // Giữ lại giá gốc để hiển thị
               onDeal: item.onDeal || false,
               dealPercentage: item.dealPercentage || 0,

@@ -460,6 +460,8 @@ function renderOrderItems() {
             '<img class="order-item-image" src="' + imgSrc + '" alt="' + item.name + '">' +
             '<div class="order-item-info">' +
             '<div class="order-item-name">' + item.name + '</div>' +
+            // Display color if available
+            (item.color ? 'Màu: <strong>' + item.color + '</strong></div>' : '') +
             '<div class="order-item-qty">Số lượng: ' + item.quantity + '</div>' +
             '</div>' +
             '<div class="order-item-price">' + formatPrice(item.price * item.quantity) + '</div>';

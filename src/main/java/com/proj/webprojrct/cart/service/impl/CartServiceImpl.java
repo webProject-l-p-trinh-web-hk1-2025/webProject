@@ -54,13 +54,26 @@ public class CartServiceImpl implements CartService {
             resp.setCartId(item.getCart().getId());
             resp.setProductId(item.getProductId());
             resp.setQuantity(item.getQuantity());
+            resp.setColor(item.getColor()); // Add color to response
             
             // Lấy thông tin sản phẩm
             Product product = productRepository.findById(item.getProductId()).orElse(null);
             if (product != null) {
                 resp.setProductName(product.getName());
                 resp.setProductPrice(product.getPrice().doubleValue());
-                resp.setProductImageUrl(product.getImageUrl());
+                
+                // Get image URL based on selected color (if available)
+                String imageUrl = product.getImageUrl(); // Default fallback
+                if (item.getColor() != null && product.getImages() != null && !product.getImages().isEmpty()) {
+                    // Find first image matching the selected color
+                    imageUrl = product.getImages().stream()
+                        .filter(img -> item.getColor().equals(img.getColor()))
+                        .map(img -> img.getUrl())
+                        .findFirst()
+                        .orElse(product.getImageUrl()); // Fallback to default if no color match
+                }
+                resp.setProductImageUrl(imageUrl);
+                
                 resp.setProductStock(product.getStock()); // Thêm stock
                 resp.setProductOnDeal(product.getOnDeal()); // Thêm onDeal
                 resp.setProductDealPercentage(product.getDealPercentage()); // Thêm dealPercentage
@@ -90,18 +103,32 @@ public class CartServiceImpl implements CartService {
                     return cartRepository.save(newCart);
                 });
         List<CartItem> items = cartItemRepository.findByCart(cart);
+        
+        // Check if item with same product AND color already exists
         Optional<CartItem> existing = items.stream()
                 .filter(i -> i.getProductId().equals(request.getProductId()))
+                .filter(i -> {
+                    // Match color: both null OR both equal
+                    String existingColor = i.getColor();
+                    String requestColor = request.getColor();
+                    if (existingColor == null && requestColor == null) return true;
+                    if (existingColor == null || requestColor == null) return false;
+                    return existingColor.equals(requestColor);
+                })
                 .findFirst();
+                
         if (existing.isPresent()) {
+            // Update quantity for existing item with same color
             CartItem item = existing.get();
             item.setQuantity(item.getQuantity() + request.getQuantity());
             cartItemRepository.save(item);
         } else {
+            // Create new cart item with color
             CartItem item = new CartItem();
             item.setCart(cart);
             item.setProductId(request.getProductId());
             item.setQuantity(request.getQuantity());
+            item.setColor(request.getColor()); // Save selected color
             cartItemRepository.save(item);
         }
     }

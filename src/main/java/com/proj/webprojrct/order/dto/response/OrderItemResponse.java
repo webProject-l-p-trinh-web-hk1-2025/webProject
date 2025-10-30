@@ -15,6 +15,7 @@ public class OrderItemResponse {
     private Long productId;
     private Integer quantity;
     private BigDecimal price;
+    private String color; // Selected color variant
     private String productName;
     private String productImageUrl;
 }

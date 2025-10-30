@@ -6,4 +6,5 @@ import lombok.*;
 public class ImageDto {
     private Long id;
     private String url;
+    private String color;
 }

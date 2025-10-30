@@ -151,7 +151,21 @@
 
                             <!-- Product Variants Section -->
                             <div class="product-variants" style="margin: 20px 0">
-                              <!-- Storage Options -->
+                              <!-- Color Options (NEW - switches images only, NO redirect) -->
+                              <div class="variant-group" id="colorVariants" style="margin-bottom: 15px; display: none;">
+                                <h4 style="
+                          font-size: 16px;
+                          font-weight: 600;
+                          margin-bottom: 10px;
+                        ">
+                                  <i class="fa fa-palette"></i> Màu sắc
+                                </h4>
+                                <div class="variant-options" style="display: flex; gap: 10px; flex-wrap: wrap">
+                                  <!-- Color buttons will be inserted here by JavaScript -->
+                                </div>
+                              </div>
+
+                              <!-- Storage Options (existing - redirects to different products) -->
                               <div class="variant-group" id="storageVariants" style="margin-bottom: 15px">
                                 <h4 style="
                           font-size: 16px;
@@ -386,6 +400,12 @@
                 const isUserLoggedIn = ${ isUserAuthenticated };
                 const isAdmin = <c:out value="${pageContext.request.isUserInRole('ADMIN')}" default="false" />;
 
+                // Color management variables - GLOBAL SCOPE (must be before any function that uses them)
+                let currentProduct = null;
+                let imagesByColor = {}; // { "Đen": [url1, url2], "Trắng": [url3, url4] }
+                let allImages = []; // All product images (for fallback)
+                let currentColor = null;
+
             // Sử dụng data từ server thay vì fetch API
             <c:if test="${not empty product}">
             var productData = {
@@ -398,6 +418,20 @@
               imageUrls: [
                 <c:forEach items="${product.imageUrls}" var="imgUrl" varStatus="status">
                   "<c:out value='${imgUrl}'/>"<c:if test="${!status.last}">,</c:if>
+                </c:forEach>
+              ],
+              images: [
+                <c:forEach items="${product.images}" var="img" varStatus="status">
+                {
+                  id: ${img.id},
+                  url: "<c:out value='${img.url}'/>",
+                  color: "<c:out value='${img.color}'/>"
+                }<c:if test="${!status.last}">,</c:if>
+                </c:forEach>
+              ],
+              availableColors: [
+                <c:forEach items="${product.availableColors}" var="color" varStatus="status">
+                  "<c:out value='${color}'/>"<c:if test="${!status.last}">,</c:if>
                 </c:forEach>
               ],
               <c:choose>
@@ -613,7 +647,7 @@
 
                   // Initialize slick carousel for product images
                   setTimeout(() => {
-                    if (typeof $.fn.slick !== 'undefined') {
+                    if (typeof $ !== 'undefined' && typeof $.fn.slick !== 'undefined') {
                       // Destroy existing slick instances if any
                       if ($('#product-main-img').hasClass('slick-initialized')) {
                         $('#product-main-img').slick('unslick');
@@ -667,6 +701,226 @@
                     e.preventDefault();
                     addToWishlist(p.id);
                   });
+
+                  // Load and display color options
+                  displayColorOptions(p);
+                }
+
+                // Function to display color options and handle image switching
+                function displayColorOptions(p) {
+                  currentProduct = p;
+                  const colorVariantsContainer = document.getElementById('colorVariants');
+                  const colorOptionsContainer = colorVariantsContainer.querySelector('.variant-options');
+
+                  // Get images from product response
+                  const images = p.images || [];
+                  allImages = p.imageUrls && p.imageUrls.length ? p.imageUrls : (p.imageUrl ? [p.imageUrl] : []);
+
+                  // Group images by color
+                  imagesByColor = {};
+                  let hasColors = false;
+
+                  images.forEach(img => {
+                    if (img.color) {
+                      hasColors = true;
+                      if (!imagesByColor[img.color]) {
+                        imagesByColor[img.color] = [];
+                      }
+                      imagesByColor[img.color].push(img.url);
+                    }
+                  });
+
+                  // Show color selector only if product has colors
+                  if (hasColors && Object.keys(imagesByColor).length > 0) {
+                    colorVariantsContainer.style.display = 'block';
+                    colorOptionsContainer.innerHTML = '';
+
+                    // Create color buttons
+                    Object.keys(imagesByColor).sort().forEach((color, index) => {
+                      const btn = document.createElement('button');
+                      btn.type = 'button';
+                      btn.className = 'variant-btn';
+                      btn.dataset.color = color;
+                      
+                      // Style like storage variants
+                      btn.style.cssText = `
+                        padding: 10px 20px;
+                        border: 2px solid #ddd;
+                        border-radius: 6px;
+                        background: white;
+                        color: #333;
+                        font-weight: normal;
+                        cursor: pointer;
+                        transition: all 0.3s;
+                        margin-right: 10px;
+                        margin-bottom: 10px;
+                      `;
+                      
+                      // Text only (checkmark added on selection)
+                      btn.textContent = color;
+
+                      // Set first color as active by default
+                      if (index === 0) {
+                        currentColor = color;
+                        btn.classList.add('selected');
+                        btn.style.borderColor = '#d70018';
+                        btn.style.background = '#d70018';
+                        btn.style.color = 'white';
+                        btn.style.fontWeight = 'bold';
+                        
+                        // Add checkmark to selected
+                        const checkmark = document.createElement('i');
+                        checkmark.className = 'fa fa-check';
+                        checkmark.style.marginLeft = '5px';
+                        btn.appendChild(checkmark);
+                        
+                        // Switch to first color images
+                        switchToColorImages(color);
+                      }
+
+                      btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Check if already showing this color
+                        if (currentColor === color) {
+                          return;
+                        }
+                        
+                        // Remove selected state from all color buttons
+                        colorOptionsContainer.querySelectorAll('.variant-btn').forEach(b => {
+                          b.classList.remove('selected');
+                          b.style.borderColor = '#ddd';
+                          b.style.background = 'white';
+                          b.style.color = '#333';
+                          b.style.fontWeight = 'normal';
+                          // Remove checkmark
+                          const check = b.querySelector('.fa-check');
+                          if (check) check.remove();
+                        });
+                        
+                        // Add selected state to clicked button
+                        this.classList.add('selected');
+                        this.style.borderColor = '#d70018';
+                        this.style.background = '#d70018';
+                        this.style.color = 'white';
+                        this.style.fontWeight = 'bold';
+                        
+                        // Add checkmark
+                        const checkmark = document.createElement('i');
+                        checkmark.className = 'fa fa-check';
+                        checkmark.style.marginLeft = '5px';
+                        this.appendChild(checkmark);
+                        
+                        currentColor = color;
+                        switchToColorImages(color);
+                      });
+                      
+                      // Hover effects (only if not selected)
+                      btn.onmouseover = () => {
+                        if (!btn.classList.contains('selected')) {
+                          btn.style.borderColor = '#d70018';
+                          btn.style.background = '#fff5f5';
+                        }
+                      };
+                      btn.onmouseout = () => {
+                        if (!btn.classList.contains('selected')) {
+                          btn.style.borderColor = '#ddd';
+                          btn.style.background = 'white';
+                        }
+                      };
+
+                      colorOptionsContainer.appendChild(btn);
+                    });
+                  } else {
+                    colorVariantsContainer.style.display = 'none';
+                  }
+                }
+
+                function switchToColorImages(color) {
+                  if (!imagesByColor[color] || imagesByColor[color].length === 0) {
+                    console.warn('No images found for color:', color);
+                    return;
+                  }
+
+                  console.log('Switching to color:', color);
+                  const imgs = imagesByColor[color];
+
+                  // FORCE destroy slick BEFORE clearing HTML to prevent memory leaks
+                  if (typeof $ !== 'undefined' && typeof $.fn.slick !== 'undefined') {
+                    try {
+                      if ($('#product-main-img').hasClass('slick-initialized')) {
+                        $('#product-main-img').slick('unslick');
+                      }
+                      if ($('#product-imgs').hasClass('slick-initialized')) {
+                        $('#product-imgs').slick('unslick');
+                      }
+                    } catch(e) {
+                      console.warn('Error destroying slick:', e);
+                    }
+                  }
+
+                  // Update main images slider
+                  const mainImgContainer = document.getElementById('product-main-img');
+                  mainImgContainer.innerHTML = ''; // Clear existing
+
+                  imgs.forEach((url) => {
+                    const mainDiv = document.createElement('div');
+                    mainDiv.className = 'product-preview';
+                    const mainImg = document.createElement('img');
+                    mainImg.src = url.startsWith('/') ? ctx + url : url;
+                    mainImg.alt = currentProduct.name + ' - ' + color;
+                    mainDiv.appendChild(mainImg);
+                    mainImgContainer.appendChild(mainDiv);
+                  });
+
+                  // Update thumbnails
+                  const thumbsContainer = document.getElementById('product-imgs');
+                  thumbsContainer.innerHTML = '';
+
+                  imgs.forEach((url, index) => {
+                    const thumbDiv = document.createElement('div');
+                    thumbDiv.className = 'product-preview';
+                    const thumbImg = document.createElement('img');
+                    thumbImg.src = url.startsWith('/') ? ctx + url : url;
+                    thumbImg.alt = currentProduct.name + ' - ' + color;
+                    thumbImg.style.cursor = 'pointer';
+                    thumbImg.dataset.index = index;
+                    thumbDiv.appendChild(thumbImg);
+                    thumbsContainer.appendChild(thumbDiv);
+                  });
+
+                  // Re-initialize slick carousel (already destroyed above)
+                  setTimeout(() => {
+                    if (typeof $ !== 'undefined' && typeof $.fn.slick !== 'undefined') {
+                      // Reinitialize slick (no need to destroy again - already done above)
+                      $('#product-main-img').slick({
+                        infinite: true,
+                        speed: 300,
+                        slidesToShow: 1,
+                        arrows: false,
+                        fade: true,
+                        asNavFor: '#product-imgs'
+                      });
+
+                      $('#product-imgs').slick({
+                        slidesToShow: 3,
+                        slidesToScroll: 1,
+                        arrows: true,
+                        vertical: true,
+                        verticalSwiping: true,
+                        focusOnSelect: true,
+                        asNavFor: '#product-main-img',
+                        responsive: [{
+                          breakpoint: 991,
+                          settings: {
+                            vertical: false,
+                            slidesToShow: 4
+                          }
+                        }]
+                      });
+                    }
+                  }, 100);
                 }
 
                 function displaySpecs(p) {
@@ -725,16 +979,30 @@
                   }
 
                   try {
+                    // Prepare cart request with selected color (if any)
+                    const cartRequest = { 
+                      productId: productId, 
+                      quantity: quantity
+                    };
+                    
+                    // Add color if one is selected
+                    if (currentColor) {
+                      cartRequest.color = currentColor;
+                      console.log('Adding to cart with color:', currentColor);
+                    }
+                    
                     const response = await fetch(ctx + '/api/cart/add', {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json'
                       },
                       credentials: 'include',
-                      body: JSON.stringify({ productId: productId, quantity: quantity })
+                      body: JSON.stringify(cartRequest)
                     });
 
                     if (response.ok) {
+                  
+                      
                       // Update cart count in header
                       if (typeof updateGlobalCartCount === 'function') {
                         updateGlobalCartCount();
@@ -1285,34 +1553,61 @@
                 /**
                  * Extract model name from product name
                  * Returns the base model without storage/color (e.g., "iPhone 15 Pro Max")
+                 * ✅ SMART PARSING - No need to hardcode models!
                  */
                 function extractModelName(productName) {
-                  // List of known models (longest first to match correctly)
-                  const models = [
-                    'iPhone 15 Pro Max', 'iPhone 15 Plus', 'iPhone 15 Pro', 'iPhone 15',
-                    'iPhone 17 Pro Max', 'iPhone 17',
-                    'iPhone 13',
-                    'Galaxy Z Flip6', 'Galaxy A35',
-                    'Redmi Note 13 5G',
-                    'OPPO Reno12 Pro',
-                    'Xiaomi 14 Ultra',
-                    'realme C67'
+                  // Remove storage variants (128GB, 256GB, 512GB, 1TB, 2TB, etc.)
+                  let modelName = productName.replace(/\s*\d+\s*(GB|TB)\s*/gi, '').trim();
+                  
+                  // Remove color variants (common color words at the end)
+                  const colorPatterns = [
+                    /\s+(Đen|Trắng|Xanh|Đỏ|Vàng|Hồng|Tím|Xám|Bạc|Vang|Titan|Gold|Silver|Black|White|Blue|Red|Pink|Purple|Gray|Green|Midnight|Starlight|Sierra|Natural)(\s+\w+)?$/i,
+                    /\s+\(.*\)$/  // Remove anything in parentheses at end
                   ];
-
-                  // Find matching model
-                  for (const model of models) {
-                    if (productName.startsWith(model)) {
-                      return model;
-                    }
-                  }
-
-                  // Fallback: remove storage and color to extract model
-                  return productName.replace(/\d+\s*(GB|TB)/gi, '').trim().split(/\s+/).slice(0, 3).join(' ');
+                  
+                  colorPatterns.forEach(pattern => {
+                    modelName = modelName.replace(pattern, '').trim();
+                  });
+                  
+                  return modelName;
+                }
+                
+                /**
+                 * ALTERNATIVE: Extract model with known suffixes (more accurate for complex names)
+                 */
+                function extractModelNameAdvanced(productName) {
+                  // Common suffixes to remove
+                  const suffixPatterns = [
+                    /\s*\d+\s*(GB|TB)/gi,           // Storage
+                    /\s+(5G|4G|LTE)/gi,              // Network type
+                    /\s+(Dual\s+SIM|eSIM)/gi,        // SIM type
+                    /\s+\d+MP/gi,                    // Camera specs
+                  ];
+                  
+                  let cleaned = productName;
+                  suffixPatterns.forEach(pattern => {
+                    cleaned = cleaned.replace(pattern, '');
+                  });
+                  
+                  // Remove color words (more comprehensive list)
+                  const colorWords = [
+                    'Đen', 'Trắng', 'Xanh', 'Đỏ', 'Vàng', 'Hồng', 'Tím', 'Xám', 'Bạc', 'Titan',
+                    'Black', 'White', 'Blue', 'Red', 'Yellow', 'Pink', 'Purple', 'Gray', 'Silver', 'Gold',
+                    'Midnight', 'Starlight', 'Sierra', 'Natural', 'Alpine', 'Deep'
+                  ];
+                  
+                  const words = cleaned.split(/\s+/);
+                  const filtered = words.filter(word => !colorWords.includes(word));
+                  
+                  return filtered.join(' ').trim();
                 }
 
                 /**
                  * Render storage option buttons
                  */
+                // Track redirecting state globally to prevent double-click
+                let isRedirectingToVariant = false;
+                
                 function renderStorageOptions(storages, currentStorage, variantMap) {
                   const container = document.querySelector('#storageVariants .variant-options');
                   if (!storages || storages.length === 0) {
@@ -1342,7 +1637,32 @@
                           `;
 
                     if (isAvailable) {
-                      button.onclick = () => window.location.href = ctx + '/product/' + variant.id;
+                      // Prevent double-click causing multiple redirects - USE GLOBAL FLAG
+                      button.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        if (isRedirectingToVariant) {
+                          console.log('Already redirecting, ignoring click');
+                          return; // Already redirecting
+                        }
+                        
+                        isRedirectingToVariant = true;
+                        console.log('Redirecting to variant:', variant.id);
+                        
+                        // Visual feedback
+                        button.style.opacity = '0.5';
+                        button.style.cursor = 'wait';
+                        button.disabled = true;
+                        
+                        // Disable ALL variant buttons to prevent any other clicks
+                        container.querySelectorAll('.variant-btn').forEach(btn => {
+                          btn.disabled = true;
+                          btn.style.cursor = 'wait';
+                        });
+                        
+                        window.location.href = ctx + '/product/' + variant.id;
+                      };
                       button.onmouseover = () => {
                         if (!isSelected) {
                           button.style.borderColor = '#d70018';

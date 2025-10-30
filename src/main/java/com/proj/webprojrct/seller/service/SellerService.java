@@ -63,17 +63,7 @@ public class SellerService {
                 if (item == null) {
                     continue;
                 }
-                Product product = productRepository.findById(item.getProductId()).orElse(null);
-                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
-
-                OrderItemResponse itemResponse = new OrderItemResponse();
-                itemResponse.setOrderItemId(item.getId());
-                itemResponse.setOrderId(order.getId());
-                itemResponse.setProductId(item.getProductId());
-                itemResponse.setQuantity(item.getQuantity());
-                itemResponse.setPrice(item.getPrice());
-                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
-                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                OrderItemResponse itemResponse = mapToOrderItemResponse(item, order);
                 orderItemResponses.add(itemResponse);
             }
 
@@ -126,17 +116,7 @@ public class SellerService {
                 if (item == null) {
                     continue;
                 }
-                Product product = productRepository.findById(item.getProductId()).orElse(null);
-                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
-
-                OrderItemResponse itemResponse = new OrderItemResponse();
-                itemResponse.setOrderItemId(item.getId());
-                itemResponse.setOrderId(order.getId());
-                itemResponse.setProductId(item.getProductId());
-                itemResponse.setQuantity(item.getQuantity());
-                itemResponse.setPrice(item.getPrice());
-                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
-                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                OrderItemResponse itemResponse = mapToOrderItemResponse(item, order);
                 orderItemResponses.add(itemResponse);
             }
 
@@ -259,17 +239,7 @@ public class SellerService {
                 if (item == null) {
                     continue;
                 }
-                Product product = productRepository.findById(item.getProductId()).orElse(null);
-                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
-
-                OrderItemResponse itemResponse = new OrderItemResponse();
-                itemResponse.setOrderItemId(item.getId());
-                itemResponse.setOrderId(order.getId());
-                itemResponse.setProductId(item.getProductId());
-                itemResponse.setQuantity(item.getQuantity());
-                itemResponse.setPrice(item.getPrice());
-                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
-                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                OrderItemResponse itemResponse = mapToOrderItemResponse(item, order);
                 orderItemResponses.add(itemResponse);
             }
 
@@ -335,17 +305,7 @@ public class SellerService {
                 if (item == null) {
                     continue;
                 }
-                Product product = productRepository.findById(item.getProductId()).orElse(null);
-                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
-
-                OrderItemResponse itemResponse = new OrderItemResponse();
-                itemResponse.setOrderItemId(item.getId());
-                itemResponse.setOrderId(order.getId());
-                itemResponse.setProductId(item.getProductId());
-                itemResponse.setQuantity(item.getQuantity());
-                itemResponse.setPrice(item.getPrice());
-                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
-                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                OrderItemResponse itemResponse = mapToOrderItemResponse(item, order);
                 orderItemResponses.add(itemResponse);
             }
 
@@ -408,17 +368,7 @@ public class SellerService {
                 if (item == null) {
                     continue;
                 }
-                Product product = productRepository.findById(item.getProductId()).orElse(null);
-                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
-
-                OrderItemResponse itemResponse = new OrderItemResponse();
-                itemResponse.setOrderItemId(item.getId());
-                itemResponse.setOrderId(order.getId());
-                itemResponse.setProductId(item.getProductId());
-                itemResponse.setQuantity(item.getQuantity());
-                itemResponse.setPrice(item.getPrice());
-                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
-                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                OrderItemResponse itemResponse = mapToOrderItemResponse(item, order);
                 orderItemResponses.add(itemResponse);
             }
 
@@ -481,17 +431,7 @@ public class SellerService {
                 if (item == null) {
                     continue;
                 }
-                Product product = productRepository.findById(item.getProductId()).orElse(null);
-                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
-
-                OrderItemResponse itemResponse = new OrderItemResponse();
-                itemResponse.setOrderItemId(item.getId());
-                itemResponse.setOrderId(order.getId());
-                itemResponse.setProductId(item.getProductId());
-                itemResponse.setQuantity(item.getQuantity());
-                itemResponse.setPrice(item.getPrice());
-                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
-                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                OrderItemResponse itemResponse = mapToOrderItemResponse(item, order);
                 orderItemResponses.add(itemResponse);
             }
 
@@ -531,17 +471,7 @@ public class SellerService {
                 if (item == null) {
                     continue;
                 }
-                Product product = productRepository.findById(item.getProductId()).orElse(null);
-                ProductImage productImage = productImageRepository.findFirstByProductOrderByIdAsc(product).orElse(null);
-
-                OrderItemResponse itemResponse = new OrderItemResponse();
-                itemResponse.setOrderItemId(item.getId());
-                itemResponse.setOrderId(order.getId());
-                itemResponse.setProductId(item.getProductId());
-                itemResponse.setQuantity(item.getQuantity());
-                itemResponse.setPrice(item.getPrice());
-                itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
-                itemResponse.setProductImageUrl(productImage != null ? productImage.getUrl() : null);
+                OrderItemResponse itemResponse = mapToOrderItemResponse(item, order);
                 orderItemResponses.add(itemResponse);
             }
         }
@@ -574,6 +504,42 @@ public class SellerService {
             return "UNKNOWN";
         }
         return p.getMethod();
+    }
+    
+    /**
+     * Helper method to map OrderItem to OrderItemResponse with color-specific image
+     */
+    private OrderItemResponse mapToOrderItemResponse(OrderItem item, Order order) {
+        Product product = productRepository.findById(item.getProductId()).orElse(null);
+        
+        // Get image URL based on selected color (if available)
+        String imageUrl = null;
+        if (product != null) {
+            List<ProductImage> images = productImageRepository.findByProduct(product);
+            
+            if (item.getColor() != null && !images.isEmpty()) {
+                // Find first image matching the selected color
+                imageUrl = images.stream()
+                    .filter(img -> item.getColor().equals(img.getColor()))
+                    .map(ProductImage::getUrl)
+                    .findFirst()
+                    .orElse(images.isEmpty() ? null : images.get(0).getUrl()); // Fallback to first image
+            } else if (!images.isEmpty()) {
+                imageUrl = images.get(0).getUrl();
+            }
+        }
+
+        OrderItemResponse itemResponse = new OrderItemResponse();
+        itemResponse.setOrderItemId(item.getId());
+        itemResponse.setOrderId(order.getId());
+        itemResponse.setProductId(item.getProductId());
+        itemResponse.setQuantity(item.getQuantity());
+        itemResponse.setPrice(item.getPrice());
+        itemResponse.setColor(item.getColor()); // Add color to response
+        itemResponse.setProductName(product != null ? product.getName() : "Unknown Product");
+        itemResponse.setProductImageUrl(imageUrl);
+        
+        return itemResponse;
     }
 
 }

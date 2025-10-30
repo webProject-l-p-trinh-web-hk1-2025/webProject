@@ -240,19 +240,51 @@
 
                   <div class="card mt-4">
                     <div class="card-header">
-                      <div class="card-title">Quản lý hình ảnh</div>
+                      <div class="card-title">Quản lý hình ảnh theo màu sắc</div>
                     </div>
                     <div class="card-body">
+                      <!-- Color selector -->
                       <div class="form-group">
-                        <label>Ảnh sản phẩm (có thể chọn nhiều ảnh)</label>
-                        <input type="file" id="imagesInputCreate" name="image" class="form-control" accept="image/*"
-                          multiple />
+                        <label>Chọn màu sắc <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                          <select id="colorSelect" class="form-select" style="flex: 1;">
+                            <option value="">-- Chọn màu có sẵn --</option>
+                          </select>
+                          <button type="button" class="btn btn-outline-primary" id="addNewColorBtn" style="margin-left: 10px;">
+                            <i class="fas fa-plus"></i> Màu mới
+                          </button>
+                        </div>
+                        <small class="text-muted">Chọn màu trước khi upload ảnh</small>
                       </div>
 
-                      <!-- Preview images -->
+                      <!-- New color input (hidden by default) -->
+                      <div class="form-group" id="newColorGroup" style="display: none;">
+                        <label>Tên màu mới</label>
+                        <div class="input-group">
+                          <input type="text" id="newColorInput" class="form-control" placeholder="VD: Đen Titan, Xanh Dương, Vàng Gold..." />
+                          <button type="button" class="btn btn-success" id="saveNewColorBtn" style="margin-left: 10px;">
+                            <i class="fas fa-check"></i> Thêm
+                          </button>
+                          <button type="button" class="btn btn-secondary" id="cancelNewColorBtn" style="margin-left: 5px;">
+                            <i class="fas fa-times"></i> Hủy
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Upload images for selected color -->
+                      <div class="form-group">
+                        <label>
+                          Ảnh cho màu: <span id="currentColorLabel" class="text-primary font-weight-bold">Chưa chọn</span>
+                        </label>
+                        <input type="file" id="imagesInputCreate" name="image" class="form-control" accept="image/*"
+                          multiple disabled />
+                        <small class="text-muted">Vui lòng chọn màu trước khi upload ảnh</small>
+                      </div>
+
+                      <!-- Preview images grouped by color -->
                       <div class="form-group mt-4">
-                        <label>Ảnh đã chọn</label>
-                        <div id="previewImages" class="mt-2"></div>
+                        <label>Ảnh đã chọn (theo màu)</label>
+                        <div id="previewImagesByColor" class="mt-2"></div>
                       </div>
                     </div>
                   </div>
@@ -336,73 +368,179 @@
             loadProductSeries(this.value);
           });
 
-        // Preview images khi chọn file
-        let selectedFiles = [];
+        // Preview images khi chọn file - with COLOR support
+        let imagesByColor = {}; // { "Đen Titan": [File, File], "Trắng": [File] }
+        let currentSelectedColor = "";
+        let availableColors = [];
+        
         const imageInput = document.getElementById("imagesInputCreate");
-        const previewContainer = document.getElementById("previewImages");
+        const previewContainer = document.getElementById("previewImagesByColor");
+        const colorSelect = document.getElementById("colorSelect");
+        const currentColorLabel = document.getElementById("currentColorLabel");
+        const addNewColorBtn = document.getElementById("addNewColorBtn");
+        const newColorGroup = document.getElementById("newColorGroup");
+        const newColorInput = document.getElementById("newColorInput");
+        const saveNewColorBtn = document.getElementById("saveNewColorBtn");
+        const cancelNewColorBtn = document.getElementById("cancelNewColorBtn");
+
+        // Add new color button
+        addNewColorBtn.addEventListener("click", function() {
+          newColorGroup.style.display = "block";
+          newColorInput.focus();
+        });
+
+        // Save new color
+        saveNewColorBtn.addEventListener("click", function() {
+          const colorName = newColorInput.value.trim();
+          if (!colorName) {
+            alert("Vui lòng nhập tên màu!");
+            return;
+          }
+          
+          if (availableColors.includes(colorName)) {
+            alert("Màu này đã tồn tại!");
+            return;
+          }
+          
+          // Add new color to list
+          availableColors.push(colorName);
+          const opt = document.createElement("option");
+          opt.value = colorName;
+          opt.textContent = colorName;
+          colorSelect.appendChild(opt);
+          
+          // Select the new color
+          colorSelect.value = colorName;
+          currentSelectedColor = colorName;
+          currentColorLabel.textContent = colorName;
+          imageInput.disabled = false;
+          
+          // Hide new color input
+          newColorGroup.style.display = "none";
+          newColorInput.value = "";
+        });
+
+        // Cancel new color
+        cancelNewColorBtn.addEventListener("click", function() {
+          newColorGroup.style.display = "none";
+          newColorInput.value = "";
+        });
+
+        // Color selection change
+        colorSelect.addEventListener("change", function() {
+          currentSelectedColor = this.value;
+          if (currentSelectedColor) {
+            currentColorLabel.textContent = currentSelectedColor;
+            imageInput.disabled = false;
+          } else {
+            currentColorLabel.textContent = "Chưa chọn";
+            imageInput.disabled = true;
+          }
+        });
 
         imageInput.addEventListener("change", function (e) {
           const files = Array.from(e.target.files);
-          selectedFiles = files;
-          renderPreviewImages();
+          
+          if (!currentSelectedColor) {
+            alert("Vui lòng chọn màu trước khi upload ảnh!");
+            this.value = "";
+            return;
+          }
+          
+          // Add files to current color
+          if (!imagesByColor[currentSelectedColor]) {
+            imagesByColor[currentSelectedColor] = [];
+          }
+          imagesByColor[currentSelectedColor].push(...files);
+          
+          // Clear input để có thể chọn lại
+          this.value = "";
+          
+          renderPreviewImagesByColor();
         });
 
-        function renderPreviewImages() {
+        function renderPreviewImagesByColor() {
           previewContainer.innerHTML = "";
 
-          if (selectedFiles.length === 0) {
-            previewContainer.innerHTML = '<div class="text-muted">Chưa chọn ảnh nào</div>';
+          const colors = Object.keys(imagesByColor);
+          if (colors.length === 0) {
+            previewContainer.innerHTML = '<div class="text-muted">Chưa có ảnh nào</div>';
             return;
           }
 
-          const imageGrid = document.createElement("div");
-          imageGrid.className = "image-preview";
+          colors.forEach(color => {
+            const colorSection = document.createElement("div");
+            colorSection.className = "color-section mb-4";
+            colorSection.style.border = "1px solid #ddd";
+            colorSection.style.borderRadius = "8px";
+            colorSection.style.padding = "15px";
+            colorSection.style.backgroundColor = "#f9f9f9";
 
-          selectedFiles.forEach((file, index) => {
-            const wrap = document.createElement("div");
-            wrap.className = "image-item";
+            const colorHeader = document.createElement("div");
+            colorHeader.style.marginBottom = "10px";
+            colorHeader.style.fontWeight = "bold";
+            colorHeader.style.fontSize = "16px";
+            colorHeader.style.color = "#333";
+            colorHeader.innerHTML = `
+              <i class="fas fa-palette"></i> ${color} 
+              <span class="badge bg-primary">${imagesByColor[color].length} ảnh</span>
+              <button type="button" class="btn btn-sm btn-danger float-right" onclick="removeColorImages('${color}')">
+                <i class="fas fa-trash"></i> Xóa tất cả
+              </button>
+            `;
+            colorSection.appendChild(colorHeader);
 
-            const img = document.createElement("img");
-            img.style.objectFit = "cover";
-            img.style.width = "100%";
-            img.style.height = "100%";
+            const imageGrid = document.createElement("div");
+            imageGrid.className = "image-preview";
 
-            // Read file and show preview
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            imagesByColor[color].forEach((file, index) => {
+              const wrap = document.createElement("div");
+              wrap.className = "image-item";
 
-            wrap.appendChild(img);
+              const img = document.createElement("img");
+              img.style.objectFit = "cover";
+              img.style.width = "100%";
+              img.style.height = "100%";
 
-            // Add delete button
-            const del = document.createElement("button");
-            del.type = "button";
-            del.className = "delete-img";
-            del.innerHTML = '<i class="fas fa-trash"></i>';
-            del.title = "Xóa ảnh";
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                img.src = e.target.result;
+              };
+              reader.readAsDataURL(file);
 
-            del.addEventListener("click", function (ev) {
-              ev.stopPropagation();
-              // Remove file from array
-              selectedFiles.splice(index, 1);
+              wrap.appendChild(img);
 
-              // Update file input
-              const dt = new DataTransfer();
-              selectedFiles.forEach(f => dt.items.add(f));
-              imageInput.files = dt.files;
+              const del = document.createElement("button");
+              del.type = "button";
+              del.className = "delete-img";
+              del.innerHTML = '<i class="fas fa-trash"></i>';
+              del.title = "Xóa ảnh";
 
-              // Re-render preview
-              renderPreviewImages();
+              del.addEventListener("click", function (ev) {
+                ev.stopPropagation();
+                imagesByColor[color].splice(index, 1);
+                if (imagesByColor[color].length === 0) {
+                  delete imagesByColor[color];
+                }
+                renderPreviewImagesByColor();
+              });
+
+              wrap.appendChild(del);
+              imageGrid.appendChild(wrap);
             });
 
-            wrap.appendChild(del);
-            imageGrid.appendChild(wrap);
+            colorSection.appendChild(imageGrid);
+            previewContainer.appendChild(colorSection);
           });
-
-          previewContainer.appendChild(imageGrid);
         }
+
+        // Helper function to remove all images of a color
+        window.removeColorImages = function(color) {
+          if (confirm(`Xóa tất cả ảnh màu "${color}"?`)) {
+            delete imagesByColor[color];
+            renderPreviewImagesByColor();
+          }
+        };
 
         document
           .getElementById("createForm")
@@ -443,15 +581,31 @@
             if (!res.ok) return alert("Lỗi tạo sản phẩm!");
             const p = await res.json();
 
-            const imgs = document.getElementById("imagesInputCreate").files;
-            if (imgs && imgs.length > 0) {
-              const fd = new FormData();
-              for (let i = 0; i < imgs.length; i++) fd.append("images", imgs[i]);
-              await fetch(ctx + "/api/products/" + p.id + "/images", {
-                method: "POST",
-                body: fd,
-              });
+            // Upload images by color
+            const colors = Object.keys(imagesByColor);
+            if (colors.length > 0) {
+              for (const color of colors) {
+                const files = imagesByColor[color];
+                if (files && files.length > 0) {
+                  const fd = new FormData();
+                  for (let i = 0; i < files.length; i++) {
+                    fd.append("images", files[i]);
+                  }
+                  fd.append("color", color); // Thêm color vào request
+                  
+                  const uploadRes = await fetch(ctx + "/api/products/" + p.id + "/images", {
+                    method: "POST",
+                    body: fd,
+                  });
+                  
+                  if (!uploadRes.ok) {
+                    alert("Lỗi upload ảnh cho màu: " + color);
+                    return;
+                  }
+                }
+              }
             }
+            
             alert("Thêm sản phẩm thành công!");
             location.href = ctx + "/admin/products";
           });

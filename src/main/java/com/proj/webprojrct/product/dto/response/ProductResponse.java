@@ -40,4 +40,7 @@ public class ProductResponse {
     private Boolean onDeal;
     private Integer dealPercentage;
     private Boolean isActive;
+    
+    // Helper field for frontend: list of available colors
+    private List<String> availableColors;
 }

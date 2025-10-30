@@ -29,4 +29,7 @@ public class CartItem {
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
+    
+    @Column(name = "color")
+    private String color; // Selected color variant
 }

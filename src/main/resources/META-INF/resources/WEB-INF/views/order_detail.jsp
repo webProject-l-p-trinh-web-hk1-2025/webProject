@@ -345,6 +345,11 @@
                                                     </td>
                                                     <td>
                                                         <div class="product-name">${item.productName}</div>
+                                                        <c:if test="${not empty item.color}">
+                                                            <div style="color: #666; font-size: 13px; margin-top: 3px;">
+                                                                Màu: <strong>${item.color}</strong>
+                                                            </div>
+                                                        </c:if>
                                                     </td>
                                                     <td style="text-align: center;">
                                                         <span class="product-price">

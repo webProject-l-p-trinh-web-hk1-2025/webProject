@@ -33,4 +33,7 @@ public class OrderItem {
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
+    
+    @Column(name = "color")
+    private String color; // Selected color variant for this order item
 }

@@ -361,11 +361,51 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 
                 <div class="card mt-4">
                   <div class="card-header">
-                    <div class="card-title">Quản lý hình ảnh</div>
+                    <div class="card-title">Quản lý hình ảnh theo màu sắc</div>
                   </div>
                   <div class="card-body">
+                    <!-- Color selector for new images -->
                     <div class="form-group">
-                      <label>Ảnh mới (tùy chọn, có thể chọn nhiều ảnh)</label>
+                      <label><i class="fas fa-palette"></i> Chọn màu để upload ảnh</label>
+                      <div class="row">
+                        <div class="col-md-8">
+                          <select id="colorSelectEdit" class="form-control">
+                            <option value="">-- Chọn màu --</option>
+                          </select>
+                        </div>
+                        <div class="col-md-4">
+                          <button type="button" id="addNewColorBtnEdit" class="btn btn-success btn-block">
+                            <i class="fas fa-plus"></i> Thêm màu mới
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <!-- New color input (hidden by default) -->
+                      <div id="newColorGroupEdit" style="display: none; margin-top: 10px;">
+                        <div class="input-group">
+                          <input type="text" id="newColorInputEdit" class="form-control" placeholder="Nhập tên màu (vd: Đen Titan, Trắng Bạc...)">
+                          <div class="input-group-append">
+                            <button type="button" id="saveNewColorBtnEdit" class="btn btn-primary">
+                              <i class="fas fa-check"></i> Lưu
+                            </button>
+                            <button type="button" id="cancelNewColorBtnEdit" class="btn btn-secondary">
+                              <i class="fas fa-times"></i> Hủy
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Selected color display -->
+                      <div class="mt-2">
+                        <small class="text-muted">
+                          Màu đang chọn: <strong id="currentColorLabelEdit">Chưa chọn</strong>
+                        </small>
+                      </div>
+                    </div>
+
+                    <!-- Image upload input (disabled until color selected) -->
+                    <div class="form-group">
+                      <label>Ảnh mới cho màu đã chọn</label>
                       <input
                         type="file"
                         id="imagesInputEdit"
@@ -373,13 +413,24 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                         accept="image/*"
                         class="form-control"
                         multiple
+                        disabled
+                        title="Vui lòng chọn màu trước khi upload ảnh"
                       />
+                      <small class="form-text text-muted">
+                        <i class="fas fa-info-circle"></i> Chọn màu ở trên trước khi upload ảnh
+                      </small>
                     </div>
 
-                    <!-- Existing uploaded images -->
+                    <!-- Existing images grouped by color -->
                     <div class="form-group mt-4">
-                      <label>Ảnh đã upload</label>
-                      <div id="existingImages" class="mt-2"></div>
+                      <label>Ảnh đã upload (theo màu sắc)</label>
+                      <div id="existingImagesByColor" class="mt-2"></div>
+                    </div>
+
+                    <!-- New images preview (grouped by color) -->
+                    <div class="form-group mt-4" id="newImagesSection" style="display: none;">
+                      <label>Ảnh mới sẽ được upload</label>
+                      <div id="newImagesByColor" class="mt-2"></div>
                     </div>
                   </div>
                 </div>
@@ -543,18 +594,33 @@ uri="http://java.sun.com/jsp/jstl/core" %>
             if (res.ok) {
               const body = await res.json().catch(() => null);
               console.log("Update success", body);
-              // if multiple images selected, upload them via the images endpoint
-              const imgs = document.getElementById("imagesInputEdit").files;
-              if (imgs && imgs.length > 0) {
-                const fd = new FormData();
-                for (let i = 0; i < imgs.length; i++)
-                  fd.append("images", imgs[i]);
-                await fetch(ctx + "/api/products/" + id + "/images", {
-                  method: "POST",
-                  body: fd,
-                });
+              
+              // Upload new images by color
+              const colors = Object.keys(newImagesByColor);
+              if (colors.length > 0) {
+                for (const color of colors) {
+                  const files = newImagesByColor[color];
+                  if (files && files.length > 0) {
+                    const fd = new FormData();
+                    for (let i = 0; i < files.length; i++) {
+                      fd.append("images", files[i]);
+                    }
+                    fd.append("color", color); // Add color to request
+                    
+                    const uploadRes = await fetch(ctx + "/api/products/" + id + "/images", {
+                      method: "POST",
+                      body: fd,
+                    });
+                    
+                    if (!uploadRes.ok) {
+                      alert("Lỗi upload ảnh cho màu: " + color);
+                      return;
+                    }
+                  }
+                }
               }
 
+              alert("Cập nhật sản phẩm thành công!");
               location.href = ctx + "/admin/products";
               return;
             }
@@ -579,70 +645,326 @@ uri="http://java.sun.com/jsp/jstl/core" %>
           }
         });
 
-      function renderExistingImages(p) {
-        const container = document.getElementById("existingImages");
-        container.innerHTML = "";
-        const imgs =
-          p.images && p.images.length
-            ? p.images
-            : p.imageUrls && p.imageUrls.length
-            ? p.imageUrls.map((u) => ({ id: null, url: u }))
-            : p.imageUrl
-            ? [{ id: null, url: p.imageUrl }]
-            : [];
+      // Color and image management for EDIT page
+      let newImagesByColor = {}; // New images to upload { "Đen": [File, File] }
+      let availableColors = []; // All colors (existing + new)
+      let currentSelectedColor = "";
+      let productData = null; // Store product data
 
-        if (imgs.length === 0) {
-          container.innerHTML = '<div class="text-muted">Không có ảnh</div>';
+      const colorSelectEdit = document.getElementById("colorSelectEdit");
+      const currentColorLabelEdit = document.getElementById("currentColorLabelEdit");
+      const imageInputEdit = document.getElementById("imagesInputEdit");
+      const addNewColorBtnEdit = document.getElementById("addNewColorBtnEdit");
+      const newColorGroupEdit = document.getElementById("newColorGroupEdit");
+      const newColorInputEdit = document.getElementById("newColorInputEdit");
+      const saveNewColorBtnEdit = document.getElementById("saveNewColorBtnEdit");
+      const cancelNewColorBtnEdit = document.getElementById("cancelNewColorBtnEdit");
+
+      // Add new color button
+      addNewColorBtnEdit.addEventListener("click", function() {
+        newColorGroupEdit.style.display = "block";
+        newColorInputEdit.focus();
+      });
+
+      // Save new color
+      saveNewColorBtnEdit.addEventListener("click", function() {
+        const colorName = newColorInputEdit.value.trim();
+        if (!colorName) {
+          alert("Vui lòng nhập tên màu!");
+          return;
+        }
+        
+        if (availableColors.includes(colorName)) {
+          alert("Màu này đã tồn tại!");
+          return;
+        }
+        
+        // Add new color to list
+        availableColors.push(colorName);
+        const opt = document.createElement("option");
+        opt.value = colorName;
+        opt.textContent = colorName;
+        colorSelectEdit.appendChild(opt);
+        
+        // Select the new color
+        colorSelectEdit.value = colorName;
+        currentSelectedColor = colorName;
+        currentColorLabelEdit.textContent = colorName;
+        imageInputEdit.disabled = false;
+        
+        // Hide new color input
+        newColorGroupEdit.style.display = "none";
+        newColorInputEdit.value = "";
+      });
+
+      // Cancel new color
+      cancelNewColorBtnEdit.addEventListener("click", function() {
+        newColorGroupEdit.style.display = "none";
+        newColorInputEdit.value = "";
+      });
+
+      // Color selection change
+      colorSelectEdit.addEventListener("change", function() {
+        currentSelectedColor = this.value;
+        if (currentSelectedColor) {
+          currentColorLabelEdit.textContent = currentSelectedColor;
+          imageInputEdit.disabled = false;
+        } else {
+          currentColorLabelEdit.textContent = "Chưa chọn";
+          imageInputEdit.disabled = true;
+        }
+      });
+
+      // Handle new image selection
+      imageInputEdit.addEventListener("change", function(e) {
+        const files = Array.from(e.target.files);
+        
+        if (!currentSelectedColor) {
+          alert("Vui lòng chọn màu trước khi upload ảnh!");
+          this.value = "";
+          return;
+        }
+        
+        // Add files to current color
+        if (!newImagesByColor[currentSelectedColor]) {
+          newImagesByColor[currentSelectedColor] = [];
+        }
+        newImagesByColor[currentSelectedColor].push(...files);
+        
+        // Clear input
+        this.value = "";
+        
+        // Show and render new images section
+        document.getElementById("newImagesSection").style.display = "block";
+        renderNewImagesByColor();
+      });
+
+      function renderNewImagesByColor() {
+        const container = document.getElementById("newImagesByColor");
+        container.innerHTML = "";
+
+        const colors = Object.keys(newImagesByColor);
+        if (colors.length === 0) {
+          document.getElementById("newImagesSection").style.display = "none";
           return;
         }
 
-        const imageGrid = document.createElement("div");
-        imageGrid.className = "image-preview";
+        colors.forEach(color => {
+          const colorSection = document.createElement("div");
+          colorSection.className = "color-section mb-3";
+          colorSection.style.border = "1px solid #28a745";
+          colorSection.style.borderRadius = "8px";
+          colorSection.style.padding = "15px";
+          colorSection.style.backgroundColor = "#f0fff4";
 
-        imgs.forEach((it) => {
-          const wrap = document.createElement("div");
-          wrap.className = "image-item";
+          const colorHeader = document.createElement("div");
+          colorHeader.style.marginBottom = "10px";
+          colorHeader.style.fontWeight = "bold";
+          colorHeader.style.color = "#28a745";
+          colorHeader.innerHTML = `
+            <i class="fas fa-palette"></i> ${color} 
+            <span class="badge badge-success">${newImagesByColor[color].length} ảnh mới</span>
+            <button type="button" class="btn btn-sm btn-danger float-right" onclick="removeNewColorImages('${color}')">
+              <i class="fas fa-trash"></i> Xóa tất cả
+            </button>
+          `;
+          colorSection.appendChild(colorHeader);
 
-          const img = document.createElement("img");
-          img.src = (it.url || "").startsWith("/") ? ctx + it.url : it.url;
-          img.style.objectFit = "cover";
-          img.style.width = "100%";
-          img.style.height = "100%";
-          wrap.appendChild(img);
+          const imageGrid = document.createElement("div");
+          imageGrid.className = "image-preview";
 
-          if (it.id) {
+          newImagesByColor[color].forEach((file, index) => {
+            const wrap = document.createElement("div");
+            wrap.className = "image-item";
+
+            const img = document.createElement("img");
+            img.style.objectFit = "cover";
+            img.style.width = "100%";
+            img.style.height = "100%";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            wrap.appendChild(img);
+
             const del = document.createElement("button");
             del.type = "button";
             del.className = "delete-img";
             del.innerHTML = '<i class="fas fa-trash"></i>';
             del.title = "Xóa ảnh";
 
-            // Thay đổi: Xóa câu lệnh xác nhận 'confirm'
-            del.addEventListener("click", async (ev) => {
+            del.addEventListener("click", function(ev) {
               ev.stopPropagation();
-
-              // Bắt đầu ngay quá trình xóa mà không cần hỏi người dùng
-              const d = await fetch(ctx + "/api/products/images/" + it.id, {
-                method: "DELETE",
-              });
-
-              if (d.ok) {
-                // Xóa phần tử ảnh khỏi giao diện nếu API báo thành công
-                wrap.remove();
-              } else {
-                // Xử lý lỗi (ví dụ: thông báo lỗi cho người dùng)
-                console.error("Lỗi khi xóa ảnh từ server.");
-                alert("Đã xảy ra lỗi khi xóa ảnh. Vui lòng thử lại.");
+              newImagesByColor[color].splice(index, 1);
+              if (newImagesByColor[color].length === 0) {
+                delete newImagesByColor[color];
               }
+              renderNewImagesByColor();
             });
 
             wrap.appendChild(del);
-          }
+            imageGrid.appendChild(wrap);
+          });
 
-          imageGrid.appendChild(wrap);
+          colorSection.appendChild(imageGrid);
+          container.appendChild(colorSection);
+        });
+      }
+
+      // Helper function to remove all new images of a color
+      window.removeNewColorImages = function(color) {
+        if (confirm(`Xóa tất cả ảnh mới màu "${color}"?`)) {
+          delete newImagesByColor[color];
+          renderNewImagesByColor();
+        }
+      };
+
+      function renderExistingImages(p) {
+        productData = p; // Store for later use
+        const container = document.getElementById("existingImagesByColor");
+        container.innerHTML = "";
+        
+        const imgs = p.images && p.images.length ? p.images : [];
+
+        // Extract colors from existing images and populate color selector
+        const existingColors = [...new Set(imgs.map(img => img.color).filter(c => c))];
+        availableColors = [...existingColors];
+        
+        // Populate color select
+        colorSelectEdit.innerHTML = '<option value="">-- Chọn màu --</option>';
+        availableColors.forEach(color => {
+          const opt = document.createElement("option");
+          opt.value = color;
+          opt.textContent = color;
+          colorSelectEdit.appendChild(opt);
         });
 
-        container.appendChild(imageGrid);
+        if (imgs.length === 0) {
+          container.innerHTML = '<div class="text-muted">Chưa có ảnh nào</div>';
+          return;
+        }
+
+        // Group images by color
+        const imagesByColor = {};
+        const noColorImages = [];
+        
+        imgs.forEach(img => {
+          const color = img.color || null;
+          if (color) {
+            if (!imagesByColor[color]) {
+              imagesByColor[color] = [];
+            }
+            imagesByColor[color].push(img);
+          } else {
+            noColorImages.push(img);
+          }
+        });
+
+        // Render images without color first (legacy images)
+        if (noColorImages.length > 0) {
+          const noColorSection = document.createElement("div");
+          noColorSection.className = "color-section mb-4";
+          noColorSection.style.border = "1px solid #6c757d";
+          noColorSection.style.borderRadius = "8px";
+          noColorSection.style.padding = "15px";
+          noColorSection.style.backgroundColor = "#f8f9fa";
+
+          const header = document.createElement("div");
+          header.style.marginBottom = "10px";
+          header.style.fontWeight = "bold";
+          header.style.color = "#6c757d";
+          header.innerHTML = `
+            <i class="fas fa-images"></i> Ảnh chưa có màu 
+            <span class="badge badge-secondary">${noColorImages.length} ảnh</span>
+          `;
+          noColorSection.appendChild(header);
+
+          const imageGrid = document.createElement("div");
+          imageGrid.className = "image-preview";
+
+          noColorImages.forEach(img => {
+            imageGrid.appendChild(createImageElement(img));
+          });
+
+          noColorSection.appendChild(imageGrid);
+          container.appendChild(noColorSection);
+        }
+
+        // Render images grouped by color
+        Object.keys(imagesByColor).sort().forEach(color => {
+          const colorSection = document.createElement("div");
+          colorSection.className = "color-section mb-4";
+          colorSection.style.border = "1px solid #007bff";
+          colorSection.style.borderRadius = "8px";
+          colorSection.style.padding = "15px";
+          colorSection.style.backgroundColor = "#f0f8ff";
+
+          const colorHeader = document.createElement("div");
+          colorHeader.style.marginBottom = "10px";
+          colorHeader.style.fontWeight = "bold";
+          colorHeader.style.fontSize = "16px";
+          colorHeader.style.color = "#007bff";
+          colorHeader.innerHTML = `
+            <i class="fas fa-palette"></i> ${color} 
+            <span class="badge badge-primary">${imagesByColor[color].length} ảnh</span>
+          `;
+          colorSection.appendChild(colorHeader);
+
+          const imageGrid = document.createElement("div");
+          imageGrid.className = "image-preview";
+
+          imagesByColor[color].forEach(img => {
+            imageGrid.appendChild(createImageElement(img));
+          });
+
+          colorSection.appendChild(imageGrid);
+          container.appendChild(colorSection);
+        });
+      }
+
+      function createImageElement(img) {
+        const wrap = document.createElement("div");
+        wrap.className = "image-item";
+
+        const imgEl = document.createElement("img");
+        imgEl.src = (img.url || "").startsWith("/") ? ctx + img.url : img.url;
+        imgEl.style.objectFit = "cover";
+        imgEl.style.width = "100%";
+        imgEl.style.height = "100%";
+        wrap.appendChild(imgEl);
+
+        if (img.id) {
+          const del = document.createElement("button");
+          del.type = "button";
+          del.className = "delete-img";
+          del.innerHTML = '<i class="fas fa-trash"></i>';
+          del.title = "Xóa ảnh";
+
+          del.addEventListener("click", async (ev) => {
+            ev.stopPropagation();
+
+            const d = await fetch(ctx + "/api/products/images/" + img.id, {
+              method: "DELETE",
+            });
+
+            if (d.ok) {
+              wrap.remove();
+              // Reload product to update colors if needed
+              const p = await (await fetch(ctx + "/api/products/" + id)).json();
+              renderExistingImages(p);
+            } else {
+              console.error("Lỗi khi xóa ảnh từ server.");
+              alert("Đã xảy ra lỗi khi xóa ảnh. Vui lòng thử lại.");
+            }
+          });
+
+          wrap.appendChild(del);
+        }
+
+        return wrap;
       }
     </script>
 

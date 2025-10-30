@@ -16,7 +16,7 @@ public interface ProductService {
     List<ProductResponse> getAll();
     List<ProductResponse> getByCategoryId(Long categoryId);
     Page<ProductResponse> search(String brand, String name, BigDecimal minPrice, BigDecimal maxPrice, int page, int size, String sort);
-    String uploadImage(Long id, MultipartFile file) throws IOException;
+    String uploadImage(Long id, MultipartFile file, String color) throws IOException;
     void deleteImage(Long imageId) throws IOException;
     List<String> getAllBrands();
     List<String> suggestNames(String q, int limit);

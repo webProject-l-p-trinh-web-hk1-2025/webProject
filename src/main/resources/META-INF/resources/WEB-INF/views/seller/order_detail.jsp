@@ -477,7 +477,15 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
-                                        <td>${item.productName}</td>
+                                        <td>
+                                            <div>${item.productName}</div>
+                                            <c:if test="${not empty item.color}">
+                                                <div style="color: #666; font-size: 12px; margin-top: 3px;">
+                                                    <i class="fa fa-circle" style="color: #d70018; font-size: 9px;"></i> 
+                                                    Màu: <strong>${item.color}</strong>
+                                                </div>
+                                            </c:if>
+                                        </td>
                                         <td>
                                             <fmt:formatNumber value="${item.price}" type="currency"
                                                 currencySymbol="₫" />

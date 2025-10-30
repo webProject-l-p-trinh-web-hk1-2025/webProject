@@ -135,7 +135,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public String uploadImage(Long id, MultipartFile file) throws IOException {
+    public String uploadImage(Long id, MultipartFile file, String color) throws IOException {
         if (file == null || file.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ảnh không hợp lệ");
 
@@ -164,6 +164,7 @@ public class ProductServiceImpl implements ProductService {
 
         var img = com.proj.webprojrct.product.entity.ProductImage.builder()
                 .url(url)
+                .color(color)  // Set color for the image
                 .product(p)
                 .build();
         // recordtheme vào product và lưu ảnh

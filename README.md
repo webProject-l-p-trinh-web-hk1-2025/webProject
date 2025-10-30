@@ -7,7 +7,7 @@
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0.33-blue.svg)](https://www.mysql.com/)
-[![License](https://img.shields.io/badge/License-Academic-yellow.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Academic-yellow.svg)](https://github.com/webProject-l-p-trinh-web-hk1-2025/webProject.git)
 
 ---
 
@@ -537,6 +537,7 @@ documents             # Tài liệu
 
 -- Authentication
 otp_codes             # OTP codes
+otp_types             # Loại OTP
 refresh_tokens        # JWT refresh tokens
 
 -- Others

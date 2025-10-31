@@ -30,8 +30,8 @@ public class SecurityConfig {
     private final CustomUserDetailsService uds;
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationFilter jwtFilter;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
-    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    // private final CustomAccessDeniedHandler accessDeniedHandler;
+    // private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     @Autowired(required = false)
     private CustomOauth2UserService customOauth2UserService;
@@ -45,57 +45,34 @@ public class SecurityConfig {
     public SecurityConfig(
             CustomUserDetailsService uds,
             PasswordEncoder passwordEncoder,
-            JwtAuthenticationFilter jwtFilter,
-            CustomAccessDeniedHandler accessDeniedHandler,
-            CustomAuthenticationEntryPoint authenticationEntryPoint
+            JwtAuthenticationFilter jwtFilter
+    // CustomAccessDeniedHandler accessDeniedHandler,
+    // CustomAuthenticationEntryPoint authenticationEntryPoint
     ) {
         this.uds = uds;
         this.passwordEncoder = passwordEncoder;
         this.jwtFilter = jwtFilter;
-        this.accessDeniedHandler = accessDeniedHandler;
-        this.authenticationEntryPoint = authenticationEntryPoint;
+        // this.accessDeniedHandler = accessDeniedHandler;
+        // this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
-    // @Bean
-    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    //     http
-    //             .csrf(csrf -> csrf.disable())
-    //             .authorizeHttpRequests(auth -> auth
-    //             .anyRequest().permitAll() // tạm mở tất cả
-    //             );
-    //     return http.build();
-    // }
-    // @Bean
-    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    //     http.csrf(csrf -> csrf.disable())
-    //             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    //             .authorizeHttpRequests(auth -> auth
-    //             .requestMatchers("/", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/api/documents/**", "/api/products/**", "/css/**", "/js/**", "/favicon.ico", "/error", "/WEB-INF/jsp/**").permitAll()
-    //             .requestMatchers("/admin/**").hasRole("ADMIN")
-    //             .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-    //             .anyRequest().authenticated()
-    //             )
-    //             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    //             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-    //     return http.build();
-    // }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/oauth2/**", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/about", "/product/**", "/products", "/shop", "/deals", "/cart", "/wishlist", "/css/**", "/js/**", "/fonts/**", "/img/**", "/image/**", "/uploads/**", "/favicon.ico", "/error", "/error/**", "/webjars/**", "/WEB-INF/views/**", "/WEB-INF/decorators/**", "/common/**").permitAll()
+                .requestMatchers("/", "/oauth2/**", "/login", "/dologin", "/register", "/doregister", "/doResetPassword", "/resetPassword", "/refresh", "/home", "/about", "/product/**", "/products", "/shop", "/deals", "/css/**", "/js/**", "/fonts/**", "/img/**", "/image/**", "/uploads/**", "/favicon.ico", "/error", "/error/**", "/webjars/**", "/WEB-INF/views/**", "/WEB-INF/decorators/**", "/common/**").permitAll()
                 .requestMatchers("/api/products/**", "/api/categories/**", "/api/media/**", "/api/cart/**", "/api/favorite/**", "/api/documents/**", "/api/reviews/**").permitAll()
                 .requestMatchers("/about", "/faq", "/warranty", "/return", "/payment", "/shipping", "/contact").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN", "SELLER")
+                // .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN", "SELLER")
                 .anyRequest().authenticated()
                 )
-                .exceptionHandling(e -> e
-                .accessDeniedHandler(accessDeniedHandler)
-                .authenticationEntryPoint(authenticationEntryPoint)
-                )
+                // .exceptionHandling(e -> e
+                // .accessDeniedHandler(accessDeniedHandler)
+                // .authenticationEntryPoint(authenticationEntryPoint)
+                // )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable());

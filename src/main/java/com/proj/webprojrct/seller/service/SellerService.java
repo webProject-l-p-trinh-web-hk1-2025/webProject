@@ -219,6 +219,9 @@ public class SellerService {
         order.setCancelNote(cancelNote);
         orderRepository.save(order);
 
+        // Hoàn lại số lượng sản phẩm khi hủy đơn
+        restoreProductStock(order, "Order Cancelled");
+
         // Lưu thông tin có hoàn tiền hay không vào cancelNote để hiển thị sau
         if (isRefunded) {
             order.setCancelNote("[ĐÃ HOÀN TIỀN] " + cancelNote);
@@ -302,6 +305,10 @@ public class SellerService {
         if (order == null) {
             throw new IllegalArgumentException("Order not found with id: " + orderId);
         }
+
+        // Hoàn lại số lượng sản phẩm khi chấp nhận hoàn tiền
+        restoreProductStock(order, "Refund Accepted");
+
         // Logic to process refund based on transType and percent
         order.setStatus("REFUNDED_ACCEPTED");
         orderRepository.save(order);
@@ -579,6 +586,34 @@ public class SellerService {
             return "UNKNOWN";
         }
         return p.getMethod();
+    }
+
+    /**
+     * Hoàn lại số lượng sản phẩm vào kho khi hủy đơn hoặc hoàn tiền
+     *
+     * @param order Đơn hàng cần hoàn lại stock
+     * @param reason Lý do hoàn (để log)
+     */
+    private void restoreProductStock(Order order, String reason) {
+        List<OrderItem> orderItems = order.getOrderItems();
+        if (orderItems == null || orderItems.isEmpty()) {
+            System.out.println("No order items to restore stock for order #" + order.getId());
+            return;
+        }
+
+        for (OrderItem item : orderItems) {
+            Product product = productRepository.findById(item.getProductId()).orElse(null);
+            if (product != null) {
+                int restoredStock = product.getStock() + item.getQuantity();
+                product.setStock(restoredStock);
+                productRepository.save(product);
+
+                System.out.println("Restored stock for product " + product.getName()
+                        + " (" + reason + "): " + (restoredStock - item.getQuantity()) + " -> " + restoredStock);
+            } else {
+                System.err.println("Product not found with ID: " + item.getProductId() + " for order #" + order.getId());
+            }
+        }
     }
 
 }

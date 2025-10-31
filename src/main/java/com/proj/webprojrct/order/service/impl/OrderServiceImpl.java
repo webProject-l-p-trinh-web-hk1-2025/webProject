@@ -241,6 +241,20 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("Only PENDING or PAID orders can be cancelled.");
         }
 
+        // Restore product stock when cancelling
+        List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
+        for (OrderItem item : orderItems) {
+            Product product = productRepository.findById(item.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + item.getProductId()));
+
+            int restoredStock = product.getStock() + item.getQuantity();
+            product.setStock(restoredStock);
+            productRepository.save(product);
+
+            System.out.println("Restored stock for product " + product.getName()
+                    + ": " + (restoredStock - item.getQuantity()) + " -> " + restoredStock);
+        }
+
         order.setStatus("CANCELLED");
         orderRepository.save(order);
     }
@@ -321,22 +335,10 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Update order status to REFUNDED_REQUESTED
+        // Chỉ đổi status, chưa hoàn stock
+        // Stock sẽ được hoàn khi seller chấp nhận hoàn tiền
         order.setStatus("REFUNDED_REQUESTED");
         orderRepository.save(order);
-
-        // Restore product stock
-        List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
-        for (OrderItem item : orderItems) {
-            Product product = productRepository.findById(item.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found: " + item.getProductId()));
-
-            int restoredStock = product.getStock() + item.getQuantity();
-            product.setStock(restoredStock);
-            productRepository.save(product);
-
-            System.out.println("Restored stock for product " + product.getName()
-                    + ": " + (restoredStock - item.getQuantity()) + " -> " + restoredStock);
-        }
     }
 
 }

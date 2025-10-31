@@ -75,14 +75,92 @@
                     display: block;
                     position: relative;
                     max-width: 100%;
-                    margin: 5px auto;
+                    margin: 15px auto;
+                    overflow: auto; /* For table scrolling if too wide */
                 }
 
-                .img-wrapper img,
-                .table-wrapper table {
+                .img-wrapper img {
                     display: block;
                     width: 100%;
                     max-width: 100%;
+                }
+                
+                .table-wrapper {
+                    overflow-x: auto;
+                }
+                
+                .table-wrapper table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    background: white;
+                }
+                
+                /* Default table styling in editor */
+                #editor table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 15px 0;
+                    background: white;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                    table-layout: fixed; /* Important for column resizing */
+                    position: relative;
+                }
+                
+                #editor table td,
+                #editor table th {
+                    border: 1px solid #ddd;
+                    padding: 10px 12px;
+                    text-align: left;
+                    vertical-align: top;
+                    min-width: 50px;
+                    position: relative;
+                    overflow: hidden;
+                    word-wrap: break-word;
+                }
+                
+                #editor table th {
+                    background-color: #f5f5f5;
+                    font-weight: 600;
+                    color: #333;
+                }
+                
+                #editor table tr:hover {
+                    background-color: #f9f9f9;
+                }
+                
+                /* Make table cells editable */
+                #editor table td[contenteditable="true"],
+                #editor table th[contenteditable="true"] {
+                    cursor: text;
+                }
+                
+                #editor table td:focus,
+                #editor table th:focus {
+                    outline: 2px solid #1976d2;
+                    background-color: #e3f2fd;
+                }
+                
+                /* Column resize handle */
+                #editor table th::after,
+                #editor table td::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    right: -3px;
+                    width: 6px;
+                    height: 100%;
+                    cursor: col-resize;
+                    z-index: 10;
+                }
+                
+                #editor table th:hover::after,
+                #editor table td:hover::after {
+                    background: rgba(25, 118, 210, 0.3);
+                }
+                
+                #editor table th.resizing::after,
+                #editor table td.resizing::after {
+                    background: #1976d2;
                 }
                 
                 /* Support for text-align from justifyCenter/justifyLeft/justifyRight */
@@ -348,33 +426,71 @@
                                 return;
                             }
 
-                            // Xây dựng chuỗi HTML cho bảng
-                            // Thêm style cơ bản để nhìn thấy đường viền
-                            let tableHtml = '<table border="1" style="border-collapse: collapse; width: 100%;">';
-                            tableHtml += '<tbody>';
+                            // Tạo table element với styling đẹp
+                            const table = document.createElement('table');
+                            table.style.borderCollapse = 'collapse';
+                            table.style.width = '100%';
+                            table.style.margin = '15px 0';
+                            table.style.background = 'white';
+                            table.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                            
+                            const tbody = document.createElement('tbody');
 
                             for (let i = 0; i < numRows; i++) {
-                                tableHtml += '<tr>';
+                                const tr = document.createElement('tr');
+                                
                                 for (let j = 0; j < numCols; j++) {
-                                    // Thêm &nbsp; để ô không bị xẹp và có thể click vào
-                                    tableHtml += '<td>&nbsp;</td>';
+                                    const td = document.createElement(i === 0 ? 'th' : 'td');
+                                    td.style.border = '1px solid #ddd';
+                                    td.style.padding = '10px 12px';
+                                    td.style.textAlign = 'left';
+                                    td.style.minWidth = '80px';
+                                    
+                                    if (i === 0) {
+                                        // Header row
+                                        td.style.backgroundColor = '#f5f5f5';
+                                        td.style.fontWeight = '600';
+                                        td.innerHTML = `Header ${j + 1}`;
+                                    } else {
+                                        td.innerHTML = '&nbsp;';
+                                    }
+                                    
+                                    tr.appendChild(td);
                                 }
-                                tableHtml += '</tr>';
+                                
+                                tbody.appendChild(tr);
                             }
-
-                            tableHtml += '</tbody></table>';
-
-                            // Chèn HTML vào editor
-                            document.execCommand('insertHTML', false, tableHtml);
-                            document.getElementById('editor').focus();
                             
-                            // Make the new table resizable
+                            table.appendChild(tbody);
+
+                            // Insert vào editor
+                            const selection = window.getSelection();
+                            if (selection.rangeCount > 0) {
+                                const range = selection.getRangeAt(0);
+                                range.deleteContents();
+                                range.insertNode(table);
+                                
+                                // Move cursor after table
+                                const br = document.createElement('br');
+                                table.parentNode.insertBefore(br, table.nextSibling);
+                                range.setStartAfter(br);
+                                range.setEndAfter(br);
+                                selection.removeAllRanges();
+                                selection.addRange(range);
+                            } else {
+                                editor.appendChild(table);
+                            }
+                            
+                            // Make table resizable
                             setTimeout(() => {
-                                const tables = editor.querySelectorAll('table:not(.resizable)');
-                                if (tables.length > 0) {
-                                    makeResizable(tables[tables.length - 1]);
+                                if (!table.parentElement.classList.contains('table-wrapper')) {
+                                    makeResizable(table);
                                 }
+                                // Enable column resizing
+                                makeTableColumnsResizable(table);
                             }, 100);
+                            
+                            document.getElementById('editor').focus();
                         }
 
                         // --- (Các hàm upload ảnh giữ nguyên) ---
@@ -403,7 +519,38 @@
                                     .then(data => {
                                         if (data && data.imageUrl) {
                                             const imageUrl = "${pageContext.request.contextPath}" + data.imageUrl;
-                                            document.execCommand('insertImage', false, imageUrl);
+                                            
+                                            // Insert image with proper styling
+                                            const img = document.createElement('img');
+                                            img.src = imageUrl;
+                                            img.style.maxWidth = '100%';
+                                            img.style.height = 'auto';
+                                            img.style.display = 'block';
+                                            img.style.margin = '15px auto';
+                                            
+                                            // Insert at cursor position
+                                            const selection = window.getSelection();
+                                            if (selection.rangeCount > 0) {
+                                                const range = selection.getRangeAt(0);
+                                                range.deleteContents();
+                                                range.insertNode(img);
+                                                
+                                                // Move cursor after image
+                                                range.setStartAfter(img);
+                                                range.setEndAfter(img);
+                                                selection.removeAllRanges();
+                                                selection.addRange(range);
+                                            } else {
+                                                document.getElementById('editor').appendChild(img);
+                                            }
+                                            
+                                            // Make it resizable
+                                            setTimeout(() => {
+                                                if (!img.parentElement.classList.contains('img-wrapper')) {
+                                                    makeResizable(img);
+                                                }
+                                            }, 100);
+                                            
                                             document.getElementById('editor').focus();
                                         } else {
                                             throw new Error('Invalid JSON response from server');
@@ -419,13 +566,114 @@
 
                         // --- (Hàm đồng bộ và khởi tạo giữ nguyên) ---
                         function syncEditor() {
-                            document.getElementById('description').value = document.getElementById('editor').innerHTML;
+                            // Clone editor content to clean it up
+                            const editorClone = document.getElementById('editor').cloneNode(true);
+                            
+                            // Remove all resize handles
+                            editorClone.querySelectorAll('.resize-handle').forEach(handle => {
+                                handle.remove();
+                            });
+                            
+                            // Unwrap all images from img-wrapper
+                            editorClone.querySelectorAll('.img-wrapper').forEach(wrapper => {
+                                const img = wrapper.querySelector('img');
+                                if (img) {
+                                    // Keep the img element, remove wrapper
+                                    wrapper.replaceWith(img);
+                                }
+                            });
+                            
+                            // Unwrap all tables from table-wrapper
+                            editorClone.querySelectorAll('.table-wrapper').forEach(wrapper => {
+                                const table = wrapper.querySelector('table');
+                                if (table) {
+                                    // Keep the table element, remove wrapper
+                                    wrapper.replaceWith(table);
+                                }
+                            });
+                            
+                            // Save cleaned HTML
+                            document.getElementById('description').value = editorClone.innerHTML;
                         }
 
                         const editor = document.getElementById('editor');
                         if (editor.innerHTML.trim() === '') {
                             editor.innerHTML = '<p>&nbsp;</p>';
                         }
+
+                        // Handle paste event to ensure images have proper styling
+                        editor.addEventListener('paste', function(e) {
+                            // Check if pasting an image
+                            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                            for (let i = 0; i < items.length; i++) {
+                                if (items[i].type.indexOf('image') !== -1) {
+                                    e.preventDefault();
+                                    
+                                    const blob = items[i].getAsFile();
+                                    const formData = new FormData();
+                                    formData.append('image', blob);
+
+                                    const uploadUrl = "${pageContext.request.contextPath}/admin/document/upload-image";
+
+                                    fetch(uploadUrl, {
+                                        method: 'POST',
+                                        body: formData
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data && data.imageUrl) {
+                                            const imageUrl = "${pageContext.request.contextPath}" + data.imageUrl;
+                                            
+                                            const img = document.createElement('img');
+                                            img.src = imageUrl;
+                                            img.style.maxWidth = '100%';
+                                            img.style.height = 'auto';
+                                            img.style.display = 'block';
+                                            img.style.margin = '15px auto';
+                                            
+                                            const selection = window.getSelection();
+                                            if (selection.rangeCount > 0) {
+                                                const range = selection.getRangeAt(0);
+                                                range.deleteContents();
+                                                range.insertNode(img);
+                                                range.setStartAfter(img);
+                                                range.setEndAfter(img);
+                                                selection.removeAllRanges();
+                                                selection.addRange(range);
+                                            } else {
+                                                editor.appendChild(img);
+                                            }
+                                            
+                                            setTimeout(() => {
+                                                if (!img.parentElement.classList.contains('img-wrapper')) {
+                                                    makeResizable(img);
+                                                }
+                                            }, 100);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error uploading pasted image:', error);
+                                    });
+                                    
+                                    return;
+                                }
+                            }
+                            
+                            // For pasted HTML content, ensure images have proper styling
+                            setTimeout(() => {
+                                editor.querySelectorAll('img').forEach(img => {
+                                    if (!img.style.maxWidth) {
+                                        img.style.maxWidth = '100%';
+                                        img.style.height = 'auto';
+                                        img.style.display = 'block';
+                                        img.style.margin = '15px auto';
+                                    }
+                                    if (!img.parentElement.classList.contains('img-wrapper')) {
+                                        makeResizable(img);
+                                    }
+                                });
+                            }, 100);
+                        });
 
                         // --- DRAG TO RESIZE IMAGES & TABLES ---
                         let isResizing = false;
@@ -545,6 +793,155 @@
                             
                             return result;
                         };
+
+                        // ========== TABLE COLUMN RESIZE ==========
+                        let isResizingColumn = false;
+                        let currentCell = null;
+                        let startXColumn = 0;
+                        let startWidthColumn = 0;
+                        let columnIndex = 0;
+
+                        // Add resize functionality to all tables
+                        function makeTableColumnsResizable(table) {
+                            const rows = table.querySelectorAll('tr');
+                            if (rows.length === 0) return;
+
+                            // Set initial widths if not set
+                            const firstRow = rows[0];
+                            const cells = firstRow.querySelectorAll('th, td');
+                            const colCount = cells.length;
+                            
+                            if (!table.style.width) {
+                                table.style.width = '100%';
+                            }
+
+                            // Add mousedown listener to detect resize handle clicks
+                            table.addEventListener('mousedown', function(e) {
+                                const cell = e.target.closest('th, td');
+                                if (!cell) return;
+
+                                const rect = cell.getBoundingClientRect();
+                                const offsetX = e.clientX - rect.left;
+                                const cellWidth = rect.width;
+
+                                // Check if clicking near right edge (resize handle area)
+                                if (cellWidth - offsetX <= 6) {
+                                    e.preventDefault();
+                                    startColumnResize(cell, e);
+                                }
+                            });
+
+                            // Change cursor when hovering over resize area
+                            table.addEventListener('mousemove', function(e) {
+                                if (isResizingColumn) return;
+
+                                const cell = e.target.closest('th, td');
+                                if (!cell) {
+                                    table.style.cursor = '';
+                                    return;
+                                }
+
+                                const rect = cell.getBoundingClientRect();
+                                const offsetX = e.clientX - rect.left;
+                                const cellWidth = rect.width;
+
+                                if (cellWidth - offsetX <= 6) {
+                                    table.style.cursor = 'col-resize';
+                                } else {
+                                    table.style.cursor = '';
+                                }
+                            });
+
+                            table.addEventListener('mouseleave', function() {
+                                if (!isResizingColumn) {
+                                    table.style.cursor = '';
+                                }
+                            });
+                        }
+
+                        function startColumnResize(cell, e) {
+                            isResizingColumn = true;
+                            currentCell = cell;
+                            startXColumn = e.clientX;
+                            startWidthColumn = cell.offsetWidth;
+
+                            // Get column index
+                            const row = cell.parentElement;
+                            const cells = Array.from(row.children);
+                            columnIndex = cells.indexOf(cell);
+
+                            cell.classList.add('resizing');
+                            document.body.style.cursor = 'col-resize';
+                            document.body.style.userSelect = 'none';
+
+                            document.addEventListener('mousemove', doColumnResize);
+                            document.addEventListener('mouseup', stopColumnResize);
+                        }
+
+                        function doColumnResize(e) {
+                            if (!isResizingColumn || !currentCell) return;
+
+                            const deltaX = e.clientX - startXColumn;
+                            let newWidth = startWidthColumn + deltaX;
+
+                            // Min width 30px
+                            newWidth = Math.max(30, newWidth);
+
+                            // Apply width to all cells in this column
+                            const table = currentCell.closest('table');
+                            const rows = table.querySelectorAll('tr');
+                            
+                            rows.forEach(row => {
+                                const cells = row.querySelectorAll('th, td');
+                                if (cells[columnIndex]) {
+                                    cells[columnIndex].style.width = newWidth + 'px';
+                                }
+                            });
+                        }
+
+                        function stopColumnResize() {
+                            if (isResizingColumn) {
+                                isResizingColumn = false;
+                                if (currentCell) {
+                                    currentCell.classList.remove('resizing');
+                                }
+                                document.body.style.cursor = '';
+                                document.body.style.userSelect = '';
+                                currentCell = null;
+
+                                document.removeEventListener('mousemove', doColumnResize);
+                                document.removeEventListener('mouseup', stopColumnResize);
+                            }
+                        }
+
+                        // Initialize column resize for existing tables
+                        editor.querySelectorAll('table').forEach(table => {
+                            makeTableColumnsResizable(table);
+                        });
+
+                        // Initialize existing images on page load
+                        setTimeout(() => {
+                            editor.querySelectorAll('img').forEach(img => {
+                                // Ensure all images have proper styling
+                                if (!img.style.maxWidth) {
+                                    img.style.maxWidth = '100%';
+                                    img.style.height = 'auto';
+                                    img.style.display = 'block';
+                                    img.style.margin = '15px auto';
+                                }
+                                // Make them resizable if not already wrapped
+                                if (!img.parentElement.classList.contains('img-wrapper')) {
+                                    makeResizable(img);
+                                }
+                            });
+                            
+                            // Also wrap existing tables
+                            editor.querySelectorAll('table').forEach(table => {
+                                if (!table.parentElement.classList.contains('table-wrapper')) {
+                                    makeResizable(table);
+                                }
+                            });
+                        }, 200);
 
                         // Delete with keyboard
                         document.addEventListener('keydown', function(e) {

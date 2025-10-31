@@ -619,18 +619,35 @@
                     addToCartBtn.style.backgroundColor = '#999';
                     addToCartBtn.style.cursor = 'not-allowed';
                     addToCartBtn.style.opacity = '0.6';
-                  } else {
-                    // Hiển thị lại stock status
-                    document.getElementById('productStock').style.display = '';
-                    document.getElementById('productStock').textContent = (p.stock > 0 ? 'Còn hàng' : 'Hết hàng');
+                  } else {// Hiển thị lại stock status
+      document.getElementById('productStock').style.display = '';
+      document.getElementById('productStock').textContent = (p.stock > 0 ? 'Còn hàng' : 'Hết hàng');
 
-                    // Đảm bảo nút "Thêm vào giỏ hàng" hoạt động bình thường
-                    const addToCartBtn = document.getElementById('addToCartBtn');
-                    addToCartBtn.innerHTML = '<i class="fa fa-shopping-cart"></i> Thêm Vào Giỏ';
-                    addToCartBtn.disabled = false;
-                    addToCartBtn.style.backgroundColor = '';
-                    addToCartBtn.style.cursor = '';
-                    addToCartBtn.style.opacity = '';
+      const addToCartBtn = document.getElementById('addToCartBtn');
+
+      if (p.stock > 0) {
+          // Còn hàng → cho phép thêm
+          addToCartBtn.innerHTML = '<i class="fa fa-shopping-cart"></i> Thêm Vào Giỏ';
+          addToCartBtn.disabled = false;
+          addToCartBtn.style.backgroundColor = '';
+          addToCartBtn.style.cursor = 'pointer';
+          addToCartBtn.style.opacity = '1';
+      } else {
+          // Hết hàng → CHẶN hoàn toàn việc thêm vào giỏ
+          addToCartBtn.innerHTML = '<i class="fa fa-ban"></i> Hết hàng';
+          addToCartBtn.disabled = true;
+          addToCartBtn.style.backgroundColor = '#999';
+          addToCartBtn.style.cursor = 'not-allowed';
+          addToCartBtn.style.opacity = '0.6';
+
+          // Ngăn chặn hoàn toàn sự kiện click (phòng user dùng devtool bật lại nút)
+          addToCartBtn.onclick = function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              alert('Sản phẩm đã hết hàng!');
+              return false;
+          };
+      }
                   }
 
                   // Tạo short description từ specs cho phần product details
@@ -1477,8 +1494,47 @@
                       console.log('Tab innerHTML length:', tabDescElement.innerHTML.length);
                       console.log('Tab visible:', tabDescElement.offsetHeight > 0);
 
-                      // Setup toggle button if content is long
-                      setupDescriptionToggle();
+                      // Fix all images to have proper styling and remove resize handles
+                      setTimeout(() => {
+                        // Remove all resize handles from img-wrapper and table-wrapper
+                        const resizeHandles = tabDescElement.querySelectorAll('.resize-handle');
+                        console.log('Found resize handles:', resizeHandles.length);
+                        resizeHandles.forEach(handle => {
+                          handle.remove();
+                          console.log('Removed resize handle');
+                        });
+
+                        // Fix images
+                        const images = tabDescElement.querySelectorAll('img');
+                        console.log('Found images in description:', images.length);
+                        images.forEach((img, index) => {
+                          console.log('Image', index, '- Has style.maxWidth:', !!img.style.maxWidth);
+                          console.log('Image', index, '- Current src:', img.src);
+                          
+                          // Force max-width on all images
+                          img.style.maxWidth = '100%';
+                          img.style.height = 'auto';
+                          img.style.display = 'block';
+                          img.style.margin = '15px auto';
+                          console.log('Applied styles to image', index);
+                          
+                          // If image is in wrapper, unwrap it for better display
+                          const wrapper = img.parentElement;
+                          if (wrapper && wrapper.classList.contains('img-wrapper')) {
+                            console.log('Image is in wrapper, keeping wrapper but removing resize handle');
+                            // Wrapper is OK, just make sure it has proper styles
+                            wrapper.style.maxWidth = '100%';
+                            wrapper.style.width = '100%';
+                            wrapper.style.display = 'block';
+                            wrapper.style.margin = '15px auto';
+                          }
+                        });
+                      }, 100);
+
+                      // Setup toggle button AFTER images are processed
+                      setTimeout(() => {
+                        setupDescriptionToggle();
+                      }, 300);
                     } else {
                       console.warn('Document exists but description is empty');
                       tabDescElement.innerHTML =
@@ -1500,35 +1556,87 @@
                   const descElement = document.getElementById('tabDescription');
                   const toggleBtn = document.getElementById('toggleDescriptionBtn');
 
-                  if (!descElement || !toggleBtn) return;
+                  if (!descElement || !toggleBtn) {
+                    console.warn('Description element or toggle button not found');
+                    return;
+                  }
 
-                  // Get full height of content
-                  const fullHeight = descElement.scrollHeight;
+                  console.log('=== SETUP TOGGLE BUTTON ===');
 
-                  // Always show toggle button if there's content
-                  if (fullHeight > 0) {
-                    toggleBtn.style.display = 'inline-block';
+                  // Force recalculate height after images load
+                  const images = descElement.querySelectorAll('img');
+                  const totalImages = images.length;
+                  
+                  console.log('Total images to wait for:', totalImages);
 
-                    // Add click event
-                    toggleBtn.onclick = function () {
-                      if (descElement.classList.contains('collapsed')) {
-                        // Expand - show full content
-                        descElement.classList.remove('collapsed');
-                        descElement.style.maxHeight = fullHeight + 'px';
-                        toggleBtn.innerHTML = '<i class="fa fa-angle-up"></i> Thu gọn mô tả';
-                      } else {
-                        // Collapse - hide all content
-                        descElement.classList.add('collapsed');
-                        descElement.style.maxHeight = '0';
-                        toggleBtn.innerHTML = '<i class="fa fa-angle-down"></i> Xem mô tả chi tiết';
+                  // Setup button immediately, don't wait for images
+                  setupToggleButton();
 
-                        // Scroll to toggle button
-                        toggleBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  // Also recalculate after images load (for better accuracy)
+                  if (totalImages > 0) {
+                    let imagesLoaded = 0;
+                    
+                    function checkImageLoaded() {
+                      imagesLoaded++;
+                      console.log(`Image loaded: ${imagesLoaded}/${totalImages}`);
+                      
+                      if (imagesLoaded === totalImages) {
+                        console.log('All images loaded, recalculating height');
+                        // Recalculate height after all images loaded
+                        const fullHeight = descElement.scrollHeight;
+                        console.log('Updated full height:', fullHeight);
                       }
-                    };
-                  } else {
-                    // No content, hide button
-                    hideToggleButton();
+                    }
+
+                    images.forEach((img, index) => {
+                      if (img.complete) {
+                        console.log(`Image ${index} already loaded`);
+                        checkImageLoaded();
+                      } else {
+                        img.addEventListener('load', checkImageLoaded);
+                        img.addEventListener('error', () => {
+                          console.warn(`Image ${index} failed to load`);
+                          checkImageLoaded();
+                        });
+                      }
+                    });
+                  }
+
+                  function setupToggleButton() {
+                    // Get full height of content
+                    const fullHeight = descElement.scrollHeight;
+                    console.log('Initial description full height:', fullHeight);
+
+                    // Always show toggle button if there's content
+                    if (fullHeight > 0) {
+                      toggleBtn.style.display = 'inline-block';
+                      console.log('Toggle button displayed');
+
+                      // Add click event
+                      toggleBtn.onclick = function () {
+                        if (descElement.classList.contains('collapsed')) {
+                          // Expand - show full content
+                          descElement.classList.remove('collapsed');
+                          // Use 'none' to remove max-height limit completely
+                          descElement.style.maxHeight = 'none';
+                          toggleBtn.innerHTML = '<i class="fa fa-angle-up"></i> Thu gọn mô tả';
+                          console.log('Expanded description');
+                        } else {
+                          // Collapse - hide all content
+                          descElement.classList.add('collapsed');
+                          descElement.style.maxHeight = '135px';
+                          toggleBtn.innerHTML = '<i class="fa fa-angle-down"></i> Xem mô tả chi tiết';
+                          console.log('Collapsed description');
+
+                          // Scroll to toggle button
+                          toggleBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                      };
+                    } else {
+                      // No content, hide button
+                      console.warn('No content height, hiding button');
+                      hideToggleButton();
+                    }
                   }
                 }
 

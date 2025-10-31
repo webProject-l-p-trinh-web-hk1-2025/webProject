@@ -70,8 +70,8 @@
 
 /* Styling for images inside document content */
 .document-content img {
-  max-width: 100%;
-  height: auto;
+  max-width: 100% !important;
+  height: auto !important;
   display: block;
   margin: 15px auto;
   border-radius: 4px;

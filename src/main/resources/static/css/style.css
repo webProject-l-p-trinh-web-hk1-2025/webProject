@@ -2340,3 +2340,76 @@ textarea.input {
     margin-top: 10px;
   }
 }
+
+/* ========================================
+   PRODUCT TAB DESCRIPTION IMAGES FIX
+   ======================================== */
+#tabDescription img,
+.product-tab-content img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 15px auto !important;
+}
+
+/* Handle image wrappers from document editor */
+#tabDescription .img-wrapper,
+.product-tab-content .img-wrapper {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 15px auto !important;
+  display: block !important;
+  position: relative !important;
+}
+
+#tabDescription .img-wrapper img,
+.product-tab-content .img-wrapper img {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+/* Hide resize handles in view mode */
+#tabDescription .resize-handle,
+.product-tab-content .resize-handle {
+  display: none !important;
+}
+
+/* Handle table wrappers from document editor */
+#tabDescription .table-wrapper,
+.product-tab-content .table-wrapper {
+  max-width: 100%;
+  margin: 15px auto;
+  display: block;
+  overflow-x: auto;
+}
+
+#tabDescription .table-wrapper table,
+.product-tab-content .table-wrapper table {
+  width: 100%;
+  margin: 0;
+}
+
+#tabDescription table,
+.product-tab-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+#tabDescription table td,
+#tabDescription table th,
+.product-tab-content table td,
+.product-tab-content table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+#tabDescription table th,
+.product-tab-content table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}

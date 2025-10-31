@@ -74,6 +74,54 @@
                 .product-price {
                     min-height: 80px;
                 }
+
+                /* Inline Alert System */
+                .inline-alert {
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    animation: slideDown 0.4s ease-out;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    transition: opacity 0.5s ease;
+                }
+
+                .inline-alert i {
+                    font-size: 20px;
+                }
+
+                .inline-alert-danger {
+                    background: #f8d7da;
+                    color: #721c24;
+                    border: 1px solid #f5c6cb;
+                }
+
+                .inline-alert-warning {
+                    background: #fff3cd;
+                    color: #856404;
+                    border: 1px solid #ffc107;
+                }
+
+                .inline-alert-success {
+                    background: #d4edda;
+                    color: #155724;
+                    border: 1px solid #c3e6cb;
+                }
+
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-20px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
             </style>
         </head>
 
@@ -137,6 +185,32 @@
             <script>
                 const ctx = '${pageContext.request.contextPath}';
                 let wishlistData = [];
+
+                // Inline Alert System
+                function showInlineAlert(message, type = 'danger') {
+                    // Remove existing alerts
+                    document.querySelectorAll('.inline-alert').forEach(alert => alert.remove());
+
+                    // Create alert element
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'inline-alert inline-alert-' + type;
+                    alertDiv.innerHTML = '<i class="fa fa-' + (type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle') + '"></i> <span>' + message + '</span>';
+
+                    // Insert at top of wishlist container
+                    const container = document.getElementById('wishlist-container');
+                    if (container && container.parentElement) {
+                        container.parentElement.insertBefore(alertDiv, container);
+                    }
+
+                    // Scroll to alert
+                    alertDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                    // Auto-hide after 5 seconds
+                    setTimeout(() => {
+                        alertDiv.style.opacity = '0';
+                        setTimeout(() => alertDiv.remove(), 500);
+                    }, 5000);
+                }
 
                 // Load wishlist on page load
                 window.addEventListener('DOMContentLoaded', function () {
@@ -376,7 +450,7 @@
                         })
                         .catch(function (error) {
                             if (error.message !== 'Unauthorized') {
-                                alert('Có lỗi: ' + error.message);
+                                showInlineAlert('Có lỗi: ' + error.message, 'danger');
                             }
                         });
                 }
@@ -405,7 +479,7 @@
                         })
                         .catch(function (error) {
                             console.error('Error removing from wishlist:', error);
-                            alert('Lỗi khi xóa sản phẩm: ' + error.message);
+                            showInlineAlert('Lỗi khi xóa sản phẩm: ' + error.message, 'danger');
                         });
                 }
 

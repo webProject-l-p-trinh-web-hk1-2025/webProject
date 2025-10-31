@@ -907,6 +907,9 @@
                             <!-- Tab 4: Thông tin tài khoản -->
                             <div id="tab-account" class="tab-content-section">
                                 <div class="card-compact">
+                                    <!-- Alert Container for Account Tab -->
+                                    <div id="accountAlertContainer"></div>
+
                                     <h6
                                         style="margin:0 0 20px 0; font-size:16px; font-weight:700; color:#2B2D42; border-bottom:2px solid #D10024; padding-bottom:10px; display:inline-block;">
                                         <i class="fa fa-edit" style="color:#D10024; margin-right:8px;"></i>Cập nhật
@@ -1227,14 +1230,14 @@
                                 if (file) {
                                     // Check file size (max 5MB)
                                     if (file.size > 5 * 1024 * 1024) {
-                                        alert('Kích thước ảnh không được vượt quá 5MB!');
+                                        showInlineAlert('Kích thước ảnh không được vượt quá 5MB!', 'warning');
                                         event.target.value = '';
                                         return;
                                     }
 
                                     // Check file type
                                     if (!file.type.startsWith('image/')) {
-                                        alert('Vui lòng chọn file ảnh!');
+                                        showInlineAlert('Vui lòng chọn file ảnh!', 'warning');
                                         event.target.value = '';
                                         return;
                                     }
@@ -1299,7 +1302,7 @@
                                             btn.innerHTML = originalHtml;
                                             btn.style.opacity = '1';
                                             btn.disabled = false;
-                                            alert('Lỗi: ' + (data.message || 'Không thể gửi OTP'));
+                                            showInlineAlert('Lỗi: ' + (data.message || 'Không thể gửi OTP'), 'danger');
                                         }
                                     })
                                     .catch(error => {
@@ -1307,14 +1310,14 @@
                                         btn.innerHTML = originalHtml;
                                         btn.style.opacity = '1';
                                         btn.disabled = false;
-                                        alert('Lỗi khi gửi OTP: ' + error);
+                                        showInlineAlert('Lỗi khi gửi OTP: ' + error, 'danger');
                                     });
                             }
 
                             function verifyEmailOTP() {
                                 const otp = document.getElementById('emailOtpInput').value;
                                 if (!otp || otp.length !== 6) {
-                                    alert('Vui lòng nhập mã OTP 6 số!');
+                                    showInlineAlert('Vui lòng nhập mã OTP 6 số!', 'warning');
                                     return;
                                 }
 
@@ -1325,14 +1328,14 @@
                                     .then(response => response.json())
                                     .then(data => {
                                         if (data.success) {
-                                            alert('Xác thực email thành công!');
-                                            location.reload();
+                                            showInlineAlert('Xác thực email thành công!', 'success');
+                                            setTimeout(() => location.reload(), 1500);
                                         } else {
-                                            alert('Mã OTP không đúng hoặc đã hết hạn!');
+                                            showInlineAlert('Mã OTP không đúng hoặc đã hết hạn!', 'danger');
                                         }
                                     })
                                     .catch(error => {
-                                        alert('Lỗi khi xác thực: ' + error);
+                                        showInlineAlert('Lỗi khi xác thực: ' + error, 'danger');
                                     });
                             }
 
@@ -1383,7 +1386,7 @@
                                             btn.innerHTML = originalHtml;
                                             btn.style.opacity = '1';
                                             btn.disabled = false;
-                                            alert('Lỗi: ' + (data.message || 'Không thể gửi OTP'));
+                                            showInlineAlert('Lỗi: ' + (data.message || 'Không thể gửi OTP'), 'danger');
                                         }
                                     })
                                     .catch(error => {
@@ -1391,14 +1394,14 @@
                                         btn.innerHTML = originalHtml;
                                         btn.style.opacity = '1';
                                         btn.disabled = false;
-                                        alert('Lỗi khi gửi OTP: ' + error);
+                                        showInlineAlert('Lỗi khi gửi OTP: ' + error, 'danger');
                                     });
                             }
 
                             function verifyPhoneOTP() {
                                 const otp = document.getElementById('phoneOtpInput').value;
                                 if (!otp || otp.length !== 6) {
-                                    alert('Vui lòng nhập mã OTP 6 số!');
+                                    showInlineAlert('Vui lòng nhập mã OTP 6 số!', 'warning');
                                     return;
                                 }
 
@@ -1409,14 +1412,14 @@
                                     .then(response => response.json())
                                     .then(data => {
                                         if (data.success) {
-                                            alert('Xác thực số điện thoại thành công!');
-                                            location.reload();
+                                            showInlineAlert('Xác thực số điện thoại thành công!', 'success');
+                                            setTimeout(() => location.reload(), 1500);
                                         } else {
-                                            alert('Mã OTP không đúng hoặc đã hết hạn!');
+                                            showInlineAlert('Mã OTP không đúng hoặc đã hết hạn!', 'danger');
                                         }
                                     })
                                     .catch(error => {
-                                        alert('Lỗi khi xác thực: ' + error);
+                                        showInlineAlert('Lỗi khi xác thực: ' + error, 'danger');
                                     });
                             }
 
@@ -1494,7 +1497,122 @@
                                         location.reload();
                                     });
                             }
+
+                            // ===== INLINE ALERT SYSTEM =====
+                            function showInlineAlert(message, type = 'danger') {
+                                // Remove existing alerts
+                                document.querySelectorAll('.inline-alert').forEach(alert => alert.remove());
+
+                                // Create alert element
+                                const alertDiv = document.createElement('div');
+                                alertDiv.className = 'inline-alert inline-alert-' + type;
+                                alertDiv.innerHTML = '<i class="fa fa-' + (type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle') + '"></i> <span>' + message + '</span>';
+
+                                // Priority order for container selection:
+                                // 1. Specific alert container in account tab (if visible)
+                                // 2. Modal that's currently visible
+                                // 3. Active tab's card-compact
+                                // 4. Profile wrapper as fallback
+                                let container = null;
+
+                                // Check for account alert container (highest priority)
+                                const accountContainer = document.getElementById('accountAlertContainer');
+                                const accountTab = document.getElementById('tab-account');
+                                if (accountContainer && accountTab && accountTab.classList.contains('active')) {
+                                    container = accountContainer;
+                                }
+
+                                // Check for visible modal
+                                if (!container) {
+                                    const visibleModal = document.querySelector('#verifyEmailModal[style*="display: flex"], #verifyPhoneModal[style*="display: flex"]');
+                                    if (visibleModal) {
+                                        container = visibleModal.querySelector('div[style*="background:white"]');
+                                    }
+                                }
+
+                                // Use active tab's card-compact
+                                if (!container) {
+                                    const activeTab = document.querySelector('.tab-content-section.active');
+                                    if (activeTab) {
+                                        const cardCompact = activeTab.querySelector('.card-compact');
+                                        container = cardCompact || activeTab;
+                                    }
+                                }
+
+                                // Fallback to profile wrapper
+                                if (!container) {
+                                    container = document.querySelector('.profile-wrapper');
+                                }
+
+                                if (container) {
+                                    // If container is accountAlertContainer, just append
+                                    // Otherwise, insertBefore first child
+                                    if (container.id === 'accountAlertContainer') {
+                                        container.appendChild(alertDiv);
+                                    } else {
+                                        container.insertBefore(alertDiv, container.firstChild);
+                                    }
+
+                                    // Scroll to alert
+                                    alertDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                                    // Auto-hide after 5 seconds
+                                    setTimeout(() => {
+                                        alertDiv.style.opacity = '0';
+                                        setTimeout(() => alertDiv.remove(), 500);
+                                    }, 5000);
+                                }
+                            }
                         </script>
+
+                        <style>
+                            .inline-alert {
+                                padding: 15px 20px;
+                                margin: 0 0 20px 0;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                font-weight: 500;
+                                display: flex;
+                                align-items: center;
+                                gap: 12px;
+                                animation: slideDown 0.3s ease-out;
+                                transition: opacity 0.5s ease-out;
+                            }
+
+                            .inline-alert i {
+                                font-size: 18px;
+                            }
+
+                            .inline-alert-danger {
+                                background: #f8d7da;
+                                color: #721c24;
+                                border: 1px solid #f5c6cb;
+                            }
+
+                            .inline-alert-success {
+                                background: #d4edda;
+                                color: #155724;
+                                border: 1px solid #c3e6cb;
+                            }
+
+                            .inline-alert-warning {
+                                background: #fff3cd;
+                                color: #856404;
+                                border: 1px solid #ffeeba;
+                            }
+
+                            @keyframes slideDown {
+                                from {
+                                    opacity: 0;
+                                    transform: translateY(-20px);
+                                }
+
+                                to {
+                                    opacity: 1;
+                                    transform: translateY(0);
+                                }
+                            }
+                        </style>
                     </div>
                 </div>
             </body>

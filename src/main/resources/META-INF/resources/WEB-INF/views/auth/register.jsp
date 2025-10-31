@@ -38,6 +38,11 @@
           </div>
         </c:if>
 
+        <!-- Inline validation messages -->
+        <div id="validationMessage" class="auth-error" style="display: none;">
+          <i class="fa fa-exclamation-circle"></i> <span id="validationText"></span>
+        </div>
+
         <form id="registerForm" action="${pageContext.request.contextPath}/doregister" method="post">
           <h2 class="section-title">
             <i class="fa fa-user"></i> Thông tin cá nhân
@@ -113,6 +118,32 @@
       </div>
 
       <script>
+        // Hàm hiển thị thông báo lỗi inline
+        function showValidationError(message, inputElement) {
+          const validationMessage = document.getElementById('validationMessage');
+          const validationText = document.getElementById('validationText');
+
+          validationText.textContent = message;
+          validationMessage.style.display = 'block';
+
+          // Scroll đến thông báo
+          validationMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+          // Focus vào input lỗi
+          if (inputElement) {
+            inputElement.focus();
+            inputElement.classList.add('error-input');
+          }
+
+          // Ẩn thông báo sau 5 giây
+          setTimeout(() => {
+            validationMessage.style.display = 'none';
+            if (inputElement) {
+              inputElement.classList.remove('error-input');
+            }
+          }, 5000);
+        }
+
         // Validation cho form đăng ký
         document.getElementById('registerForm').addEventListener('submit', function (e) {
           const phone = document.getElementById('phone').value;
@@ -120,12 +151,14 @@
           const password = document.querySelector('input[name="password"]').value;
           const confirmPassword = document.querySelector('input[name="confirmPassword"]').value;
 
+          // Ẩn thông báo cũ
+          document.getElementById('validationMessage').style.display = 'none';
+
           // Kiểm tra số điện thoại (đúng 10 số)
           const phoneRegex = /^[0-9]{10}$/;
           if (!phoneRegex.test(phone)) {
             e.preventDefault();
-            alert('Số điện thoại phải có đúng 10 chữ số!');
-            document.getElementById('phone').focus();
+            showValidationError('Số điện thoại phải có đúng 10 chữ số!', document.getElementById('phone'));
             return false;
           }
 
@@ -133,8 +166,7 @@
           const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
           if (!emailRegex.test(email)) {
             e.preventDefault();
-            alert('Email không hợp lệ! Vui lòng nhập đúng định dạng email.');
-            document.getElementById('email').focus();
+            showValidationError('Email không hợp lệ! Vui lòng nhập đúng định dạng email.', document.getElementById('email'));
             return false;
           }
 
@@ -142,14 +174,14 @@
           const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
           if (!passwordRegex.test(password)) {
             e.preventDefault();
-            alert('Mật khẩu phải có ít nhất 6 ký tự, bao gồm cả chữ cái và số!');
+            showValidationError('Mật khẩu phải có ít nhất 6 ký tự, bao gồm cả chữ cái và số!', document.querySelector('input[name="password"]'));
             return false;
           }
 
           // Kiểm tra mật khẩu khớp
           if (password !== confirmPassword) {
             e.preventDefault();
-            alert('Mật khẩu xác nhận không khớp!');
+            showValidationError('Mật khẩu xác nhận không khớp!', document.querySelector('input[name="confirmPassword"]'));
             return false;
           }
 
@@ -167,6 +199,14 @@
         // Chuyển email về chữ thường
         document.getElementById('email').addEventListener('input', function (e) {
           this.value = this.value.toLowerCase();
+        });
+
+        // Xóa error khi user bắt đầu nhập lại
+        document.querySelectorAll('.form-control').forEach(input => {
+          input.addEventListener('input', function () {
+            this.classList.remove('error-input');
+            document.getElementById('validationMessage').style.display = 'none';
+          });
         });
       </script>
     </body>

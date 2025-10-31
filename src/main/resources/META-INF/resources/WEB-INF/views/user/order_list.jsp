@@ -240,6 +240,88 @@
                                 text-align: center;
                             }
                         }
+
+                        /* Confirm Modal */
+                        .confirm-overlay {
+                            display: none;
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background: rgba(0, 0, 0, 0.5);
+                            z-index: 9999;
+                            align-items: center;
+                            justify-content: center;
+                        }
+
+                        .confirm-modal {
+                            background: white;
+                            border-radius: 12px;
+                            padding: 30px;
+                            max-width: 450px;
+                            width: 90%;
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                            animation: slideDown 0.3s ease-out;
+                        }
+
+                        .confirm-modal h4 {
+                            margin: 0 0 20px 0;
+                            color: #d10024;
+                            font-weight: 700;
+                            font-size: 20px;
+                        }
+
+                        .confirm-modal p {
+                            color: #666;
+                            margin-bottom: 25px;
+                            line-height: 1.6;
+                        }
+
+                        .confirm-buttons {
+                            display: flex;
+                            gap: 15px;
+                            justify-content: flex-end;
+                        }
+
+                        .confirm-buttons button {
+                            padding: 10px 25px;
+                            border: none;
+                            border-radius: 6px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                        }
+
+                        .confirm-btn-cancel {
+                            background: #6c757d;
+                            color: white;
+                        }
+
+                        .confirm-btn-cancel:hover {
+                            background: #5a6268;
+                        }
+
+                        .confirm-btn-confirm {
+                            background: #d10024;
+                            color: white;
+                        }
+
+                        .confirm-btn-confirm:hover {
+                            background: #a30019;
+                        }
+
+                        @keyframes slideDown {
+                            from {
+                                opacity: 0;
+                                transform: translateY(-30px);
+                            }
+
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                            }
+                        }
                     </style>
                 </head>
 
@@ -324,15 +406,18 @@
                                                         <c:forEach var="item" items="${order.items}" varStatus="status">
                                                             <c:if test="${status.index < 6}">
                                                                 <c:choose>
-                                                                    <c:when test="${fn:startsWith(item.productImageUrl, '/uploads/')}">
+                                                                    <c:when
+                                                                        test="${fn:startsWith(item.productImageUrl, '/uploads/')}">
                                                                         <img src="${pageContext.request.contextPath}${item.productImageUrl}"
-                                                                            alt="${item.productName}" class="order-item-image"
-                                                                            title="${item.productName}"/>
+                                                                            alt="${item.productName}"
+                                                                            class="order-item-image"
+                                                                            title="${item.productName}" />
                                                                     </c:when>
                                                                     <c:otherwise>
                                                                         <img src="${pageContext.request.contextPath}/uploads/products/${item.productImageUrl}"
-                                                                            alt="${item.productName}" class="order-item-image"
-                                                                            title="${item.productName}"/>
+                                                                            alt="${item.productName}"
+                                                                            class="order-item-image"
+                                                                            title="${item.productName}" />
                                                                     </c:otherwise>
                                                                 </c:choose>
                                                             </c:if>
@@ -458,27 +543,44 @@
                             showPage(currentPage + direction);
                         }
 
+                        let pendingOrderId = null;
+
                         function cancelOrder(orderId) {
-                            if (!confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
+                            // Store orderId and show confirm modal
+                            pendingOrderId = orderId;
+                            document.getElementById('confirmOverlay').style.display = 'flex';
+                        }
+
+                        function closeConfirm() {
+                            document.getElementById('confirmOverlay').style.display = 'none';
+                            pendingOrderId = null;
+                        }
+
+                        function confirmAction() {
+                            if (!pendingOrderId) return;
+
+                            const orderId = pendingOrderId;
+                            closeConfirm();
+
                             fetch('/api/orders/' + orderId + '/cancel', {
                                 method: 'PUT',
                                 credentials: 'include'
                             })
-                            .then(response => {
-                                if (!response.ok) throw new Error('Không thể hủy đơn hàng');
-                                return response.json();
-                            })
-                            .then(data => {
-                                showMessage(data.message || 'Đã hủy đơn hàng', 'success');
-                                const statusEl = document.getElementById('status-' + orderId);
-                                if (statusEl) {
-                                    statusEl.textContent = 'CANCELLED';
-                                    statusEl.className = 'order-status-badge status-CANCELLED';
-                                }
-                                const btn = document.querySelector('#order-row-' + orderId + ' .btn-cancel');
-                                if (btn) btn.style.display = 'none';
-                            })
-                            .catch(() => showMessage('Lỗi khi hủy đơn hàng!', 'error'));
+                                .then(response => {
+                                    if (!response.ok) throw new Error('Không thể hủy đơn hàng');
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    showMessage(data.message || 'Đã hủy đơn hàng', 'success');
+                                    const statusEl = document.getElementById('status-' + orderId);
+                                    if (statusEl) {
+                                        statusEl.textContent = 'CANCELLED';
+                                        statusEl.className = 'order-status-badge status-CANCELLED';
+                                    }
+                                    const btn = document.querySelector('#order-row-' + orderId + ' .btn-cancel');
+                                    if (btn) btn.style.display = 'none';
+                                })
+                                .catch(() => showMessage('Lỗi khi hủy đơn hàng!', 'error'));
                         }
 
                         function showMessage(message, type) {
@@ -491,6 +593,22 @@
                             setTimeout(() => container.style.display = 'none', 5000);
                         }
                     </script>
+
+                    <!-- Confirm Modal -->
+                    <div id="confirmOverlay" class="confirm-overlay">
+                        <div class="confirm-modal">
+                            <h4><i class="fa fa-exclamation-circle"></i> Xác nhận hủy đơn hàng</h4>
+                            <p id="confirmMessage">Bạn có chắc muốn hủy đơn hàng này?</p>
+                            <div class="confirm-buttons">
+                                <button class="confirm-btn-cancel" onclick="closeConfirm()">
+                                    <i class="fa fa-times"></i> Hủy
+                                </button>
+                                <button class="confirm-btn-confirm" onclick="confirmAction()">
+                                    <i class="fa fa-check"></i> Xác nhận
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
                 </body>
 

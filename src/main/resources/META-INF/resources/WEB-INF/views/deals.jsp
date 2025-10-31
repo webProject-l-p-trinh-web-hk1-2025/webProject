@@ -323,7 +323,7 @@
                                             alt="${brand}" style="width: 100%; height: 250px; object-fit: cover;">
                                     </c:when>
                                     <c:when test="${status.index == 1}">
-                                        <img src="${pageContext.request.contextPath}/uploads/products/bannerapple.jpg"
+                                        <img src="${pageContext.request.contextPath}/uploads/products/banerapple.jpg"
                                             alt="${brand}" style="width: 100%; height: 250px; object-fit: cover;">
                                     </c:when>
                                     <c:otherwise>

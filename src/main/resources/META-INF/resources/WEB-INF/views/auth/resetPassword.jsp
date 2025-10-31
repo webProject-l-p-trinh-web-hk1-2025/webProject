@@ -57,7 +57,12 @@
                             </div>
                         </c:if>
 
-                        <form action="${pageContext.request.contextPath}/doResetPassword" method="post">
+                        <!-- Inline validation message -->
+                        <div id="validationMessage" class="auth-error" style="display: none;">
+                            <i class="fa fa-exclamation-circle"></i> <span id="validationText"></span>
+                        </div>
+
+                        <form id="resetForm" action="${pageContext.request.contextPath}/doResetPassword" method="post">
                             <div class="form-group mb-3">
                                 <label for="input">
                                     <i class="fa fa-envelope"></i> Email hoặc số điện thoại
@@ -90,6 +95,126 @@
 
             <!-- JS -->
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+            <style>
+                /* Inline validation styles */
+                .error-input {
+                    border-color: #D10024 !important;
+                    box-shadow: 0 0 0 3px rgba(209, 0, 36, 0.1) !important;
+                    animation: shake 0.3s ease-in-out;
+                }
+
+                @keyframes shake {
+
+                    0%,
+                    100% {
+                        transform: translateX(0);
+                    }
+
+                    25% {
+                        transform: translateX(-5px);
+                    }
+
+                    75% {
+                        transform: translateX(5px);
+                    }
+                }
+
+                #validationMessage {
+                    animation: slideDown 0.3s ease-out;
+                }
+
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .auth-error,
+                .auth-message {
+                    animation: slideDown 0.3s ease-out;
+                }
+            </style>
+
+            <script>
+                // Hàm hiển thị thông báo lỗi inline
+                function showValidationError(message, inputElement) {
+                    const validationMessage = document.getElementById('validationMessage');
+                    const validationText = document.getElementById('validationText');
+
+                    validationText.textContent = message;
+                    validationMessage.style.display = 'block';
+
+                    // Scroll đến thông báo
+                    validationMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    // Focus vào input lỗi
+                    if (inputElement) {
+                        inputElement.focus();
+                        inputElement.classList.add('error-input');
+                    }
+
+                    // Ẩn thông báo sau 5 giây
+                    setTimeout(() => {
+                        validationMessage.style.display = 'none';
+                        if (inputElement) {
+                            inputElement.classList.remove('error-input');
+                        }
+                    }, 5000);
+                }
+
+                // Validation form
+                document.getElementById('resetForm').addEventListener('submit', function (e) {
+                    const input = document.getElementById('input');
+                    const inputValue = input.value.trim();
+
+                    // Ẩn thông báo cũ
+                    document.getElementById('validationMessage').style.display = 'none';
+
+                    // Kiểm tra không để trống
+                    if (!inputValue) {
+                        e.preventDefault();
+                        showValidationError('Vui lòng nhập email hoặc số điện thoại!', input);
+                        return false;
+                    }
+
+                    // Kiểm tra định dạng (email hoặc phone)
+                    const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+                    const phoneRegex = /^[0-9]{10}$/;
+
+                    if (!emailRegex.test(inputValue) && !phoneRegex.test(inputValue)) {
+                        e.preventDefault();
+                        showValidationError('Vui lòng nhập email hợp lệ hoặc số điện thoại 10 chữ số!', input);
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                // Xóa error khi user bắt đầu nhập lại
+                document.getElementById('input').addEventListener('input', function () {
+                    this.classList.remove('error-input');
+                    document.getElementById('validationMessage').style.display = 'none';
+                });
+
+                // Auto-hide server messages
+                const alerts = document.querySelectorAll('.auth-error, .auth-message');
+                alerts.forEach(alert => {
+                    if (alert.id !== 'validationMessage') {
+                        setTimeout(() => {
+                            alert.style.transition = 'opacity 0.5s ease-out';
+                            alert.style.opacity = '0';
+                            setTimeout(() => alert.remove(), 500);
+                        }, 5000);
+                    }
+                });
+            </script>
         </body>
 
         </html>

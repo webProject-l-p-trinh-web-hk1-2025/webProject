@@ -46,6 +46,11 @@
                             </div>
                         </c:if>
 
+                        <!-- Inline validation message -->
+                        <div id="validationMessage" class="alert alert-danger" style="display: none;">
+                            <i class="fa fa-exclamation-circle"></i> <span id="validationText"></span>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">
                                 <i class="fa fa-envelope"></i> Email
@@ -103,6 +108,111 @@
             </div>
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+            <script>
+                // Hàm hiển thị thông báo lỗi inline
+                function showValidationError(message, inputElement) {
+                    const validationMessage = document.getElementById('validationMessage');
+                    const validationText = document.getElementById('validationText');
+
+                    validationText.textContent = message;
+                    validationMessage.style.display = 'block';
+
+                    // Scroll đến thông báo
+                    validationMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    // Focus vào input lỗi
+                    if (inputElement) {
+                        inputElement.focus();
+                        inputElement.style.borderColor = '#D10024';
+                        inputElement.style.boxShadow = '0 0 0 3px rgba(209, 0, 36, 0.1)';
+                    }
+
+                    // Ẩn thông báo sau 5 giây
+                    setTimeout(() => {
+                        validationMessage.style.display = 'none';
+                        if (inputElement) {
+                            inputElement.style.borderColor = '';
+                            inputElement.style.boxShadow = '';
+                        }
+                    }, 5000);
+                }
+
+                // Validation form
+                document.querySelector('form').addEventListener('submit', function (e) {
+                    const fullName = document.querySelector('input[name="fullName"]');
+                    const phone = document.querySelector('input[name="phone"]');
+
+                    // Ẩn thông báo cũ
+                    document.getElementById('validationMessage').style.display = 'none';
+
+                    // Kiểm tra họ tên
+                    if (!fullName.value.trim()) {
+                        e.preventDefault();
+                        showValidationError('Vui lòng nhập họ và tên!', fullName);
+                        return false;
+                    }
+
+                    if (fullName.value.trim().length < 3) {
+                        e.preventDefault();
+                        showValidationError('Họ và tên phải có ít nhất 3 ký tự!', fullName);
+                        return false;
+                    }
+
+                    // Kiểm tra số điện thoại
+                    const phoneValue = phone.value.trim();
+                    if (!phoneValue) {
+                        e.preventDefault();
+                        showValidationError('Vui lòng nhập số điện thoại!', phone);
+                        return false;
+                    }
+
+                    const phoneRegex = /^[0-9]{10}$/;
+                    if (!phoneRegex.test(phoneValue)) {
+                        e.preventDefault();
+                        showValidationError('Số điện thoại phải có đúng 10 chữ số!', phone);
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                // Chỉ cho phép nhập số vào ô điện thoại
+                const phoneInput = document.querySelector('input[name="phone"]');
+                if (phoneInput) {
+                    phoneInput.addEventListener('input', function (e) {
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                        if (this.value.length > 10) {
+                            this.value = this.value.slice(0, 10);
+                        }
+                        // Xóa error khi bắt đầu sửa
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                        document.getElementById('validationMessage').style.display = 'none';
+                    });
+                }
+
+                // Xóa error khi user bắt đầu nhập lại
+                document.querySelectorAll('.form-control').forEach(input => {
+                    input.addEventListener('input', function () {
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                        document.getElementById('validationMessage').style.display = 'none';
+                    });
+                });
+
+                // Auto-hide alert messages
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    if (!alert.id || alert.id !== 'validationMessage') {
+                        setTimeout(() => {
+                            alert.style.transition = 'opacity 0.5s ease-out';
+                            alert.style.opacity = '0';
+                            setTimeout(() => alert.remove(), 500);
+                        }, 5000);
+                    }
+                });
+            </script>
         </body>
 
         </html>

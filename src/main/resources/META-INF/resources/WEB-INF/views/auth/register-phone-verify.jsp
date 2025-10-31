@@ -123,6 +123,51 @@
             <!-- Bootstrap JS -->
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+            <style>
+                /* Inline alert animations */
+                #dynamicAlert {
+                    animation: slideDown 0.3s ease-out;
+                }
+
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .form-control.error-input {
+                    border-color: #dc3545 !important;
+                    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+                    animation: shake 0.3s ease-in-out;
+                }
+
+                @keyframes shake {
+
+                    0%,
+                    100% {
+                        transform: translateX(0);
+                    }
+
+                    25% {
+                        transform: translateX(-5px);
+                    }
+
+                    75% {
+                        transform: translateX(5px);
+                    }
+                }
+
+                .alert {
+                    animation: slideDown 0.3s ease-out;
+                }
+            </style>
+
             <script>
                 const ctx = '${pageContext.request.contextPath}';
 
@@ -212,7 +257,13 @@
 
                     if (otpValue.length !== 6) {
                         showAlert('Vui lòng nhập đủ 6 chữ số OTP', 'danger');
+                        otpInput.classList.add('error-input');
                         otpInput.focus();
+
+                        // Remove error class after animation
+                        setTimeout(() => {
+                            otpInput.classList.remove('error-input');
+                        }, 500);
                         return;
                     }
 
@@ -240,11 +291,17 @@
                                 }, 1500);
                             } else {
                                 showAlert(data.message, 'danger');
+                                otpInput.classList.add('error-input');
                                 otpInput.disabled = false;
                                 otpInput.value = '';
                                 otpInput.focus();
                                 verifyBtn.disabled = false;
                                 verifyBtn.innerHTML = originalHTML;
+
+                                // Remove error class after animation
+                                setTimeout(() => {
+                                    otpInput.classList.remove('error-input');
+                                }, 500);
                             }
                         })
                         .catch(error => {
@@ -255,6 +312,12 @@
                             verifyBtn.innerHTML = originalHTML;
                         });
                 }
+
+                // Auto-format OTP input (only numbers)
+                document.getElementById('otp').addEventListener('input', function (e) {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    this.classList.remove('error-input');
+                });
             </script>
         </body>
 

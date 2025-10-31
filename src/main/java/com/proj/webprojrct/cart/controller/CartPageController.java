@@ -50,12 +50,12 @@ public class CartPageController {
 
         CartResponse cart = cartService.getCartByUserId(userId);
         model.addAttribute("cart", cart);
-        return "cart";
+        return "user/cart";
     }
 
     @GetMapping("/cart.jsp")
     public String cartTestPage() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return "cart";
+        return "user/cart";
     }
 }

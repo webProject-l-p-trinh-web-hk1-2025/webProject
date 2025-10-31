@@ -55,7 +55,7 @@ public class AuthController {
             return "redirect:/home";
         }
 
-        return "login";
+        return "auth/login";
     }
 
     @PostMapping("/dologin")
@@ -123,7 +123,7 @@ public class AuthController {
             return "home";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            return "login";
+            return "auth/login";
         }
     }
 
@@ -175,7 +175,7 @@ public class AuthController {
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
             return "redirect:/home";
         }
-        return "register";
+        return "auth/register";
     }
 
     @PostMapping("/doregister")
@@ -240,7 +240,7 @@ public class AuthController {
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
             return "redirect:/home"; // Đã đăng nhập, chuyển hướng
         }
-        return "resetPassword";
+        return "auth/resetPassword";
     }
 
     @PostMapping("/doResetPassword")
@@ -317,7 +317,7 @@ public class AuthController {
             return "redirect:/login";
         }
         model.addAttribute("changePassRequest", new ChangePassRequest());
-        return "change-password";
+        return "auth/change-password";
     }
 
     // ========== REGISTER PHONE VERIFICATION ==========
@@ -343,7 +343,7 @@ public class AuthController {
 
         model.addAttribute("phone", user.getPhone());
         model.addAttribute("userId", userId);
-        return "register-phone-verify";
+        return "auth/register-phone-verify";
     }
 
     @PostMapping("/register-phone-skip")
@@ -355,64 +355,58 @@ public class AuthController {
     }
 
     // ========== END REGISTER PHONE VERIFICATION ==========
-    @GetMapping("/verify-otp")
-    public String showOtpForm(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
-            return "verify-otp";
-        }
-        return "redirect:/home";
-    }
-
-    @PostMapping("/send-otp-email")
-    public String sendOtpEmail(Model model) {
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
-            return "redirect:/home";
-        }
-        try {
-            String msg = authService.sendOtpEmail();
-            model.addAttribute("success", msg);
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-        }
-        return "verify-otp";
-    }
-
-    // Gửi OTP phone
-    @PostMapping("/send-otp-phone")
-    public String sendOtpPhone(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
-            return "redirect:/home";
-        }
-        try {
-            String msg = authService.sendOtpPhone();
-            model.addAttribute("success", msg);
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-        }
-        return "verify-otp";
-    }
-
-    // Xác thực OTP
-    @PostMapping("/verify-otp")
-    public String verifyOtp(@RequestParam("otp") String otpInput, Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
-            return "redirect:/home";
-        }
-        try {
-            String msg = authService.verifyOtp(otpInput);
-            model.addAttribute("success", msg);
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-        }
-        return "verify-otp";
-    }
-
+    // @GetMapping("/verify-otp")
+    // public String showOtpForm(Model model) {
+    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    //     if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
+    //         return "verify-otp";
+    //     }
+    //     return "redirect:/home";
+    // }
+    // @PostMapping("/send-otp-email")
+    // public String sendOtpEmail(Model model) {
+    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    //     if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
+    //         return "redirect:/home";
+    //     }
+    //     try {
+    //         String msg = authService.sendOtpEmail();
+    //         model.addAttribute("success", msg);
+    //     } catch (Exception e) {
+    //         model.addAttribute("error", e.getMessage());
+    //     }
+    //     return "auth/verify-otp";
+    // }
+    // // Gửi OTP phone
+    // @PostMapping("/send-otp-phone")
+    // public String sendOtpPhone(Model model) {
+    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    //     if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
+    //         return "redirect:/home";
+    //     }
+    //     try {
+    //         String msg = authService.sendOtpPhone();
+    //         model.addAttribute("success", msg);
+    //     } catch (Exception e) {
+    //         model.addAttribute("error", e.getMessage());
+    //     }
+    //     return "auth/verify-otp";
+    // }
+    // // Xác thực OTP
+    // @PostMapping("/verify-otp")
+    // public String verifyOtp(@RequestParam("otp") String otpInput, Model model) {
+    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    //     if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof CustomUserDetails)) {
+    //         return "redirect:/home";
+    //     }
+    //     try {
+    //         String msg = authService.verifyOtp(otpInput);
+    //         model.addAttribute("success", msg);
+    //     } catch (Exception e) {
+    //         model.addAttribute("error", e.getMessage());
+    //     }
+    //     return "auth/verify-otp";
+    // }
     // API endpoints for AJAX calls
     @PostMapping("/api/send-otp")
     @ResponseBody

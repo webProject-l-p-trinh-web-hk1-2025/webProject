@@ -73,7 +73,7 @@ public class Oauth2RegistrationController {
         model.addAttribute("name", name);
         model.addAttribute("picture", picture);
 
-        return "oauth2_complete_form";
+        return "auth/oauth2_complete_form";
     }
 
     @PostMapping("/complete")
@@ -141,7 +141,7 @@ public class Oauth2RegistrationController {
             model.addAttribute("phone", phone);
             model.addAttribute("address", address);
 
-            return "oauth2_complete_form";
+            return "auth/oauth2_complete_form";
         }
     }
 

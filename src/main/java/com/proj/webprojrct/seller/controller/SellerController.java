@@ -254,7 +254,7 @@ public class SellerController {
             model.addAttribute("error", e.getMessage());
             return "redirect:/home";
         }
-        return "redirect:/seller/orders-accepted";
+        return "redirect:/seller/orders-shipping";
     }
 
     @GetMapping("/seller/orders-refund")
@@ -474,6 +474,16 @@ public class SellerController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Vui lòng đăng nhập để thực hiện.");
+        }
+        String paymentMethod = sellerService.getPaymentMethodByOrderId(orderId);
+        if (paymentMethod.equals("COD")) {
+            try {
+                sellerService.acceptOrderRefund(orderId, authentication);
+                return ResponseEntity.ok("Hoàn tiền thành công cho đơn COD!");
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Lỗi khi xử lý hoàn tiền: " + e.getMessage());
+            }
         }
 
         try {

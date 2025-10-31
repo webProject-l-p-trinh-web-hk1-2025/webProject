@@ -29,7 +29,7 @@ public class OrderPageController {
         }
 
         model.addAttribute("user", userDetails.getUser());
-        return "order_create"; // JSP: order_create.jsp
+        return "user/order_create"; // JSP: order_create.jsp
     }
 
     // Trang chi tiết đơn hàng theo orderId
@@ -51,7 +51,7 @@ public class OrderPageController {
         model.addAttribute("statusPayment", statusPayment);
         model.addAttribute("order", order);
         model.addAttribute("user", userDetails.getUser());
-        return "order_detail"; // JSP: order_detail.jsp
+        return "user/order_detail"; // JSP: order_detail.jsp
     }
 
     // Trang danh sách đơn hàng của user
@@ -64,7 +64,7 @@ public class OrderPageController {
         }
 
         model.addAttribute("orders", orderService.getOrdersByUserId(userDetails.getUser().getId()));
-        return "order_list"; // JSP: order_list.jsp
+        return "user/order_list"; // JSP: order_list.jsp
     }
 
     @GetMapping("/success/{orderId}")
@@ -76,7 +76,7 @@ public class OrderPageController {
         }
 
         OrderResponse order = orderService.getOrderById(orderId);
-        
+
         // Security check: only order creator can view success page
         if (!order.getUserId().equals(userDetails.getUser().getId())) {
             return "redirect:/shop";
@@ -85,6 +85,6 @@ public class OrderPageController {
         model.addAttribute("orderId", orderId);
         model.addAttribute("order", order);
         model.addAttribute("user", userDetails.getUser());
-        return "order_success";
+        return "user/order_success";
     }
 }

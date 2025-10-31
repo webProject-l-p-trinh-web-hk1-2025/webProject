@@ -32,7 +32,7 @@ public class FavoritePageController {
         } catch (Exception e) {
             model.addAttribute("error", "Không thể tải dữ liệu: " + e.getMessage());
         }
-        
-        return "wishlist";
+
+        return "user/wishlist";
     }
 }

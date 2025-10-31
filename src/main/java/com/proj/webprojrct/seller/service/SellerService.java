@@ -450,6 +450,11 @@ public class SellerService {
         if (order == null) {
             throw new IllegalArgumentException("Order not found with id: " + orderId);
         }
+        Payment payment = paymentRepository.findByOrderId(orderId);
+        if (payment.getMethod().equals("COD")) {
+            payment.setStatus("SUCCESS");
+            paymentRepository.save(payment);
+        }
         order.setStatus("DELIVERED");
         orderRepository.save(order);
         return true;

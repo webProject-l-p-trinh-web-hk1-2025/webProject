@@ -41,5 +41,5 @@ VALUES ('anh kiet', '98898898321',
         'admin3@example.com',
         'https://example.com/avatar3.png',
         '789 Trần Hưng Đạo, Q5, TP.HCM',
-        'ADMIN', TRUE, TRUE, TRUE)
+        'SELLER', TRUE, TRUE, TRUE)
 ON DUPLICATE KEY UPDATE phone = phone;

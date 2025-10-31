@@ -519,7 +519,7 @@ Sau khi chạy application, truy cập:
 users                 # Người dùng
 categories            # Danh mục sản phẩm (hierarchical)
 products              # Sản phẩm
-product_variants      # Biến thể sản phẩm
+product_specs      # Biến thể sản phẩm
 product_images        # Ảnh sản phẩm
 
 -- Shopping
@@ -527,18 +527,16 @@ carts                 # Giỏ hàng
 cart_items            # Sản phẩm trong giỏ
 orders                # Đơn hàng
 order_items           # Sản phẩm trong đơn
-
+Payments              # Thanh Toán
+Payment_url_vnpay     # Lưu URL đã tạo khi thanh toán chưa hoàn tất
 -- Reviews
 reviews               # Đánh giá
-review_images         # Ảnh trong review
 
 -- Documents
 documents             # Tài liệu
 
 -- Authentication
 otp_codes             # OTP codes
-otp_types             # Loại OTP
-refresh_tokens        # JWT refresh tokens
 
 -- Others
 favorites             # Yêu thích

@@ -673,32 +673,10 @@
                         return false;
                     }
 
-                    // Check if order needs refund
-                    let confirmMessage = 'Bạn có chắc chắn muốn HỦY đơn hàng #' + orderId + '?';
-
-                    try {
-                        const cancelBtn = document.querySelector(`button.btn-cancel[data-order-id="${orderId}"]`);
-                        if (cancelBtn) {
-                            const orderCard = cancelBtn.closest('.order-card');
-                            if (orderCard) {
-                                const paymentBadge = orderCard.querySelector('.payment-badge');
-                                const paymentText = paymentBadge ? paymentBadge.textContent.trim() : '';
-
-                                if (paymentText.includes('VNPAY') && paymentText.includes('SUCCESS')) {
-                                    confirmMessage = 'Đơn hàng này đã thanh toán qua VNPay.\n' +
-                                        'Hệ thống sẽ TỰ ĐỘNG HOÀN TIỀN cho khách hàng.\n\n' +
-                                        'Bạn có chắc chắn muốn HỦY VÀ HOÀN TIỀN đơn hàng #' + orderId + '?';
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        console.error('Could not detect payment method:', e);
-                    }
-
-                    return confirm(confirmMessage);
+                    return true;
                 }
             </script>
-            ``` <p style="color: #666; margin-bottom: 15px;">
+            <!-- ``` <p style="color: #666; margin-bottom: 15px;">
                 Vui lòng nhập lý do hủy đơn hàng. Thông tin này sẽ được gửi đến khách hàng.
             </p>
             <div id="refundNotice"
@@ -729,7 +707,7 @@
                 </button>
             </div>
             </div>
-            </div>
+            </div> -->
 
             <script>
                 let selectedOrderId = null;

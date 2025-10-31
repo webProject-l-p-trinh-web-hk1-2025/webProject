@@ -33,7 +33,7 @@ public class VnpayController {
         if (authentication == null || !authentication.isAuthenticated()) {
             model.addAttribute("success", false);
             model.addAttribute("message", "vui lòng đăng nhập.");
-            return "vnpay_result";
+            return "user/vnpay_result";
         }
         try {
             Map<String, Object> result = paymentService.handleVnPayReturn(request);
@@ -41,7 +41,7 @@ public class VnpayController {
             if (result.containsKey("error")) {
                 model.addAttribute("success", false);
                 model.addAttribute("message", result.get("error"));
-                return "vnpay_result";
+                return "user/vnpay_result";
             }
 
             String responseCode = (String) result.get("responseCode");
@@ -59,7 +59,7 @@ public class VnpayController {
             e.printStackTrace();
             model.addAttribute("success", false);
             model.addAttribute("message", "Lỗi xử lý callback VNPAY: " + e.getMessage());
-            return "vnpay_result";
+            return "user/vnpay_result";
         }
     }
 

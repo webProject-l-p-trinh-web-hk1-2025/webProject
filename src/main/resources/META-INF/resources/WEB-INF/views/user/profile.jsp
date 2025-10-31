@@ -810,16 +810,61 @@
                                                         </a>
                                                         <c:if
                                                             test="${order.status == 'PENDING' || order.status == 'PAID'}">
-                                                            <button onclick="cancelOrder(${order.orderId})"
+                                                            <button onclick="toggleCancelForm(${order.orderId})"
                                                                 style="padding:10px 20px; background:#dc3545; color:white; border:none; border-radius:3px; font-weight:600; font-size:14px; display:inline-block; margin-left:10px; cursor:pointer;">
                                                                 <i class="fa fa-times-circle"></i> Hủy đơn hàng
                                                             </button>
+
+                                                            <!-- Inline Cancel Order Form -->
+                                                            <div id="cancelForm-${order.orderId}"
+                                                                style="display:none; margin-top:15px; padding:15px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:5px;">
+                                                                <h6 style="color:#856404; margin:0 0 10px 0;"><i
+                                                                        class="fa fa-exclamation-triangle"></i> Xác nhận
+                                                                    hủy đơn hàng #${order.orderId}</h6>
+                                                                <p
+                                                                    style="color:#856404; font-size:13px; margin-bottom:15px;">
+                                                                    Bạn có chắc chắn muốn hủy đơn hàng này không?</p>
+                                                                <div style="display:flex; gap:10px;">
+                                                                    <button onclick="toggleCancelForm(${order.orderId})"
+                                                                        style="padding:8px 15px; background:#6c757d; color:white; border:none; border-radius:3px; cursor:pointer;">
+                                                                        <i class="fa fa-times"></i> Đóng
+                                                                    </button>
+                                                                    <button
+                                                                        onclick="confirmCancelOrder(${order.orderId})"
+                                                                        style="padding:8px 15px; background:#dc3545; color:white; border:none; border-radius:3px; cursor:pointer;">
+                                                                        <i class="fa fa-check"></i> Xác nhận hủy
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                         </c:if>
                                                         <c:if test="${order.status == 'DELIVERED'}">
-                                                            <button onclick="requestRefund(${order.orderId})"
+                                                            <button onclick="toggleRefundForm(${order.orderId})"
                                                                 style="padding:10px 20px; background:#ffc107; color:#000; border:none; border-radius:3px; font-weight:600; font-size:14px; display:inline-block; margin-left:10px; cursor:pointer;">
                                                                 <i class="fa fa-undo"></i> Yêu cầu hoàn tiền
                                                             </button>
+
+                                                            <!-- Inline Refund Request Form -->
+                                                            <div id="refundForm-${order.orderId}"
+                                                                style="display:none; margin-top:15px; padding:15px; background:#d1ecf1; border-left:4px solid #17a2b8; border-radius:5px;">
+                                                                <h6 style="color:#0c5460; margin:0 0 10px 0;"><i
+                                                                        class="fa fa-undo"></i> Yêu cầu hoàn tiền cho
+                                                                    đơn hàng #${order.orderId}</h6>
+                                                                <p
+                                                                    style="color:#0c5460; font-size:13px; margin-bottom:15px;">
+                                                                    Yêu cầu hoàn tiền sẽ được gửi đến người bán để xem
+                                                                    xét và xử lý.</p>
+                                                                <div style="display:flex; gap:10px;">
+                                                                    <button onclick="toggleRefundForm(${order.orderId})"
+                                                                        style="padding:8px 15px; background:#6c757d; color:white; border:none; border-radius:3px; cursor:pointer;">
+                                                                        <i class="fa fa-times"></i> Đóng
+                                                                    </button>
+                                                                    <button
+                                                                        onclick="confirmRequestRefund(${order.orderId})"
+                                                                        style="padding:8px 15px; background:#17a2b8; color:white; border:none; border-radius:3px; cursor:pointer;">
+                                                                        <i class="fa fa-check"></i> Xác nhận yêu cầu
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                         </c:if>
                                                     </div>
                                                 </div>
@@ -1375,10 +1420,28 @@
                                     });
                             }
 
-                            // Cancel Order Function
-                            function cancelOrder(orderId) {
-                                if (!confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
+                            // Toggle Cancel Form
+                            function toggleCancelForm(orderId) {
+                                const form = document.getElementById('cancelForm-' + orderId);
+                                if (form.style.display === 'none') {
+                                    form.style.display = 'block';
+                                } else {
+                                    form.style.display = 'none';
+                                }
+                            }
 
+                            // Toggle Refund Form
+                            function toggleRefundForm(orderId) {
+                                const form = document.getElementById('refundForm-' + orderId);
+                                if (form.style.display === 'none') {
+                                    form.style.display = 'block';
+                                } else {
+                                    form.style.display = 'none';
+                                }
+                            }
+
+                            // Confirm Cancel Order (called from form)
+                            function confirmCancelOrder(orderId) {
                                 fetch('${pageContext.request.contextPath}/api/orders/' + orderId + '/cancel', {
                                     method: 'PUT',
                                     credentials: 'include',
@@ -1392,27 +1455,19 @@
                                         return response.json().then(data => ({ statusCode, data }));
                                     })
                                     .then(({ statusCode, data }) => {
-                                        if (statusCode === 200) {
-                                            // Thành công
-                                            alert(data.message || 'Đã hủy đơn hàng thành công!');
-                                            // Reload và giữ nguyên tab đơn hàng
-                                            window.location.href = '${pageContext.request.contextPath}/profile#orders';
-                                            location.reload();
-                                        } else {
-                                            // Lỗi từ server
-                                            alert(data.message || 'Không thể hủy đơn hàng!');
-                                        }
+                                        // Reload trang để hiển thị thông báo
+                                        window.location.href = '${pageContext.request.contextPath}/profile#orders';
+                                        location.reload();
                                     })
                                     .catch(error => {
                                         console.error('Error:', error);
-                                        alert('Lỗi kết nối! Vui lòng thử lại sau.');
+                                        window.location.href = '${pageContext.request.contextPath}/profile#orders';
+                                        location.reload();
                                     });
                             }
 
-                            // Request Refund Function
-                            function requestRefund(orderId) {
-                                if (!confirm('Bạn có chắc muốn yêu cầu hoàn tiền cho đơn hàng này?\n\nYêu cầu hoàn tiền sẽ được gửi đến người bán để xem xét và xử lý.')) return;
-
+                            // Confirm Request Refund (called from form)
+                            function confirmRequestRefund(orderId) {
                                 fetch('${pageContext.request.contextPath}/api/orders/' + orderId + '/refund', {
                                     method: 'PUT',
                                     credentials: 'include',
@@ -1429,13 +1484,14 @@
                                         return response.json();
                                     })
                                     .then(data => {
-                                        alert(data.message || 'Yêu cầu hoàn tiền đã được gửi thành công!\n\nNgười bán sẽ xem xét và xử lý yêu cầu của bạn.');
-                                        // Reload và giữ nguyên tab đơn hàng
+                                        // Reload trang để hiển thị thông báo
                                         window.location.href = '${pageContext.request.contextPath}/profile#orders';
+                                        location.reload();
                                     })
                                     .catch(error => {
                                         console.error(error);
-                                        alert('Lỗi: ' + error.message);
+                                        window.location.href = '${pageContext.request.contextPath}/profile#orders';
+                                        location.reload();
                                     });
                             }
                         </script>

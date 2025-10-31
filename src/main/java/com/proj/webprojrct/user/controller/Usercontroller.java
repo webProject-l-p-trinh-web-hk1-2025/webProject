@@ -84,55 +84,7 @@ public class Usercontroller {
             model.addAttribute("error", e.getMessage());
         }
 
-        return "profile";
-    }
-
-    @GetMapping("/profile/orders")
-    public String getProfileOrders(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails cud = (CustomUserDetails) authentication.getPrincipal();
-        Long userId = cud.getUser().getId();
-
-        // Get user's orders (already sorted newest first in service)
-        var orders = orderService.getOrdersByUserId(userId);
-        var recentOrders = orders.stream().limit(3).toList();
-        model.addAttribute("3orders", recentOrders);
-        model.addAttribute("orders", orders);
-
-        return "profile_history";
-    }
-
-    @GetMapping("/profile/update")
-    public String getProfileUpdate(Model model) {
-        // reuse existing update-profile endpoint/view
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        try {
-            UserResponse userResponse = userService.handleGetUserProfile(authentication);
-            model.addAttribute("user", userResponse);
-            return "profile_update";
-        } catch (RuntimeException e) {
-            model.addAttribute("error", e.getMessage());
-            return "profile";
-        }
-    }
-
-    @GetMapping("/profile/offers")
-    public String getProfileOffers(Model model) {
-        // simple page listing offers; controller will pass 'offers' if available
-        return "profile_offers";
-    }
-
-    @GetMapping("/profile-update")
-    public String updateUserProfile(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        try {
-            UserResponse userResponse = userService.handleGetUserProfile(authentication);
-            model.addAttribute("user", userResponse);
-            return "profile_update";
-        } catch (RuntimeException e) {
-            return "redirect:/login";
-        }
+        return "user/profile";
     }
 
     @PostMapping("/profile-update")

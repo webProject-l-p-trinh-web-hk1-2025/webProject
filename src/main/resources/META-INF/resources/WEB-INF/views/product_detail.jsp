@@ -52,6 +52,83 @@
                   box-shadow: none !important;
                   pointer-events: none;
                 }
+
+                /* Styling for document images in description */
+                .description-content img {
+                  max-width: 100%;
+                  height: auto;
+                  display: block;
+                  margin: 15px auto;
+                  border-radius: 4px;
+                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                }
+
+                .description-content .img-wrapper {
+                  max-width: 100%;
+                  margin: 15px auto;
+                  display: block;
+                }
+
+                .description-content .img-wrapper img {
+                  width: 100%;
+                  height: auto;
+                  display: block;
+                  margin: 0;
+                }
+
+                .description-content .table-wrapper {
+                  max-width: 100%;
+                  margin: 15px auto;
+                  display: block;
+                  overflow-x: auto;
+                }
+
+                .description-content .table-wrapper table {
+                  width: 100%;
+                  margin: 0;
+                }
+
+                .description-content table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin: 15px 0;
+                }
+
+                .description-content table td,
+                .description-content table th {
+                  border: 1px solid #ddd;
+                  padding: 8px;
+                  text-align: left;
+                }
+
+                .description-content table th {
+                  background-color: #f2f2f2;
+                  font-weight: bold;
+                }
+
+                .description-content h1,
+                .description-content h2,
+                .description-content h3 {
+                  margin-top: 20px;
+                  margin-bottom: 10px;
+                  color: #333;
+                }
+
+                .description-content p {
+                  margin: 10px 0;
+                  line-height: 1.8;
+                }
+
+                .description-content ul,
+                .description-content ol {
+                  margin: 10px 0;
+                  padding-left: 30px;
+                }
+
+                .description-content li {
+                  margin: 5px 0;
+                  line-height: 1.8;
+                }
               </style>
             </head>
 
@@ -1287,27 +1364,20 @@
                  * Returns the base model without storage/color (e.g., "iPhone 15 Pro Max")
                  */
                 function extractModelName(productName) {
-                  // List of known models (longest first to match correctly)
-                  const models = [
-                    'iPhone 15 Pro Max', 'iPhone 15 Plus', 'iPhone 15 Pro', 'iPhone 15',
-                    'iPhone 17 Pro Max', 'iPhone 17',
-                    'iPhone 13',
-                    'Galaxy Z Flip6', 'Galaxy A35',
-                    'Redmi Note 13 5G',
-                    'OPPO Reno12 Pro',
-                    'Xiaomi 14 Ultra',
-                    'realme C67'
+                  // Remove storage variants (128GB, 256GB, 512GB, 1TB, 2TB, etc.)
+                  let modelName = productName.replace(/\s*\d+\s*(GB|TB)\s*/gi, '').trim();
+                  
+                  // Remove color variants (common color words at the end)
+                  const colorPatterns = [
+                    /\s+(Đen|Trắng|Xanh|Đỏ|Vàng|Hồng|Tím|Xám|Bạc|Vang|Titan|Gold|Silver|Black|White|Blue|Red|Pink|Purple|Gray|Green|Midnight|Starlight|Sierra|Natural)(\s+\w+)?$/i,
+                    /\s+\(.*\)$/  // Remove anything in parentheses at end
                   ];
-
-                  // Find matching model
-                  for (const model of models) {
-                    if (productName.startsWith(model)) {
-                      return model;
-                    }
-                  }
-
-                  // Fallback: remove storage and color to extract model
-                  return productName.replace(/\d+\s*(GB|TB)/gi, '').trim().split(/\s+/).slice(0, 3).join(' ');
+                  
+                  colorPatterns.forEach(pattern => {
+                    modelName = modelName.replace(pattern, '').trim();
+                  });
+                  
+                  return modelName;
                 }
 
                 /**

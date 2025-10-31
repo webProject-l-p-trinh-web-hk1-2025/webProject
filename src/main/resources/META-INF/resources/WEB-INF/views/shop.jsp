@@ -268,9 +268,7 @@
 																<span
 																	style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
 																	Tiết kiệm
-																	<fmt:formatNumber value="${savedAmount}"
-																		type="currency" currencySymbol="₫"
-																		maxFractionDigits="0" />
+																	<fmt:formatNumber value="${savedAmount}" pattern="#,###" maxFractionDigits="0" /> đ
 																</span>
 															</c:when>
 															<c:otherwise>

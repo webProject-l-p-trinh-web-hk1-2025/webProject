@@ -320,104 +320,155 @@
                 initSearchAutocomplete();
               });
 
-              // ========== SEARCH AUTOCOMPLETE ==========
-              function initSearchAutocomplete() {
-                var searchInput = document.getElementById('searchInput');
-                var suggestionsBox = document.getElementById('searchSuggestions');
-                var searchForm = document.getElementById('searchForm');
-                var debounceTimer;
+                        // ========== SEARCH AUTOCOMPLETE (ĐÃ FIX) ==========
+    function initSearchAutocomplete() {
+        var searchInput = document.getElementById('searchInput');
+        var suggestionsBox = document.getElementById('searchSuggestions');
+        var searchForm = document.getElementById('searchForm');
+        var debounceTimer;
 
-                if (!searchInput || !suggestionsBox) return;
+        if (!searchInput || !suggestionsBox || !searchForm) return;
 
-                // Debounce search to avoid too many API calls
-                searchInput.addEventListener('input', function () {
-                  clearTimeout(debounceTimer);
-                  var query = searchInput.value.trim();
+        // === 1. GỢI Ý KHI GÕ (giữ nguyên) ===
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            var query = searchInput.value.trim();
 
-                  if (query.length < 2) {
-                    suggestionsBox.style.display = 'none';
-                    return;
-                  }
+            if (query.length < 2) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
 
-                  debounceTimer = setTimeout(function () {
-                    fetchSuggestions(query);
-                  }, 300); // Wait 300ms after user stops typing
-                });
+            debounceTimer = setTimeout(function () {
+                fetchSuggestions(query);
+            }, 300);
+        });
 
-                // Close suggestions when clicking outside
-                document.addEventListener('click', function (e) {
-                  if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                    suggestionsBox.style.display = 'none';
-                  }
-                });
+        // === 2. BẤM "TÌM KIẾM" → TỰ ĐỘNG CHỌN GỢI Ý ĐẦU TIÊN ===
+        searchForm.addEventListener('submit', function (e) {
+            e.preventDefault(); // Ngăn submit ngay
 
-                // Show suggestions when input is focused and has value
-                searchInput.addEventListener('focus', function () {
-                  if (searchInput.value.trim().length >= 2) {
-                    fetchSuggestions(searchInput.value.trim());
-                  }
-                });
-              }
+            // Lấy gợi ý đầu tiên (là thẻ <a> đến /product/...)
+            const firstSuggestion = suggestionsBox.querySelector('a[href*="/product/"]');
 
-              function fetchSuggestions(query) {
-                var suggestionsBox = document.getElementById('searchSuggestions');
-
-                fetch('${pageContext.request.contextPath}/api/products/search-suggestions?q=' + encodeURIComponent(query) + '&limit=5')
-                  .then(function (response) {
-                    if (!response.ok) throw new Error('Failed to fetch');
-                    return response.json();
-                  })
-                  .then(function (products) {
-                    displaySuggestions(products);
-                  })
-                  .catch(function (error) {
-                    console.error('Error fetching suggestions:', error);
-                    suggestionsBox.style.display = 'none';
-                  });
-              }
-
-              function displaySuggestions(products) {
-                var suggestionsBox = document.getElementById('searchSuggestions');
-
-                if (!products || products.length === 0) {
-                  suggestionsBox.innerHTML = '<div style="padding: 15px; text-align: center; color: #999;">Không tìm thấy sản phẩm</div>';
-                  suggestionsBox.style.display = 'block';
-                  return;
+            if (firstSuggestion) {
+                // Có gợi ý → chuyển thẳng đến sản phẩm đầu
+                window.location.href = firstSuggestion.getAttribute('href');
+            } else {
+                // Không có gợi ý → chuẩn hóa + submit form
+                const input = document.getElementById('searchInput');
+                if (input && input.value.trim()) {
+                    input.value = normalizeForSearch(input.value.trim());
                 }
+                searchForm.submit();
+            }
+        });
 
-                var html = '';
-                products.forEach(function (product) {
-                  var imgSrc = product.imageUrl && product.imageUrl.trim() !== ''
-                    ? '${pageContext.request.contextPath}' + product.imageUrl
-                    : '${pageContext.request.contextPath}/images/no-image.png';
+        // === 3. Click ngoài để ẩn gợi ý ===
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.style.display = 'none';
+            }
+        });
 
-                  var price = formatPrice(product.price);
+        // === 4. Focus lại nếu có nội dung ===
+        searchInput.addEventListener('focus', function () {
+            if (searchInput.value.trim().length >= 2) {
+                fetchSuggestions(searchInput.value.trim());
+            }
+        });
+    }
 
-                  html += '<a href="${pageContext.request.contextPath}/product/' + product.id + '" style="display: block; padding: 10px; border-bottom: 1px solid #eee; text-decoration: none; color: inherit; transition: background 0.2s;" onmouseover="this.style.background=\'#f8f8f8\'" onmouseout="this.style.background=\'white\'">' +
-                    '<div style="display: flex; align-items: center; gap: 12px;">' +
-                    '<img src="' + imgSrc + '" alt="' + product.name + '" style="width: 50px; height: 50px; object-fit: contain; border: 1px solid #eee; border-radius: 4px;">' +
-                    '<div style="flex: 1; min-width: 0;">' +
-                    '<div style="font-weight: 500; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + product.name + '</div>' +
-                    '<div style="color: #d70018; font-weight: bold; font-size: 14px; margin-top: 4px;">' + price + '</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '</a>';
-                });
+    // === GỌI HÀM GỢI Ý (giữ nguyên) ===
+    function fetchSuggestions(query) {
+        var suggestionsBox = document.getElementById('searchSuggestions');
 
-                // Add "View all results" link
-                var searchQuery = document.getElementById('searchInput').value;
-                html += '<a href="${pageContext.request.contextPath}/shop?name=' + encodeURIComponent(searchQuery) + '" style="display: block; padding: 12px; text-align: center; background: #f5f5f5; color: #d70018; font-weight: 500; text-decoration: none; border-top: 2px solid #eee;">' +
-                  'Xem tất cả kết quả <i class="fa fa-arrow-right"></i>' +
+        fetch('${pageContext.request.contextPath}/api/products/search-suggestions?q=' + encodeURIComponent(query) + '&limit=5')
+            .then(function (response) {
+                if (!response.ok) throw new Error('Failed to fetch');
+                return response.json();
+            })
+            .then(function (products) {
+                displaySuggestions(products);
+            })
+            .catch(function (error) {
+                console.error('Error fetching suggestions:', error);
+                suggestionsBox.style.display = 'none';
+            });
+    }
+
+    // === HIỂN THỊ GỢI Ý (giữ nguyên, chỉ thêm class cho dễ chọn) ===
+  function displaySuggestions(products) {
+      var suggestionsBox = document.getElementById('searchSuggestions');
+
+      if (!products || products.length === 0) {
+          suggestionsBox.innerHTML = '<div style="padding: 15px; text-align: center; color: #999;">Không tìm thấy sản phẩm</div>';
+          suggestionsBox.style.display = 'block';
+          return;
+      }
+
+      var html = '';
+      products.forEach(function (product, index) {
+          var imgSrc = product.imageUrl && product.imageUrl.trim() !== ''
+              ? '${pageContext.request.contextPath}' + product.imageUrl
+              : '${pageContext.request.contextPath}/images/no-image.png';
+
+          // === XỬ LÝ GIÁ KHUYẾN MÃI (AN TOÀN, DÙNG + GHÉP CHUỖI) ===
+          var priceHtml = '';
+          if (product.onDeal && product.dealPercentage > 0) {
+              var discountedPrice = Math.round(product.price * (100 - product.dealPercentage) / 100);
+              var saved = product.price - discountedPrice;
+              priceHtml =
+                  '<div style="font-weight: bold; color: #d70018; font-size: 14px;">' +
+                      formatPrice(discountedPrice) +
+                      '<del style="color: #999; font-size: 12px; margin-left: 4px;">' + formatPrice(product.price) + '</del>' +
+                  '</div>' +
+                  '<div style="color: #28a745; font-size: 11px; background: #e8f5e8; padding: 1px 4px; border-radius: 3px; display: inline-block; margin-top: 2px;">' +
+                      'Tiết kiệm ' + formatPrice(saved) +
+                  '</div>';
+          } else {
+              priceHtml = '<div style="color: #d70018; font-weight: bold; font-size: 14px;">' + formatPrice(product.price) + '</div>';
+          }
+
+          html += '<a href="${pageContext.request.contextPath}/product/' + product.id + '" ' +
+                  'style="display: block; padding: 10px; border-bottom: 1px solid #eee; text-decoration: none; color: inherit; transition: background 0.2s;" ' +
+                  'onmouseover="this.style.background=\'#f8f8f8\'" onmouseout="this.style.background=\'white\'">' +
+                  '<div style="display: flex; align-items: center; gap: 12px;">' +
+                  '<img src="' + imgSrc + '" alt="' + product.name + '" style="width: 50px; height: 50px; object-fit: contain; border: 1px solid #eee; border-radius: 4px;">' +
+                  '<div style="flex: 1; min-width: 0;">' +
+                  '<div style="font-weight: 500; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + product.name + '</div>' +
+                  priceHtml +
+                  '</div>' +
+                  '</div>' +
                   '</a>';
+      });
 
-                suggestionsBox.innerHTML = html;
-                suggestionsBox.style.display = 'block';
-              }
+      // Nút "Xem tất cả"
+      var searchQuery = document.getElementById('searchInput').value;
+      html += '<a href="${pageContext.request.contextPath}/shop?name=' + encodeURIComponent(searchQuery) + '" ' +
+              'style="display: block; padding: 12px; text-align: center; background: #f5f5f5; color: #d70018; font-weight: 500; text-decoration: none; border-top: 2px solid #eee;">' +
+              'Xem tất cả kết quả <i class="fa fa-arrow-right"></i>' +
+              '</a>';
 
-              function formatPrice(price) {
-                if (!price) return '0đ';
-                return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
-              }
+      suggestionsBox.innerHTML = html;
+      suggestionsBox.style.display = 'block';
+  }
+
+    function formatPrice(price) {
+        if (!price) return '0đ';
+        return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+    }
+
+    // === HÀM CHUẨN HÓA QUERY KHI KHÔNG CÓ GỢI Ý ===
+    function normalizeForSearch(str) {
+        return str
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
 
               // ========== STICKY HEADER ON SCROLL ==========
               window.addEventListener('DOMContentLoaded', function () {

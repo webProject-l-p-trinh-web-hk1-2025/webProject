@@ -118,8 +118,6 @@
                                             <option value="ADMIN">ADMIN</option>
                                             <option value="USER" selected>USER</option>
                                             <option value="SELLER">SELLER</option>
-                                            <option value="GUEST">GUEST</option>
-                                            <option value="SHIPPER">SHIPPER</option>
                                         </select>
                                     </td>
                                 </tr>
@@ -163,8 +161,6 @@
                                         <option value="ADMIN">ADMIN</option>
                                         <option value="USER">USER</option>
                                         <option value="SELLER">SELLER</option>
-                                        <option value="GUEST">GUEST</option>
-                                        <option value="SHIPPER">SHIPPER</option>
                                     </select>
                                 </div>
                                 <div class="filter-group">
@@ -298,10 +294,6 @@
                                                                         ? 'selected' : '' }>USER</option>
                                                                     <option value="SELLER" ${user.role=='SELLER'
                                                                         ? 'selected' : '' }>SELLER</option>
-                                                                    <option value="GUEST" ${user.role=='GUEST'
-                                                                        ? 'selected' : '' }>GUEST</option>
-                                                                    <option value="SHIPPER" ${user.role=='SHIPPER'
-                                                                        ? 'selected' : '' }>SHIPPER</option>
                                                                 </select>
                                                             </td>
                                                         </tr>

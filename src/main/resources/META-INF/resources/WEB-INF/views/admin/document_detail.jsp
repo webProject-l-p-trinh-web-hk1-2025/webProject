@@ -123,8 +123,10 @@ prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
             <div class="field">
               <div class="field-label">Mô tả:</div>
-              <div class="field-value document-content">
-                <c:out value="${document.description}" escapeXml="false" />
+              <div class="field-value">
+                <div class="document-content">
+                  <c:out value="${document.description}" escapeXml="false" />
+                </div>
               </div>
             </div>
 

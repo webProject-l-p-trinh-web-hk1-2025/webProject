@@ -11,6 +11,31 @@
                 <title>CellPhoneStore - Trang chủ</title>
 
                 <style>
+                    /* Hover animation cho product cards */
+                    .product {
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        position: relative;
+                        cursor: pointer;
+                    }
+
+                    .product:hover {
+                        transform: translateY(-10px);
+                        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+                    }
+
+                    .product-img {
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .product-img img {
+                        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+
+                    .product:hover .product-img img {
+                        transform: scale(1.08);
+                    }
+
                     /* Flash Sale Countdown Styling */
                     .hot-deal-countdown {
                         display: flex;

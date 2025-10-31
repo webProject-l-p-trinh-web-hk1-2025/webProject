@@ -385,7 +385,8 @@
                     </td>
                     <td>${product.name}</td>
                     <td>${product.brand}</td>
-                    <td class="text-end"><span class="product-price" data-price="${product.price}"></span><span class="product-price">₫</span></td>
+                    <!-- <td class="text-end"><span class="product-price" data-price="${product.price}"></span><span class="product-price">₫</span></td> -->
+<td class="text-end price-cell" data-price="${product.price}" data-deal="${product.onDeal}" data-percent="${product.dealPercentage != null ? product.dealPercentage : 0}"></td>
                     <td class="text-center">${product.stock}</td>
                     <td class="text-center">
                       <c:choose>
@@ -635,14 +636,24 @@
       }
     });
   // Format all product prices to 6.437.700 style
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.product-price').forEach(function(el) {
-      var price = el.getAttribute('data-price');
-      if (price) {
-        el.textContent = new Intl.NumberFormat('vi-VN').format(price);
-      }
-    });
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.price-cell').forEach(function(cell) {
+    var price = parseInt(cell.dataset.price);
+    var deal = cell.dataset.deal === 'true';
+    var percent = parseInt(cell.dataset.percent) || 0;
+
+    if (deal && percent > 0) {
+      var discounted = Math.floor(price * (100 - percent) / 100); // Giá sau giảm
+      cell.innerHTML = '<span style="color: #d70018; font-weight: bold;">' + 
+                       new Intl.NumberFormat('vi-VN').format(discounted) + 
+                       '₫</span> <del style="color: #999;">' + 
+                       new Intl.NumberFormat('vi-VN').format(price) + '₫</del>';
+    } else {
+      cell.innerHTML = '<span style="color: #d70018; font-weight: bold;">' + 
+                       new Intl.NumberFormat('vi-VN').format(price) + '₫</span>';
+    }
   });
+});
   </script>
 </body>
 </html>

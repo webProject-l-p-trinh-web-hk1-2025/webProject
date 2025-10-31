@@ -551,7 +551,8 @@
                                                                             <c:when test="${product.stock == 0}">
                                                                                 <div class="product-label">
                                                                                     <span class="sale"
-																	                    style="background:#ff3b5c;color:#fff;padding:4px 6px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);margin-left:6px;">HẾT HÀNG</span>
+                                                                                        style="background:#ff3b5c;color:#fff;padding:4px 6px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);margin-left:6px;">HẾT
+                                                                                        HÀNG</span>
                                                                                 </div>
                                                                             </c:when>
                                                                         </c:choose>
@@ -788,7 +789,8 @@
                                                     <c:when test="${product.stock == 0}">
                                                         <div class="product-label">
                                                             <span class="sale"
-																style="background:#ff3b5c;color:#fff;padding:4px 6px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);margin-left:6px;">HẾT HÀNG</span>
+                                                                style="background:#ff3b5c;color:#fff;padding:4px 6px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);margin-left:6px;">HẾT
+                                                                HÀNG</span>
                                                         </div>
                                                     </c:when>
                                                 </c:choose>

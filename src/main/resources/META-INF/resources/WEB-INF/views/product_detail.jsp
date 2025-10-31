@@ -463,120 +463,120 @@
                 const isUserLoggedIn = ${ isUserAuthenticated };
                 const isAdmin = <c:out value="${pageContext.request.isUserInRole('ADMIN')}" default="false" />;
 
-            // Sử dụng data từ server thay vì fetch API
-            <c:if test="${not empty product}">
-            var productData = {
-              id: <c:out value="${product.id}"/>,
-              name: "<c:out value='${product.name}'/>",
-              price: <c:out value="${product.price}" default="0"/>,
-              stock: <c:out value="${product.stock}" default="0"/>,
-              brand: "<c:out value='${product.brand}'/>",
-              imageUrl: "<c:out value='${product.imageUrl}'/>",
-              imageUrls: [
-                <c:forEach items="${product.imageUrls}" var="imgUrl" varStatus="status">
-                  "<c:out value='${imgUrl}'/>"<c:if test="${!status.last}">,</c:if>
-                </c:forEach>
-              ],
-              <c:choose>
-              <c:when test="${not empty product.category}">
-              category: {
-                id: <c:out value="${product.category.id}"/>,
-                name: "<c:out value='${product.category.name}'/>"
-              },
-              </c:when>
-              <c:otherwise>
-              category: null,
-              </c:otherwise>
-              </c:choose>
-              screenSize: "<c:out value='${product.screenSize}'/>",
-              displayTech: "<c:out value='${product.displayTech}'/>",
-              resolution: "<c:out value='${product.resolution}'/>",
-              displayFeatures: "<c:out value='${product.displayFeatures}'/>",
-              rearCamera: "<c:out value='${product.rearCamera}'/>",
-              frontCamera: "<c:out value='${product.frontCamera}'/>",
-              chipset: "<c:out value='${product.chipset}'/>",
-              cpuSpecs: "<c:out value='${product.cpuSpecs}'/>",
-              ram: "<c:out value='${product.ram}'/>",
-              storage: "<c:out value='${product.storage}'/>",
-              battery: "<c:out value='${product.battery}'/>",
-              simType: "<c:out value='${product.simType}'/>",
-              os: "<c:out value='${product.os}'/>",
-              nfcSupport: "<c:out value='${product.nfcSupport}'/>",
-              onDeal: ${product.onDeal != null ? product.onDeal : false},
-              dealPercentage: ${product.dealPercentage != null ? product.dealPercentage : 0},
-              isActive: ${product.isActive != null ? product.isActive : true}
-            };
+        // Sử dụng data từ server thay vì fetch API
+        <c:if test="${not empty product}">
+        var productData = {
+          id: <c:out value="${product.id}"/>,
+          name: "<c:out value='${product.name}'/>",
+          price: <c:out value="${product.price}" default="0"/>,
+          stock: <c:out value="${product.stock}" default="0"/>,
+          brand: "<c:out value='${product.brand}'/>",
+          imageUrl: "<c:out value='${product.imageUrl}'/>",
+          imageUrls: [
+            <c:forEach items="${product.imageUrls}" var="imgUrl" varStatus="status">
+              "<c:out value='${imgUrl}'/>"<c:if test="${!status.last}">,</c:if>
+            </c:forEach>
+          ],
+          <c:choose>
+          <c:when test="${not empty product.category}">
+          category: {
+            id: <c:out value="${product.category.id}"/>,
+            name: "<c:out value='${product.category.name}'/>"
+          },
+          </c:when>
+          <c:otherwise>
+          category: null,
+          </c:otherwise>
+          </c:choose>
+          screenSize: "<c:out value='${product.screenSize}'/>",
+          displayTech: "<c:out value='${product.displayTech}'/>",
+          resolution: "<c:out value='${product.resolution}'/>",
+          displayFeatures: "<c:out value='${product.displayFeatures}'/>",
+          rearCamera: "<c:out value='${product.rearCamera}'/>",
+          frontCamera: "<c:out value='${product.frontCamera}'/>",
+          chipset: "<c:out value='${product.chipset}'/>",
+          cpuSpecs: "<c:out value='${product.cpuSpecs}'/>",
+          ram: "<c:out value='${product.ram}'/>",
+          storage: "<c:out value='${product.storage}'/>",
+          battery: "<c:out value='${product.battery}'/>",
+          simType: "<c:out value='${product.simType}'/>",
+          os: "<c:out value='${product.os}'/>",
+          nfcSupport: "<c:out value='${product.nfcSupport}'/>",
+          onDeal: ${product.onDeal != null ? product.onDeal : false},
+          dealPercentage: ${product.dealPercentage != null ? product.dealPercentage : 0},
+          isActive: ${product.isActive != null ? product.isActive : true}
+        };
 
-            // Version products from server (cùng dòng series)
-            const versionProductsData = [
-              <c:forEach items="${versionProducts}" var="vp" varStatus="status">
-              {
-                id: ${vp.id},
-                name: "<c:out value='${vp.name}'/>",
-                price: ${vp.price},
-                imageUrl: "<c:out value='${vp.imageUrl}'/>",
-                imageUrls: [
-                  <c:forEach items="${vp.imageUrls}" var="imgUrl" varStatus="status">
-                    "<c:out value='${imgUrl}'/>"<c:if test="${!status.last}">,</c:if>
-                  </c:forEach>
-                ],
-                onDeal: ${vp.onDeal != null ? vp.onDeal : false},
-                dealPercentage: ${vp.dealPercentage != null ? vp.dealPercentage : 0}
-              }<c:if test="${!status.last}">,</c:if>
+        // Version products from server (cùng dòng series)
+        const versionProductsData = [
+          <c:forEach items="${versionProducts}" var="vp" varStatus="status">
+          {
+            id: ${vp.id},
+            name: "<c:out value='${vp.name}'/>",
+            price: ${vp.price},
+            imageUrl: "<c:out value='${vp.imageUrl}'/>",
+            imageUrls: [
+              <c:forEach items="${vp.imageUrls}" var="imgUrl" varStatus="status">
+                "<c:out value='${imgUrl}'/>"<c:if test="${!status.last}">,</c:if>
               </c:forEach>
-            ];
+            ],
+            onDeal: ${vp.onDeal != null ? vp.onDeal : false},
+            dealPercentage: ${vp.dealPercentage != null ? vp.dealPercentage : 0}
+          }<c:if test="${!status.last}">,</c:if>
+          </c:forEach>
+        ];
 
-            // Same brand products from server
-            const sameProductsData = [
-              <c:forEach items="${sameProducts}" var="sp" varStatus="status">
-              {
-                id: ${sp.id},
-                name: "<c:out value='${sp.name}'/>",
-                brand: "<c:out value='${sp.brand}'/>",
-                price: ${sp.price},
-                imageUrl: "<c:out value='${sp.imageUrl}'/>",
-                imageUrls: [
-                  <c:forEach items="${sp.imageUrls}" var="imgUrl" varStatus="status">
-                    "<c:out value='${imgUrl}'/>"<c:if test="${!status.last}">,</c:if>
-                  </c:forEach>
-                ],
-                dealPercentage: ${sp.dealPercentage != null ? sp.dealPercentage : 0},
-                category: {
-                  name: "<c:out value='${sp.category != null ? sp.category.name : "Chưa phân loại"}'/>"
-                }
-              }<c:if test="${!status.last}">,</c:if>
+        // Same brand products from server
+        const sameProductsData = [
+          <c:forEach items="${sameProducts}" var="sp" varStatus="status">
+          {
+            id: ${sp.id},
+            name: "<c:out value='${sp.name}'/>",
+            brand: "<c:out value='${sp.brand}'/>",
+            price: ${sp.price},
+            imageUrl: "<c:out value='${sp.imageUrl}'/>",
+            imageUrls: [
+              <c:forEach items="${sp.imageUrls}" var="imgUrl" varStatus="status">
+                "<c:out value='${imgUrl}'/>"<c:if test="${!status.last}">,</c:if>
               </c:forEach>
-            ];
-
-            console.log('Product data from server:', productData);
-            console.log('Version products:', versionProductsData);
-            console.log('Same brand products:', sameProductsData);
-
-                  // Load product ngay lập tức
-                  displayProduct(productData);
-
-                  // Check if product is in wishlist
-                  checkWishlistStatus(productData.id);
-
-            // Render version products (cùng dòng series) từ server data
-            renderVersionProducts(versionProductsData);
-
-            // Render same brand products từ server data
-            renderSameProducts(sameProductsData);
-
-            // Load and parse variants for storage and color options
-            if (productData.category && productData.category.id) {
-              loadAndParseVariants(productData.category.id, productData.id, productData.storage, productData.name);
+            ],
+            dealPercentage: ${sp.dealPercentage != null ? sp.dealPercentage : 0},
+            category: {
+              name: "<c:out value='${sp.category != null ? sp.category.name : "Chưa phân loại"}'/>"
             }
-            // Load rating statistics and reviews
-            loadRatingStatistics(productData.id);
-            loadReviews(productData.id, 0);
-            </c:if>
+          }<c:if test="${!status.last}">,</c:if>
+          </c:forEach>
+        ];
 
-                  <c:if test="${empty product}">
-                  alert("Không tìm thấy sản phẩm");
-                  window.location.href = ctx + '/shop';
-                  </c:if>
+        console.log('Product data from server:', productData);
+        console.log('Version products:', versionProductsData);
+        console.log('Same brand products:', sameProductsData);
+
+              // Load product ngay lập tức
+              displayProduct(productData);
+
+              // Check if product is in wishlist
+              checkWishlistStatus(productData.id);
+
+        // Render version products (cùng dòng series) từ server data
+        renderVersionProducts(versionProductsData);
+
+        // Render same brand products từ server data
+        renderSameProducts(sameProductsData);
+
+        // Load and parse variants for storage and color options
+        if (productData.category && productData.category.id) {
+          loadAndParseVariants(productData.category.id, productData.id, productData.storage, productData.name);
+        }
+        // Load rating statistics and reviews
+        loadRatingStatistics(productData.id);
+        loadReviews(productData.id, 0);
+        </c:if>
+
+              <c:if test="${empty product}">
+              alert("Không tìm thấy sản phẩm");
+              window.location.href = ctx + '/shop';
+              </c:if>
 
                 function displayProduct(p) {
                   // Update breadcrumb
@@ -620,34 +620,34 @@
                     addToCartBtn.style.cursor = 'not-allowed';
                     addToCartBtn.style.opacity = '0.6';
                   } else {// Hiển thị lại stock status
-      document.getElementById('productStock').style.display = '';
-      document.getElementById('productStock').textContent = (p.stock > 0 ? 'Còn hàng' : 'Hết hàng');
+                    document.getElementById('productStock').style.display = '';
+                    document.getElementById('productStock').textContent = (p.stock > 0 ? 'Còn hàng' : 'Hết hàng');
 
-      const addToCartBtn = document.getElementById('addToCartBtn');
+                    const addToCartBtn = document.getElementById('addToCartBtn');
 
-      if (p.stock > 0) {
-          // Còn hàng → cho phép thêm
-          addToCartBtn.innerHTML = '<i class="fa fa-shopping-cart"></i> Thêm Vào Giỏ';
-          addToCartBtn.disabled = false;
-          addToCartBtn.style.backgroundColor = '';
-          addToCartBtn.style.cursor = 'pointer';
-          addToCartBtn.style.opacity = '1';
-      } else {
-          // Hết hàng → CHẶN hoàn toàn việc thêm vào giỏ
-          addToCartBtn.innerHTML = '<i class="fa fa-ban"></i> Hết hàng';
-          addToCartBtn.disabled = true;
-          addToCartBtn.style.backgroundColor = '#999';
-          addToCartBtn.style.cursor = 'not-allowed';
-          addToCartBtn.style.opacity = '0.6';
+                    if (p.stock > 0) {
+                      // Còn hàng → cho phép thêm
+                      addToCartBtn.innerHTML = '<i class="fa fa-shopping-cart"></i> Thêm Vào Giỏ';
+                      addToCartBtn.disabled = false;
+                      addToCartBtn.style.backgroundColor = '';
+                      addToCartBtn.style.cursor = 'pointer';
+                      addToCartBtn.style.opacity = '1';
+                    } else {
+                      // Hết hàng → CHẶN hoàn toàn việc thêm vào giỏ
+                      addToCartBtn.innerHTML = '<i class="fa fa-ban"></i> Hết hàng';
+                      addToCartBtn.disabled = true;
+                      addToCartBtn.style.backgroundColor = '#999';
+                      addToCartBtn.style.cursor = 'not-allowed';
+                      addToCartBtn.style.opacity = '0.6';
 
-          // Ngăn chặn hoàn toàn sự kiện click (phòng user dùng devtool bật lại nút)
-          addToCartBtn.onclick = function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              alert('Sản phẩm đã hết hàng!');
-              return false;
-          };
-      }
+                      // Ngăn chặn hoàn toàn sự kiện click (phòng user dùng devtool bật lại nút)
+                      addToCartBtn.onclick = function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert('Sản phẩm đã hết hàng!');
+                        return false;
+                      };
+                    }
                   }
 
                   // Tạo short description từ specs cho phần product details
@@ -1383,17 +1383,17 @@
                 function extractModelName(productName) {
                   // Remove storage variants (128GB, 256GB, 512GB, 1TB, 2TB, etc.)
                   let modelName = productName.replace(/\s*\d+\s*(GB|TB)\s*/gi, '').trim();
-                  
+
                   // Remove color variants (common color words at the end)
                   const colorPatterns = [
                     /\s+(Đen|Trắng|Xanh|Đỏ|Vàng|Hồng|Tím|Xám|Bạc|Vang|Titan|Gold|Silver|Black|White|Blue|Red|Pink|Purple|Gray|Green|Midnight|Starlight|Sierra|Natural)(\s+\w+)?$/i,
                     /\s+\(.*\)$/  // Remove anything in parentheses at end
                   ];
-                  
+
                   colorPatterns.forEach(pattern => {
                     modelName = modelName.replace(pattern, '').trim();
                   });
-                  
+
                   return modelName;
                 }
 
@@ -1510,14 +1510,14 @@
                         images.forEach((img, index) => {
                           console.log('Image', index, '- Has style.maxWidth:', !!img.style.maxWidth);
                           console.log('Image', index, '- Current src:', img.src);
-                          
+
                           // Force max-width on all images
                           img.style.maxWidth = '100%';
                           img.style.height = 'auto';
                           img.style.display = 'block';
                           img.style.margin = '15px auto';
                           console.log('Applied styles to image', index);
-                          
+
                           // If image is in wrapper, unwrap it for better display
                           const wrapper = img.parentElement;
                           if (wrapper && wrapper.classList.contains('img-wrapper')) {
@@ -1566,7 +1566,7 @@
                   // Force recalculate height after images load
                   const images = descElement.querySelectorAll('img');
                   const totalImages = images.length;
-                  
+
                   console.log('Total images to wait for:', totalImages);
 
                   // Setup button immediately, don't wait for images
@@ -1575,11 +1575,11 @@
                   // Also recalculate after images load (for better accuracy)
                   if (totalImages > 0) {
                     let imagesLoaded = 0;
-                    
+
                     function checkImageLoaded() {
                       imagesLoaded++;
                       console.log(`Image loaded: ${imagesLoaded}/${totalImages}`);
-                      
+
                       if (imagesLoaded === totalImages) {
                         console.log('All images loaded, recalculating height');
                         // Recalculate height after all images loaded

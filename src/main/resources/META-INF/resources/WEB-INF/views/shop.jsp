@@ -35,8 +35,6 @@
 					.product:hover .product-img img {
 						transform: scale(1.08);
 					}
-
-					
 				</style>
 			</head>
 
@@ -184,7 +182,8 @@
 													<c:choose>
 														<c:when test="${not empty product.imageUrls}">
 															<c:set var="foundImage" value="false" />
-															<c:forEach items="${product.imageUrls}" var="imgUrl" varStatus="status">
+															<c:forEach items="${product.imageUrls}" var="imgUrl"
+																varStatus="status">
 																<c:if test="${not empty imgUrl && !foundImage}">
 																	<img src="${pageContext.request.contextPath}${imgUrl}"
 																		alt="${product.name}"
@@ -230,7 +229,8 @@
 														<c:when test="${product.stock == 0}">
 															<div class="product-label">
 																<span class="sale"
-																	style="background:#ff3b5c;color:#fff;padding:4px 6px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);margin-left:6px;">HẾT HÀNG</span>
+																	style="background:#ff3b5c;color:#fff;padding:4px 6px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);margin-left:6px;">HẾT
+																	HÀNG</span>
 															</div>
 														</c:when>
 													</c:choose>
@@ -269,7 +269,8 @@
 																<span
 																	style="color: #28a745; font-size: 12px; font-weight: bold; background: #e8f5e8; padding: 1px 5px; border-radius: 3px;">
 																	Tiết kiệm
-																	<fmt:formatNumber value="${savedAmount}" pattern="#,###" maxFractionDigits="0" /> đ
+																	<fmt:formatNumber value="${savedAmount}"
+																		pattern="#,###" maxFractionDigits="0" /> đ
 																</span>
 															</c:when>
 															<c:otherwise>
